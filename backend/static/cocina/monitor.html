@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FastFood Cocina - Monitor KDS</title>
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="/static/css/app-modules.css">
+</head>
+<body>
+
+  <!-- KDS Header -->
+  <header class="navbar">
+    <a href="#" class="nav-brand">
+      <span class="logo-icon" style="background: linear-gradient(135deg, #ef4444, #f59e0b);">👨‍🍳</span>
+      <span>Monitor de Cocina (KDS)</span>
+    </a>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span style="font-size: 0.9rem; color: var(--text-muted);" id="kds-order-count">Comandas activas: 0</span>
+      <button class="btn btn-outline" onclick="Auth.logout()">🚪 Salir</button>
+    </div>
+  </header>
+
+  <div class="kds-container">
+    <div class="kds-grid" id="kds-grid">
+      <!-- Dynamic Order Cards populated via JS -->
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/websocket.js"></script>
+  <script src="/static/js/cocina.js"></script>
+</body>
+</html>

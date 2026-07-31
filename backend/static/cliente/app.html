@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Donde David Fresh & Tasty! UNIVERSE TOON'S</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#FFBC0D">
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <style>
+    .urgency-bar-app {
+      background: linear-gradient(90deg, #DA291C, #FFBC0D, #DA291C);
+      background-size: 200% 200%;
+      animation: gradientShift 4s ease infinite;
+      color: #000;
+      font-weight: 900;
+      font-size: 0.75rem;
+      text-align: center;
+      padding: 0.35rem 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .screen {
+      display: none;
+      padding-bottom: 85px;
+      animation: fadeIn 0.25s ease;
+    }
+    .screen.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .app-container {
+      max-width: 520px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--toon-bg);
+      position: relative;
+      box-shadow: 0 0 50px rgba(0,0,0,0.9);
+    }
+    .brand-header-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: rgba(16, 23, 38, 0.95);
+      border-bottom: 1px solid var(--toon-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .badge-mesa-active {
+      background: linear-gradient(135deg, #00f5d4, #00b4d8);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 245, 212, 0.4);
+      cursor: pointer;
+    }
+    .carousel-slide-media {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+    }
+  </style>
+</head>
+<body class="toon-theme">
+
+  <div class="app-container">
+
+    <!-- Top Urgency Bar App -->
+    <div class="urgency-bar-app">
+      <span>🔥 PROMO EXCLUSIVA EN MESA: 15% OFF CON CÓDIGO <u>MESA15</u></span>
+      <span style="background: #000; color: var(--gold-accent); padding: 0.1rem 0.4rem; border-radius: 4px;" id="app-countdown-timer">14:59</span>
+    </div>
+
+    <!-- Header Banner Global Con Logo Oficial -->
+    <div class="brand-header-banner">
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <img src="/static/images/logo-donde-david.jpg" style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
+        <div>
+          <h1 style="font-size: 1.1rem; font-weight: 900; margin: 0; line-height: 1;">DONDE DAVID</h1>
+          <small style="color: var(--gold-accent); font-weight: 800; font-size: 0.65rem; letter-spacing: 1px;">FRESH & TASTY!</small>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.4rem; align-items: center;">
+        <button style="background: rgba(255,183,3,0.15); border: 1px solid var(--gold-accent); color: var(--gold-accent); font-size: 0.75rem; font-weight: 800; padding: 0.3rem 0.5rem; border-radius: 20px; cursor: pointer;" onclick="openGuiaModal()">❓ GUÍA</button>
+        <span class="badge-mesa-active" id="current-table-indicator" onclick="openSwapTableModal()">📱 QR MESA #5 (CAMBIAR)</span>
+      </div>
+    </div>
+
+    <!-- 1. SPLASH SCREEN -->
+    <div id="screen-splash" class="screen active" style="text-align: center; padding: 3rem 1.5rem;">
+      <div style="margin-top: 1rem;">
+        <img src="/static/images/logo-donde-david.jpg" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--gold-accent); box-shadow: 0 0 30px rgba(255,188,13,0.6);" alt="Donde David">
+        <h1 style="font-size: 2.2rem; font-weight: 900; background: linear-gradient(135deg, #ffb703, #ff4757); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 1rem;">
+          Donde David
+        </h1>
+        <p style="font-size: 1rem; color: var(--gold-accent); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Fresh & Tasty!</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">SISTEMA DIGITAL DE PEDIDOS QR & DELIVERY</p>
+      </div>
+
+      <div style="margin-top: 3rem;">
+        <p style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff;">¡EL SABOR QUE TE HACE VOLVER!</p>
+        <button class="btn-gold" style="width: 100%; font-size: 1.1rem;" onclick="showScreen('screen-home')">🚀 EXPLORAR MENÚ DELICIOSO</button>
+      </div>
+    </div>
+
+    <!-- 2. HOME SCREEN -->
+    <div id="screen-home" class="screen" style="padding: 1.25rem;">
+      
+      <!-- Trust Badges Bar en Mesa -->
+      <div style="display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1rem; padding-bottom: 0.2rem;">
+        <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; white-space: nowrap; color: #fff;">🥩 Carne 100% Res</span>
+        <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; white-space: nowrap; color: #fff;">⚡ Preparación &lt;12 min</span>
+        <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; white-space: nowrap; color: #fff;">📱 Pedido Directo Cocina</span>
+      </div>
+
+      <!-- Hero Promo Banner Carrusel Editable -->
+      <div style="background: linear-gradient(135deg, #ff4757, #ffb703); border-radius: var(--radius-md); padding: 1.25rem; color: #fff; margin-bottom: 1.5rem; box-shadow: 0 10px 25px rgba(255,71,87,0.4);" id="home-promo-banner-container">
+        <span style="font-size: 0.75rem; font-weight: 900; background: #000; padding: 0.2rem 0.6rem; border-radius: 20px;">BOOM! 🔥 PROMO DEL DÍA</span>
+        <h3 style="font-size: 1.3rem; font-weight: 900; margin-top: 0.4rem;" id="promo-title">COMBO EXPLOSIVO TOON</h3>
+        <p style="font-size: 0.85rem; opacity: 0.95;" id="promo-desc">2 HAMBURGUESAS + PAPAS FRITAS + 2 REFRESCOS</p>
+        <div style="font-size: 1.5rem; font-weight: 900; margin-top: 0.5rem;" id="promo-price">$15.00 <span style="font-size: 0.8rem; text-decoration: line-through; opacity: 0.7;">$20.00</span></div>
+      </div>
+
+      <!-- Categorías con Fotos -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: #fff;">CATEGORÍAS</h3>
+        <small style="color: var(--gold-accent); cursor: pointer;" onclick="showScreen('screen-categorias')">Ver todas →</small>
+      </div>
+      <div class="category-photo-grid" id="home-categories-grid">
+        <!-- Creadas dinámicamente -->
+      </div>
+
+      <!-- Productos con Fotos apetitosas -->
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin: 1.75rem 0 1rem 0; color: #fff;">🍔 LO MÁS PEDIDO Y DELICIOSO</h3>
+      <div class="product-toon-grid" id="home-featured-grid">
+        <!-- Creados dinámicamente -->
+      </div>
+    </div>
+
+    <!-- 3. CATEGORÍAS COMPLETA -->
+    <div id="screen-categorias" class="screen" style="padding: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 1.25rem;">TODAS LAS CATEGORÍAS</h2>
+      <div class="category-photo-grid" id="full-categories-grid"></div>
+    </div>
+
+    <!-- 4. MENÚ & BÚSQUEDA -->
+    <div id="screen-menu" class="screen" style="padding: 1.25rem;">
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <input type="text" id="menu-search-input" class="form-control" placeholder="🔍 Buscar por nombre o ingrediente..." oninput="filterMenuProducts()">
+      </div>
+      <div class="product-toon-grid" id="menu-products-grid"></div>
+    </div>
+
+    <!-- 5. CARRITO -->
+    <div id="screen-carrito" class="screen" style="padding: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 1.25rem;">🛒 TU PEDIDO ACTUAL</h2>
+      <div id="toon-cart-items"></div>
+
+      <div style="background: var(--toon-card); padding: 1.25rem; border-radius: var(--radius-md); margin: 1.25rem 0; border: 1px solid var(--toon-border);">
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 0.5rem;"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 0.5rem;"><span>IVA (16%)</span><span id="cart-tax">$0.00</span></div>
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 0.5rem;" id="cart-delivery-row"><span>Envío Delivery</span><span id="cart-delivery-cost">$5.00</span></div>
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 0.5rem;" id="cart-empaque-row"><span>Empaque para Llevar</span><span id="cart-empaque-cost">$1.00</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 900; border-top: 1px dashed var(--toon-border); padding-top: 0.75rem; color: var(--gold-accent);"><span>TOTAL GENERAL</span><span id="cart-total">$0.00</span></div>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1.15rem;" onclick="showScreen('screen-checkout')">IR A CHECKOUT Y CONFIRMAR</button>
+    </div>
+
+    <!-- 6. CHECKOUT COMPLETO (QR MESA VS DELIVERY) -->
+    <div id="screen-checkout" class="screen" style="padding: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 1.25rem;">CONFIRMAR Y FINALIZAR</h2>
+
+      <!-- Selección de Tipo -->
+      <div class="form-group">
+        <label>MODALIDAD DEL PEDIDO</label>
+        <select id="checkout-type" class="form-control" onchange="toggleCheckoutFields()">
+          <option value="mesa">🍽️ Pedido en Local / Mesa (Vía QR)</option>
+          <option value="delivery">🛵 Delivery (Entrega a Domicilio)</option>
+          <option value="llevar">🛍️ Para LLevar / Mostrador</option>
+        </select>
+      </div>
+
+      <!-- Sección exclusiva para MESA -->
+      <div id="section-checkout-mesa" style="background: rgba(0, 245, 212, 0.08); border: 1px solid var(--cyan-accent); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="color: var(--cyan-accent); font-weight: 800; margin: 0; font-size: 0.95rem;">📱 UBICACIÓN VALIDADA POR QR</h4>
+          <button style="background: transparent; border: 1px solid var(--cyan-accent); color: var(--cyan-accent); font-size: 0.75rem; border-radius: 12px; padding: 0.2rem 0.5rem; cursor: pointer;" onclick="openSwapTableModal()">📷 Cambiar Mesa</button>
+        </div>
+        <p style="font-size: 0.85rem; color: #fff; margin: 0.5rem 0 0.75rem 0;">Estás pidiendo directamente en: <strong id="checkout-mesa-name">Mesa #5</strong></p>
+        
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--gold-accent);">MODALIDAD DE COBRO EN MESA:</label>
+        <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+          <label style="flex: 1; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--gold-accent); cursor: pointer; font-size: 0.85rem;">
+            <input type="radio" name="modo_pago" value="PAGAR_ANTES" checked> Pagar Antes (Anticipado)
+          </label>
+          <label style="flex: 1; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--gold-accent); cursor: pointer; font-size: 0.85rem;">
+            <input type="radio" name="modo_pago" value="PAGAR_DESPUES"> Cuenta Abierta (Pagar al Salir)
+          </label>
+        </div>
+      </div>
+
+      <!-- Sección exclusiva para DELIVERY -->
+      <div id="section-checkout-delivery" style="display: none; background: rgba(255, 71, 87, 0.1); border: 1px solid var(--neon-red); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+        <h4 style="color: var(--neon-red); font-weight: 800; margin-top: 0; font-size: 0.95rem;">🛵 DATOS DE ENVÍO A DOMICILIO</h4>
+        
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label>Nombre Completo de quien recibe</label>
+          <input type="text" id="deliv-nombre" class="form-control" placeholder="Ej. Juan Pérez" value="Javier Mendoza">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label>Teléfono de Contacto (SMS / WhatsApp)</label>
+          <input type="text" id="deliv-telefono" class="form-control" placeholder="+502 5123 4567" value="+502 5123 4567">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>Dirección exacta de Entrega</label>
+          <textarea id="deliv-direccion" class="form-control" rows="2" placeholder="Calle, Avenida, Edificio, Apartamento, Puntos de referencia">Av. Reforma 12-34, Zona 9, Apt 4B</textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>FORMA DE PAGO SELECCIONADA</label>
+        <select id="checkout-payment" class="form-control">
+          <option value="Efectivo">💵 Efectivo ($ / Bs.)</option>
+          <option value="Tarjeta">💳 Tarjeta de Crédito / Débito</option>
+          <option value="Pago Móvil">📱 Pago Móvil / Transferencia</option>
+          <option value="Puntos">🏆 Puntos de Fidelidad</option>
+        </select>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1.15rem; margin-top: 1.5rem;" onclick="submitFinalOrder()">🚀 PROCESAR Y ENVIAR PEDIDO</button>
+    </div>
+
+    <!-- 7. SEGUIMIENTO DE PEDIDO -->
+    <div id="screen-tracking" class="screen" style="padding: 1.25rem; text-align: center;">
+      <div style="background: var(--toon-card); padding: 1.75rem 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--gold-accent);">
+        <span style="font-size: 3rem;">🔥</span>
+        <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.5rem;" id="track-order-num">PEDIDO #1092</h2>
+        <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;" id="track-order-status">EN PREPARACIÓN</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;" id="track-order-info">Tu pedido ya está siendo preparado por nuestros cocineros.</p>
+
+        <button class="btn-gold" style="width: 100%; margin-top: 1.5rem;" onclick="showScreen('screen-home')">VER MÁS PRODUCTOS O CONTINUAR</button>
+      </div>
+    </div>
+
+    <!-- 8. HISTORIAL DE PEDIDOS -->
+    <div id="screen-historial" class="screen" style="padding: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 1.25rem;">MIS PEDIDOS REALIZADOS</h2>
+      <div id="historial-orders-list"></div>
+    </div>
+
+    <!-- 9. PERFIL DE USUARIO -->
+    <div id="screen-perfil" class="screen" style="padding: 1.25rem;">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="width: 76px; height: 76px; border-radius: 50%; background: var(--gold-gradient); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; color: #000; font-weight: 900; margin-bottom: 0.5rem; box-shadow: 0 0 20px rgba(255,183,3,0.4);">JM</div>
+        <h2 style="font-size: 1.3rem; font-weight: 900;" id="profile-name">Javier Mendoza</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem;" id="profile-email">javier@mail.com</p>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; background: rgba(255, 71, 87, 0.2); color: var(--neon-red); border: 1px solid var(--neon-red);" onclick="Auth.logout()">🚪 Cerrar Sesión</button>
+    </div>
+
+    <!-- Bottom Navigation Bar Mobile & Tablet -->
+    <nav class="bottom-nav" id="app-bottom-nav">
+      <a class="nav-item active" onclick="showScreen('screen-home')"><span class="nav-icon">🏠</span><span>Inicio</span></a>
+      <a class="nav-item" onclick="showScreen('screen-categorias')"><span class="nav-icon">📂</span><span>Categorías</span></a>
+      <a class="nav-item" onclick="showScreen('screen-carrito')"><span class="nav-icon">🛒</span><span>Carrito</span><span class="nav-badge" id="nav-cart-badge">0</span></a>
+      <a class="nav-item" onclick="showScreen('screen-historial')"><span class="nav-icon">📋</span><span>Pedidos</span></a>
+      <a class="nav-item" onclick="showScreen('screen-perfil')"><span class="nav-icon">👤</span><span>Perfil</span></a>
+    </nav>
+
+  </div>
+
+  <!-- MODAL CAMBIAR DE MESA (CLIENTE) -->
+  <div class="product-modal-backdrop" id="swap-table-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.75rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('swap-table-modal')">&times;</button>
+      <span style="font-size: 3rem;">📱</span>
+      <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent); margin-top: 0.5rem;">📷 ESCANEAR QR / CAMBIAR MESA</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Si te has movido a otra mesa en el restaurante, selecciona tu nueva mesa para transferir tu pedido automáticamente.</p>
+
+      <div class="form-group" style="margin: 1.25rem 0;">
+        <label>Selecciona tu nueva mesa actual</label>
+        <select id="client-new-table-select" class="form-control" style="font-size: 1.1rem; font-weight: 900; text-align: center; color: var(--gold-accent);">
+          <option value="1">Mesa #1</option>
+          <option value="2">Mesa #2</option>
+          <option value="3">Mesa #3</option>
+          <option value="4">Mesa #4</option>
+          <option value="5">Mesa #5</option>
+          <option value="6">Mesa #6</option>
+          <option value="7">Mesa #7</option>
+          <option value="8">Mesa #8</option>
+          <option value="9">Mesa #9</option>
+          <option value="10">Mesa #10</option>
+          <option value="11">Mesa #11</option>
+          <option value="12">Mesa #12</option>
+          <option value="15">Mesa #15</option>
+          <option value="20">Mesa #20</option>
+        </select>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1.1rem;" onclick="submitClientSwapTable()">🔄 CONFIRMAR CAMBIO DE MESA</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE VERIFICACIÓN OTP -->
+  <div class="product-modal-backdrop" id="otp-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.75rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('otp-modal')">&times;</button>
+      <span style="font-size: 3rem;">📱</span>
+      <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.5rem;">VERIFICACIÓN OTP TELEFÓNICA</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem;" id="otp-notice-text">Hemos enviado un código de 6 dígitos a tu teléfono por WhatsApp / SMS.</p>
+      
+      <div style="background: rgba(0, 245, 212, 0.1); border: 1px border var(--cyan-accent); padding: 0.75rem; border-radius: 8px; margin: 1rem 0; font-size: 1rem; font-weight: 800; color: var(--cyan-accent);" id="otp-simulated-code">
+        Código sim: 123456
+      </div>
+
+      <div class="form-group">
+        <label>Ingresa el código OTP de 6 dígitos</label>
+        <input type="text" id="otp-input-code" class="form-control" style="text-align: center; font-size: 1.4rem; letter-spacing: 5px; font-weight: 900;" maxlength="6" value="123456">
+      </div>
+
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem; font-size: 1.1rem;" onclick="submitOtpVerification()">✅ VERIFICAR Y CONFIRMAR</button>
+    </div>
+  </div>
+
+  <!-- MODAL GUÍA INTERACTIVA / CARRUSEL -->
+  <div class="product-modal-backdrop" id="guia-modal">
+    <div class="product-modal-card" style="max-width: 440px; padding: 1.5rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeGuiaModal()">&times;</button>
+      
+      <div id="guia-carousel-container"></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+        <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="prevGuiaSlide()">← Anterior</button>
+        <span style="font-size: 0.8rem; color: var(--text-muted);" id="guia-slide-indicator">1 / 4</span>
+        <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="nextGuiaSlide()">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE DETALLE DE PRODUCTO INTERACTIVO -->
+  <div class="product-modal-backdrop" id="product-detail-modal">
+    <div class="product-modal-card">
+      <button class="modal-close-btn" onclick="closeProductModal()">&times;</button>
+      <img id="modal-product-img" src="" class="product-hero-img" alt="Producto">
+      <div class="modal-content-body">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+          <h2 id="modal-product-title" style="font-size: 1.4rem; font-weight: 900; margin: 0; color: #fff;">Nombre del Producto</h2>
+          <span id="modal-product-price" style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent);">$0.00</span>
+        </div>
+        <p id="modal-product-desc" style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.4; margin-bottom: 1.25rem;">Descripción detallada.</p>
+
+        <!-- Personalizaciones / Ingredientes Dinámicos -->
+        <div id="modal-ingredients-container"></div>
+
+        <!-- Cantidad Selector -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 1rem 0;">
+          <span style="font-weight: 800; font-size: 0.95rem;">CANTIDAD:</span>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <button class="qty-btn" onclick="adjustModalQty(-1)">-</button>
+            <span id="modal-qty-val" style="font-size: 1.2rem; font-weight: 900;">1</span>
+            <button class="qty-btn" onclick="adjustModalQty(1)">+</button>
+          </div>
+        </div>
+
+        <button class="btn-gold" style="width: 100%; font-size: 1.1rem;" onclick="addModalProductToCart()">🛒 AGREGAR AL CARRITO</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/websocket.js"></script>
+  <script src="/static/js/cliente-toon.js"></script>
+  <script>
+    let appTimerSecs = 14 * 60 + 59;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      startAppTimer();
+    });
+
+    function startAppTimer() {
+      setInterval(() => {
+        if (appTimerSecs > 0) appTimerSecs--;
+        const mins = Math.floor(appTimerSecs / 60);
+        const secs = appTimerSecs % 60;
+        const el = document.getElementById("app-countdown-timer");
+        if (el) el.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function openSwapTableModal() {
+      document.getElementById("swap-table-modal").classList.add("open");
+    }
+
+    async function submitClientSwapTable() {
+      const newMesa = document.getElementById("client-new-table-select").value;
+      currentDetectedMesa = newMesa;
+
+      document.getElementById("current-table-indicator").innerText = `📱 QR MESA #${newMesa} (CAMBIAR)`;
+      document.getElementById("checkout-mesa-name").innerText = `Mesa #${newMesa}`;
+
+      if (currentPendingOrderId) {
+        try {
+          await fetch(`/api/v1/cliente/pedidos/${currentPendingOrderId}/cambiar-mesa`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nueva_mesa: parseInt(newMesa) })
+          });
+        } catch(e){}
+      }
+
+      showToast(`Mesa actualizada a Mesa #${newMesa}`, "success");
+      document.getElementById("swap-table-modal").classList.remove("open");
+    }
+  </script>
+</body>
+</html>

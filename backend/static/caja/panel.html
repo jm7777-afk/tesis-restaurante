@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Donde David - McDonald's Style Touch POS</title>
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <style>
+    :root {
+      --mc-yellow: #FFBC0D;
+      --mc-red: #DA291C;
+      --mc-dark: #121824;
+      --mc-card: #1c2436;
+      --mc-border: rgba(255, 188, 13, 0.25);
+    }
+    body.pos-body {
+      background: var(--mc-dark);
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    .mc-pos-header {
+      background: #0d121c;
+      border-bottom: 2px solid var(--mc-yellow);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mc-pos-container {
+      display: grid;
+      grid-template-columns: 140px 1fr 380px;
+      height: calc(100vh - 65px);
+      gap: 0;
+    }
+    @media (max-width: 1100px) {
+      .mc-pos-container {
+        grid-template-columns: 110px 1fr 340px;
+      }
+    }
+    @media (max-width: 850px) {
+      .mc-pos-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+    }
+    /* Left Sidebar: Categories */
+    .mc-categories-bar {
+      background: #171f30;
+      border-right: 1px solid var(--mc-border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem 0.5rem;
+      overflow-y: auto;
+    }
+    .mc-cat-btn {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 0.85rem 0.4rem;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .mc-cat-btn.active, .mc-cat-btn:hover {
+      background: linear-gradient(135deg, var(--mc-yellow), #e0a000);
+      color: #000;
+      border-color: var(--mc-yellow);
+      box-shadow: 0 4px 15px rgba(255, 188, 13, 0.3);
+    }
+    .mc-cat-btn span.icon {
+      font-size: 1.6rem;
+    }
+
+    /* Center: Touch Products Grid */
+    .mc-products-area {
+      padding: 1.25rem;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.2);
+    }
+    .mc-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: 0.85rem;
+    }
+    .mc-product-touch-card {
+      background: var(--mc-card);
+      border: 1px solid var(--mc-border);
+      border-radius: 14px;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .mc-product-touch-card:hover, .mc-product-touch-card:active {
+      transform: scale(0.98);
+      border-color: var(--mc-yellow);
+      background: rgba(255, 188, 13, 0.12);
+    }
+    .mc-product-touch-card img {
+      width: 100%;
+      height: 95px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+    }
+    .mc-product-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 0.3rem;
+      height: 2.4em;
+      overflow: hidden;
+    }
+    .mc-product-price {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--mc-yellow);
+      background: rgba(0,0,0,0.4);
+      padding: 0.3rem;
+      border-radius: 8px;
+    }
+
+    /* Right Sidebar: Active Ticket & Billing */
+    .mc-ticket-panel {
+      background: #151c2b;
+      border-left: 1px solid var(--mc-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1rem;
+    }
+    .mc-mode-tabs {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.85rem;
+    }
+    .mc-mode-btn {
+      flex: 1;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .mc-mode-btn.active {
+      background: var(--mc-red);
+      border-color: var(--mc-red);
+      color: #fff;
+    }
+    .mc-ticket-items {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 240px;
+      border-top: 1px solid var(--mc-border);
+      border-bottom: 1px solid var(--mc-border);
+      padding: 0.5rem 0;
+      margin-bottom: 0.85rem;
+    }
+    .mc-ticket-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.07);
+      font-size: 0.85rem;
+    }
+    .mc-pay-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .mc-pay-btn {
+      padding: 0.65rem 0.2rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--mc-border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .mc-pay-btn.active {
+      background: var(--mc-yellow);
+      color: #000;
+      border-color: var(--mc-yellow);
+    }
+  </style>
+</head>
+<body class="pos-body">
+
+  <!-- Header McDonald's Style POS con Logo Oficial -->
+  <header class="mc-pos-header">
+    <div style="display: flex; align-items: center; gap: 0.8rem;">
+      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--mc-yellow);" alt="Donde David">
+      <div>
+        <h1 style="font-size: 1.2rem; font-weight: 900; margin: 0; color: var(--mc-yellow); line-height: 1;">DONDE DAVID TOUCH POS</h1>
+        <small style="color: #fff; opacity: 0.8; font-size: 0.7rem; font-weight: 700;">MCDONALD'S KIOSK INTERFACE</small>
+      </div>
+    </div>
+
+    <!-- Switcher de Vistas -->
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="mc-mode-btn active" id="view-btn-pos" onclick="switchPosMainView('pos')">🖥️ POS TOUCH</button>
+      <button class="mc-mode-btn" id="view-btn-queue" onclick="switchPosMainView('queue')">⏳ MESAS & CUENTAS (<span id="pending-count">0</span>)</button>
+      <button class="mc-mode-btn" id="view-btn-history" onclick="switchPosMainView('history')">📄 FACTURAS TURNO</button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="text-align: right; font-size: 0.8rem;">
+        <div style="color: var(--mc-yellow); font-weight: 800;" id="shift-number-label">Caja: #1 Activa</div>
+        <div style="color: var(--neon-green); font-weight: 900;" id="shift-sales-label">Q0.00</div>
+      </div>
+      <div id="shift-actions"></div>
+      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="Auth.logout()">🚪 Salir</button>
+    </div>
+  </header>
+
+  <!-- CONTENIDO 1: POS TOUCH (MCDONALD'S STYLE) -->
+  <div id="view-pos-container" class="mc-pos-container">
+    
+    <!-- Izquierda: Categorías con Iconos -->
+    <div class="mc-categories-bar" id="mc-cat-sidebar">
+      <div class="mc-cat-btn active" onclick="filterCategoryPos(null)">
+        <span class="icon">🔥</span>
+        <span>TODOS</span>
+      </div>
+      <!-- Categorías cargadas dinámicamente -->
+    </div>
+
+    <!-- Centro: Grid Apetitoso de Productos -->
+    <div class="mc-products-area">
+      <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <input type="text" id="mc-search-input" class="form-control" style="max-width: 320px;" placeholder="🔍 Buscar producto rápido..." oninput="filterProductsPos()">
+        <span style="font-size: 0.85rem; color: var(--text-muted);" id="mc-cat-title-label">Mostrando Menú Completo</span>
+      </div>
+
+      <div class="mc-products-grid" id="mc-products-touch-grid">
+        <!-- Creados dinámicamente -->
+      </div>
+    </div>
+
+    <!-- Derecha: Ticket Activo y Cobro POS -->
+    <div class="mc-ticket-panel">
+      <div>
+        <h3 style="font-size: 1.1rem; font-weight: 900; color: var(--mc-yellow); margin-top: 0; margin-bottom: 0.75rem;">🛒 PEDIDO PRESENCIAL CAJA</h3>
+        
+        <!-- Modalidad Order Tabs -->
+        <div class="mc-mode-tabs">
+          <button class="mc-mode-btn active" id="type-btn-llevar" onclick="setPosOrderType('llevar')">🛍️ Para Llevar</button>
+          <button class="mc-mode-btn" id="type-btn-mesa" onclick="setPosOrderType('mesa')">🍽️ Comer Aquí</button>
+          <button class="mc-mode-btn" id="type-btn-delivery" onclick="setPosOrderType('delivery')">🛵 Delivery</button>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0.6rem;">
+          <input type="text" id="pos-mesa-input" class="form-control" style="font-size: 0.85rem; padding: 0.4rem;" value="Mostrador" placeholder="Mesa # o Nombre Cliente">
+        </div>
+
+        <!-- Lista de Items en Ticket -->
+        <div class="mc-ticket-items" id="pos-ticket-items-list">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 2rem 0;">Toca productos a la izquierda para armar el pedido presencial.</p>
+        </div>
+      </div>
+
+      <!-- Resumen de Costos y Pago -->
+      <div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.2rem;"><span>Subtotal:</span><span id="pos-subtotal">Q0.00</span></div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.2rem;"><span>IVA (16%):</span><span id="pos-tax">Q0.00</span></div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.2rem;" id="pos-extra-row"><span>Recargo Empaque/Envío:</span><span id="pos-extra">Q0.00</span></div>
+        </div>
+
+        <div style="background: rgba(255, 188, 13, 0.15); border: 1px solid var(--mc-yellow); border-radius: 10px; padding: 0.75rem; text-align: center; margin: 0.6rem 0;">
+          <div style="font-size: 0.75rem; color: #fff; font-weight: 700;">TOTAL A COBRAR</div>
+          <div style="font-size: 1.8rem; font-weight: 900; color: var(--mc-yellow);" id="pos-total">Q0.00</div>
+        </div>
+
+        <!-- Forma de Pago -->
+        <div class="mc-pay-btn-grid">
+          <button class="mc-pay-btn active" id="pay-btn-Efectivo" onclick="setPosPaymentMethod('Efectivo')">💵 Efectivo</button>
+          <button class="mc-pay-btn" id="pay-btn-Tarjeta" onclick="setPosPaymentMethod('Tarjeta')">💳 Tarjeta</button>
+          <button class="mc-pay-btn" id="pay-btn-Pago Móvil" onclick="setPosPaymentMethod('Pago Móvil')">📱 Móvil</button>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.6rem; margin-bottom: 0.6rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.2rem;">
+            <span>Monto Recibido:</span>
+            <span style="color: var(--neon-green); font-weight: 800;" id="pos-change-lbl">Cambio: Q0.00</span>
+          </div>
+          <input type="number" step="0.01" id="pos-received-input" class="form-control" style="font-size: 1rem; font-weight: 800;" placeholder="0.00" oninput="calcPosChange()">
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn-gold" style="flex: 1; background: var(--mc-red); color: #fff; border-color: var(--mc-red); font-size: 0.85rem;" onclick="clearPosCart()">🗑️ Vaciar</button>
+          <button class="btn-gold" style="flex: 2; font-size: 0.95rem;" onclick="submitPosOrderFast()">⚡ COBRAR Y FACTURAR</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CONTENIDO 2: PEDIDOS PENDIENTES DE MESAS / CUENTAS -->
+  <div id="view-queue-container" style="display: none; max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+    <h2 style="font-size: 1.4rem; font-weight: 900; color: var(--mc-yellow); margin-top: 0; margin-bottom: 1.25rem;">⏳ CUENTAS Y PEDIDOS EN ESPERA DE COBRO</h2>
+    <div id="pending-orders-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;"></div>
+  </div>
+
+  <!-- CONTENIDO 3: HISTORIAL DE FACTURAS -->
+  <div id="view-history-container" style="display: none; max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+    <h2 style="font-size: 1.4rem; font-weight: 900; color: var(--mc-yellow); margin-top: 0; margin-bottom: 1.25rem;">📄 HISTORIAL Y REIMPRESIÓN DE FACTURAS</h2>
+    <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+            <th style="padding: 0.75rem;">Factura</th>
+            <th style="padding: 0.75rem;">Ubicación</th>
+            <th style="padding: 0.75rem;">Método</th>
+            <th style="padding: 0.75rem;">Total</th>
+            <th style="padding: 0.75rem;">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="paid-orders-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Personalizar Producto POS (Estilo McDonald's) -->
+  <div class="product-modal-backdrop" id="pos-customization-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('pos-customization-modal')">&times;</button>
+      <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--mc-yellow); margin-top: 0; margin-bottom: 0.5rem;" id="pos-cust-title">🛠️ PERSONALIZAR PRODUCTO</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0;" id="pos-cust-desc"></p>
+      
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 10px;">
+        <img id="pos-cust-img" src="" style="width: 75px; height: 75px; object-fit: cover; border-radius: 8px;">
+        <div>
+          <div style="font-size: 1.1rem; font-weight: 900; color: var(--mc-yellow);" id="pos-cust-price">Q0.00</div>
+          <div style="font-size: 0.8rem; color: #fff;">Personalización para el Cajero / Cliente</div>
+        </div>
+      </div>
+
+      <!-- Ingredientes Dinámicos y Extras -->
+      <div id="pos-cust-ingredients-container" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--mc-border); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;"></div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="font-size: 0.85rem; color: #fff;">📝 Notas Especiales para la Cocina</label>
+        <input type="text" id="pos-cust-notes" class="form-control" placeholder="Ej. Sin sal en papas, bien tostado">
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <span>Cantidad:</span>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <button class="btn-gold" style="padding: 0.3rem 0.8rem;" onclick="adjustPosCustQty(-1)">-</button>
+          <strong style="font-size: 1.2rem; color: var(--mc-yellow);" id="pos-cust-qty">1</strong>
+          <button class="btn-gold" style="padding: 0.3rem 0.8rem;" onclick="adjustPosCustQty(1)">+</button>
+        </div>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1rem;" onclick="confirmAddPosCustomizedItem()">➕ AGREGAR PRODUCTO AL TICKET</button>
+    </div>
+  </div>
+
+  <!-- Modal Cobro POS regular -->
+  <div class="product-modal-backdrop" id="payment-modal">
+    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('payment-modal')">&times;</button>
+      <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--mc-yellow); margin-top: 0;">💳 FACTURAR Y COBRAR PEDIDO <span id="pay-order-id">#0</span></h3>
+      
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--toon-border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.3rem;"><span>Ubicación:</span><strong id="pay-order-mesa" style="color: #fff;">Mesa 5</strong></div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 900; color: var(--mc-yellow); border-top: 1px dashed var(--toon-border); padding-top: 0.5rem; margin-top: 0.5rem;"><span>TOTAL A PAGAR:</span><span id="pay-order-total">Q0.00</span></div>
+      </div>
+
+      <div class="form-group"><label>NIT Cliente (Factura)</label><input type="text" id="pay-nit-input" class="form-control" value="CF"></div>
+      <div class="form-group"><label>Nombre Factura / Cliente</label><input type="text" id="pay-nombre-input" class="form-control" value="Consumidor Final"></div>
+      <div class="form-group">
+        <label>Método de Pago</label>
+        <select id="pay-method-select" class="form-control" onchange="calculateChange()">
+          <option value="Efectivo">💵 Efectivo</option>
+          <option value="Tarjeta">💳 Tarjeta de Crédito / Débito</option>
+          <option value="Pago Móvil">📱 Pago Móvil / Transferencia</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Monto Recibido (Q)</label><input type="number" step="0.01" id="pay-received-input" class="form-control" placeholder="0.00" oninput="calculateChange()"></div>
+
+      <div style="background: rgba(46, 213, 115, 0.15); border: 1px solid var(--neon-green); padding: 0.75rem; border-radius: var(--radius-sm); text-align: center; margin-bottom: 1rem;">
+        <div style="font-size: 0.75rem; color: var(--text-muted);">CAMBIO A ENTREGAR AL CLIENTE</div>
+        <div style="font-size: 1.6rem; font-weight: 900; color: var(--neon-green);" id="pay-change-display">Q0.00</div>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1.1rem;" onclick="submitPayment()">✅ PROCESAR COBRO Y EMITIR FACTURA</button>
+    </div>
+  </div>
+
+  <!-- Modal Ver Ticket Factura Imprimible -->
+  <div class="product-modal-backdrop" id="receipt-modal">
+    <div class="product-modal-card" style="max-width: 420px; background: #1a2336;">
+      <button class="modal-close-btn" onclick="closeModal('receipt-modal')">&times;</button>
+      <div style="padding: 1.5rem;">
+        <div class="factura-ticket" id="factura-ticket-content"></div>
+        <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="window.print()">🖨️ IMPRIMIR FACTURA / TICKET</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Apertura Shift -->
+  <div class="product-modal-backdrop" id="open-shift-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--mc-yellow); margin-top: 0;">🟢 APERTURA DE TURNO DE CAJA</h3>
+      <div class="form-group"><label>Monto Inicial de Apertura en Caja (Q)</label><input type="number" step="0.01" id="monto-apertura-input" class="form-control" value="200.00"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitAbrirTurno()">🟢 ABRIR TURNO DE CAJA</button>
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/websocket.js"></script>
+  <script src="/static/js/caja.js"></script>
+</body>
+</html>

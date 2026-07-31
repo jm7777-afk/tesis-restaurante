@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donde David - Panel de Administración General</title>
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <style>
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--toon-border);
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 0.8rem 1.25rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: var(--gold-accent);
+      border-bottom-color: var(--gold-accent);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+    @media (max-width: 900px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi-card {
+      background: var(--toon-card);
+      border: 1px solid var(--toon-border);
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+    }
+  </style>
+</head>
+<body class="toon-theme">
+
+  <!-- Navbar Admin con Logo Oficial -->
+  <header class="toon-header">
+    <a href="#" class="toon-brand">
+      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
+      <span>DONDE DAVID ADMIN PANEL</span>
+    </a>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span id="admin-user-label" style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 700;">Admin: Donde David</span>
+      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="Auth.logout()">🚪 Salir</button>
+    </div>
+  </header>
+
+  <div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+
+    <!-- Navigation Tabs -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard & Métricas</button>
+      <button class="tab-btn" onclick="switchTab('productos')">🍔 Productos del Menú & Ingredientes</button>
+      <button class="tab-btn" onclick="switchTab('publicaciones')">📰 Publicaciones Web</button>
+      <button class="tab-btn" onclick="switchTab('promociones')">🔥 Promos ("BOOM! PROMO DEL DÍA")</button>
+      <button class="tab-btn" onclick="switchTab('guia')">🎬 Guía Interactiva & Carrusel</button>
+      <button class="tab-btn" onclick="switchTab('portal')">🌐 Portal Web, Tasa & Historia</button>
+      <button class="tab-btn" onclick="switchTab('resenas')">⭐ Reseñas de Clientes</button>
+      <button class="tab-btn" onclick="switchTab('mesas')">🍽️ Mesas & QR</button>
+      <button class="tab-btn" onclick="switchTab('inventario')">📦 Insumos e Inventario</button>
+      <button class="tab-btn" onclick="switchTab('categorias')">📂 Categorías</button>
+      <button class="tab-btn" onclick="switchTab('usuarios')">👥 Usuarios del Sistema</button>
+    </div>
+
+    <!-- TAB 1: DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Ventas Totales ($)</div>
+          <div style="font-size: 1.8rem; font-weight: 900; color: var(--gold-accent);" id="stat-sales">$2,450.50</div>
+        </div>
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Insumos en Stock Crítico</div>
+          <div style="font-size: 1.8rem; font-weight: 900; color: var(--neon-red);" id="stat-critical">3</div>
+        </div>
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Pedidos en Cocina</div>
+          <div style="font-size: 1.8rem; font-weight: 900; color: var(--cyan-accent);" id="stat-cocina">12</div>
+        </div>
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Mesas Ocupadas</div>
+          <div style="font-size: 1.8rem; font-weight: 900; color: var(--neon-green);" id="stat-mesas">5 / 20</div>
+        </div>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1.5rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🏆 Top Productos Más Vendidos</h3>
+        <div id="top-products-container"></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PRODUCTOS Y EDICION DE INGREDIENTES -->
+    <div id="tab-productos" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>🍔 PRODUCTOS DEL CATÁLOGO & INGREDIENTES EDITABLES</h2>
+        <button class="btn-gold" onclick="openProductModal()">➕ Crear Producto</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Imagen</th>
+              <th style="padding: 0.75rem;">Nombre</th>
+              <th style="padding: 0.75rem;">Precio ($ / Bs)</th>
+              <th style="padding: 0.75rem;">Ingredientes / Opciones</th>
+              <th style="padding: 0.75rem;">Stock</th>
+              <th style="padding: 0.75rem;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: PUBLICACIONES WEB -->
+    <div id="tab-publicaciones" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>📰 PUBLICACIONES Y NOVEDADES WEB PÚBLICA</h2>
+        <button class="btn-gold" onclick="openModal('add-publicacion-modal')">➕ Nueva Publicación</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Imagen</th>
+              <th style="padding: 0.75rem;">Título Anuncio</th>
+              <th style="padding: 0.75rem;">Contenido</th>
+              <th style="padding: 0.75rem;">Autor</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="publicaciones-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: PROMOCIONES ("BOOM! PROMO DEL DIA") -->
+    <div id="tab-promociones" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>🔥 PROMOCIONES EDITABLES (BOOM! PROMO DEL DÍA)</h2>
+        <button class="btn-gold" onclick="openModal('promo-modal')">➕ Nueva Promoción</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Banner</th>
+              <th style="padding: 0.75rem;">Título Promo</th>
+              <th style="padding: 0.75rem;">Descripción</th>
+              <th style="padding: 0.75rem;">Descuento</th>
+              <th style="padding: 0.75rem;">Código Cupon</th>
+              <th style="padding: 0.75rem;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="promos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: GUÍA INTERACTIVA & CARRUSEL ADMIN -->
+    <div id="tab-guia" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>🎬 GESTIÓN DEL CARRUSEL Y GUÍA DE CLIENTES</h2>
+        <button class="btn-gold" onclick="openModal('add-guia-modal')">➕ Agregar Diapositiva a la Guía</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Contenido</th>
+              <th style="padding: 0.75rem;">Título</th>
+              <th style="padding: 0.75rem;">Descripción</th>
+              <th style="padding: 0.75rem;">Vista</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="guia-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 6: PORTAL WEB & TASA DE CAMBIO -->
+    <div id="tab-portal" class="tab-content">
+      <h2>🌐 TASA DE CAMBIO BCV/PARALELO Y CONFIGURACIÓN DEL PORTAL</h2>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1rem; max-width: 700px;">
+        
+        <div class="form-group" style="background: rgba(255, 188, 13, 0.1); border: 1px solid var(--gold-accent); padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
+          <label style="font-weight: 900; color: var(--gold-accent); font-size: 1rem;">💵 TASA DE CAMBIO (1 USD = Bs.)</label>
+          <input type="number" step="0.01" id="cfg-tasa-cambio" class="form-control" style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent);" value="36.50">
+          <small style="color: var(--text-muted); margin-top: 0.3rem; display: block;">Esta tasa se utiliza para convertir automáticamente todos los precios de la app en Bolívares (Bs.)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Nuestra Historia (Sección Web Pública)</label>
+          <textarea id="cfg-historia" class="form-control" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Número WhatsApp Oficial</label>
+          <input type="text" id="cfg-whatsapp" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Enlace Instagram</label>
+          <input type="text" id="cfg-instagram" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Enlace TikTok</label>
+          <input type="text" id="cfg-tiktok" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Costo Estándar Delivery ($ USD)</label>
+          <input type="number" step="0.5" id="cfg-costo-delivery" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Costo Empaque Para Llevar ($ USD)</label>
+          <input type="number" step="0.5" id="cfg-costo-empaque" class="form-control">
+        </div>
+        <button class="btn-gold" style="width: 100%; margin-top: 1rem; font-size: 1.05rem;" onclick="submitSavePortalConfigs()">💾 GUARDAR CONFIGURACIONES Y TASA DE CAMBIO</button>
+      </div>
+    </div>
+
+    <!-- TAB 7: RESEÑAS DE CLIENTES -->
+    <div id="tab-resenas" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>⭐ RESEÑAS ⭐⭐⭐⭐⭐ DE CLIENTES</h2>
+        <button class="btn-gold" onclick="openModal('add-resena-modal')">➕ Agregar Reseña</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Cliente</th>
+              <th style="padding: 0.75rem;">Estrellas</th>
+              <th style="padding: 0.75rem;">Comentario</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="resenas-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 8: MESAS -->
+    <div id="tab-mesas" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>🍽️ DISTRIBUCIÓN DE MESAS & CÓDIGOS QR</h2>
+        <button class="btn-gold" onclick="openModal('add-mesa-modal')">➕ Agregar Nueva Mesa</button>
+      </div>
+      <div class="mesas-grid" id="admin-mesas-grid"></div>
+    </div>
+
+    <!-- TAB 9: INVENTARIO -->
+    <div id="tab-inventario" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>📦 CONTROL DE INSUMOS E INVENTARIO</h2>
+        <button class="btn-gold" onclick="openModal('add-insumo-modal')">➕ Nuevo Insumo</button>
+      </div>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Insumo</th>
+              <th style="padding: 0.75rem;">Stock Actual</th>
+              <th style="padding: 0.75rem;">Stock Mínimo</th>
+              <th style="padding: 0.75rem;">Unidad</th>
+              <th style="padding: 0.75rem;">Estado</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="insumos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 10: CATEGORIAS -->
+    <div id="tab-categorias" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>📂 CATEGORÍAS CON FOTOS</h2>
+        <button class="btn-gold" onclick="openModal('category-modal')">➕ Nueva Categoría</button>
+      </div>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Imagen</th>
+              <th style="padding: 0.75rem;">Nombre</th>
+              <th style="padding: 0.75rem;">Descripción</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="categories-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 11: USUARIOS -->
+    <div id="tab-usuarios" class="tab-content">
+      <h2>👥 USUARIOS DEL SISTEMA</h2>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto; margin-top: 1rem;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Nombre</th>
+              <th style="padding: 0.75rem;">Usuario</th>
+              <th style="padding: 0.75rem;">Email</th>
+              <th style="padding: 0.75rem;">Rol</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Crear Publicación Web -->
+  <div class="product-modal-backdrop" id="add-publicacion-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-publicacion-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">📰 NUEVA PUBLICACIÓN PARA LA WEB PÚBLICA</h3>
+      <div class="form-group"><label>Título del Anuncio</label><input type="text" id="pub-titulo" class="form-control" placeholder="Ej. ¡Gran Inauguración de Nueva Sucursal!" required></div>
+      <div class="form-group"><label>Contenido / Detalles</label><textarea id="pub-contenido" class="form-control" rows="4" placeholder="Escribe aquí el contenido para los clientes..." required></textarea></div>
+      <div class="form-group">
+        <label>Subir Foto Ilustrativa</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'pub-img')">
+      </div>
+      <div class="form-group"><label>URL Imagen</label><input type="text" id="pub-img" class="form-control"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreatePublicacion()">PUBLICAR EN LA WEB PÚBLICA</button>
+    </div>
+  </div>
+
+  <!-- Modal Editar Producto e Ingredientes -->
+  <div class="product-modal-backdrop" id="edit-product-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('edit-product-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">✏️ EDITAR PRODUCTO E INGREDIENTES</h3>
+      <input type="hidden" id="edit-prod-id">
+      <div class="form-group"><label>Nombre del Producto</label><input type="text" id="edit-prod-name" class="form-control" required></div>
+      <div class="form-group"><label>Categoría</label><select id="edit-prod-cat-select" class="form-control" required></select></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="edit-prod-desc" class="form-control"></div>
+      <div class="form-group"><label>Precio Regular ($ USD)</label><input type="number" step="0.01" id="edit-prod-price" class="form-control" required></div>
+      <div class="form-group"><label>Precio Promoción ($ USD) (opcional)</label><input type="number" step="0.01" id="edit-prod-price-promo" class="form-control"></div>
+      <div class="form-group"><label>Ingredientes (separados por coma)</label><input type="text" id="edit-prod-ingredientes" class="form-control" placeholder="Ej. Carne 150g, Queso Cheddar, Tomate, Cebolla"></div>
+      <div class="form-group">
+        <label>Cambiar Foto (Upload Local)</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'edit-prod-img')">
+      </div>
+      <div class="form-group"><label>URL Imagen</label><input type="text" id="edit-prod-img" class="form-control"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitUpdateProduct()">GUARDAR CAMBIOS EN EL PRODUCTO</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear/Editar Promoción -->
+  <div class="product-modal-backdrop" id="promo-modal">
+    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('promo-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">🔥 PROMOCIÓN DÍA (BOOM!)</h3>
+      <div class="form-group"><label>Título Promocional</label><input type="text" id="promo-titulo" class="form-control" placeholder="Ej. COMBO EXPLOSIVO TOON" required></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="promo-desc" class="form-control" placeholder="2 Hamburguesas + Papas + 2 Refrescos"></div>
+      <div class="form-group"><label>Porcentaje Descuento (%)</label><input type="number" id="promo-pct" class="form-control" value="20"></div>
+      <div class="form-group"><label>Código Cupon</label><input type="text" id="promo-codigo" class="form-control" value="COMBO20"></div>
+      <div class="form-group">
+        <label>Subir Imagen Banner</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'promo-img')">
+      </div>
+      <div class="form-group"><label>Ruta Imagen</label><input type="text" id="promo-img" class="form-control"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreatePromo()">GUARDAR PROMOCIÓN</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Reseña Admin -->
+  <div class="product-modal-backdrop" id="add-resena-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-resena-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">⭐ NUEVA RESEÑA DE CLIENTE</h3>
+      <div class="form-group"><label>Nombre del Cliente</label><input type="text" id="res-nombre" class="form-control" placeholder="Ej. Carlos Ramos"></div>
+      <div class="form-group"><label>Comentario</label><textarea id="res-comentario" class="form-control" rows="3" placeholder="Excelente comida..."></textarea></div>
+      <div class="form-group"><label>Estrellas (1 a 5)</label><input type="number" id="res-estrellas" class="form-control" value="5" min="1" max="5"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateResena()">PUBLICAR RESEÑA</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Elemento a la Guía / Carrusel -->
+  <div class="product-modal-backdrop" id="add-guia-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-guia-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">🎬 NUEVA DIAPOSITIVA GUÍA</h3>
+      <div class="form-group"><label>Título</label><input type="text" id="guia-titulo" class="form-control" placeholder="Ej. Paso 1: Escanea tu QR" required></div>
+      <div class="form-group"><label>Descripción / Instrucciones</label><textarea id="guia-desc" class="form-control" rows="2" placeholder="Explicación detallada..."></textarea></div>
+      <div class="form-group">
+        <label>Subir Foto o Video Local (.jpg, .png, .mp4)</label>
+        <input type="file" accept="image/*,video/*" class="form-control" onchange="uploadLocalFile(event, 'guia-media-url')">
+      </div>
+      <div class="form-group"><label>Ruta / URL Guardada</label><input type="text" id="guia-media-url" class="form-control" placeholder="/static/uploads/file.jpg" required></div>
+      <div class="form-group">
+        <label>Tipo de Media</label>
+        <select id="guia-tipo-media" class="form-control">
+          <option value="imagen">🖼️ Imagen (Foto)</option>
+          <option value="video">🎥 Video corto (.mp4)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vista de Aplicación</label>
+        <select id="guia-tipo-vista" class="form-control">
+          <option value="ambos">🌐 Ambos (Mesa y Delivery)</option>
+          <option value="mesa">🍽️ Solo en Mesa (QR)</option>
+          <option value="delivery">🛵 Solo en Delivery</option>
+        </select>
+      </div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateGuia()">GUARDAR EN EL CARRUSEL</button>
+    </div>
+  </div>
+
+  <!-- Modal Ver QR Mesa -->
+  <div class="product-modal-backdrop" id="qr-modal">
+    <div class="product-modal-card" style="max-width: 380px; text-align: center; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('qr-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;" id="qr-modal-title">CÓDIGO QR MESA #1</h3>
+      <img id="qr-modal-img" src="" style="width: 220px; height: 220px; border-radius: 12px; margin: 1rem 0; border: 2px solid var(--gold-accent);">
+      <div style="font-size: 0.8rem; color: var(--text-muted); word-break: break-all;" id="qr-modal-url"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="window.print()">🖨️ IMPRIMIR CÓDIGO QR MESA</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Mesa -->
+  <div class="product-modal-backdrop" id="add-mesa-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-mesa-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ AGREGAR NUEVA MESA</h3>
+      <div class="form-group"><label>Número de Mesa</label><input type="number" id="new-mesa-num" class="form-control" placeholder="Ej. 21"></div>
+      <div class="form-group"><label>Capacidad (personas)</label><input type="number" id="new-mesa-cap" class="form-control" value="4"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateMesa()">AGREGAR Y GENERAR QR</button>
+    </div>
+  </div>
+
+  <!-- Modal Ingreso Insumo -->
+  <div class="product-modal-backdrop" id="ingreso-insumo-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('ingreso-insumo-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ REGISTRAR INGRESO DE INSUMO</h3>
+      <p id="ingreso-insumo-title" style="color: #fff; font-weight: 700;"></p>
+      <div class="form-group"><label>Cantidad a Ingresar</label><input type="number" step="0.1" id="ingreso-cant-input" class="form-control" placeholder="Ej. 10.0"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitIngresoInsumo()">CONFIRMAR INGRESO AL STOCK</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Insumo -->
+  <div class="product-modal-backdrop" id="add-insumo-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-insumo-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ NUEVO INSUMO</h3>
+      <div class="form-group"><label>Nombre</label><input type="text" id="ins-nombre" class="form-control" placeholder="Ej. Tomates frescos"></div>
+      <div class="form-group"><label>Stock Inicial</label><input type="number" step="0.1" id="ins-stock" class="form-control" value="10.0"></div>
+      <div class="form-group"><label>Stock Mínimo</label><input type="number" step="0.1" id="ins-min" class="form-control" value="5.0"></div>
+      <div class="form-group"><label>Unidad de Medida</label><input type="text" id="ins-unidad" class="form-control" value="kg"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateInsumo()">GUARDAR INSUMO</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear Producto -->
+  <div class="product-modal-backdrop" id="product-modal">
+    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('product-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ CREAR NUEVO PRODUCTO</h3>
+      <div class="form-group"><label>Nombre del Producto</label><input type="text" id="prod-name" class="form-control" required></div>
+      <div class="form-group"><label>Categoría</label><select id="prod-cat-select" class="form-control" required></select></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="prod-desc" class="form-control"></div>
+      <div class="form-group"><label>Precio ($ USD)</label><input type="number" step="0.01" id="prod-price" class="form-control" required></div>
+      <div class="form-group"><label>Ingredientes (separados por coma)</label><input type="text" id="prod-ingredientes" class="form-control" placeholder="Ej. Carne 150g, Queso Cheddar, Tomate, Cebolla"></div>
+      <div class="form-group">
+        <label>Subir Foto Local al Servidor</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'prod-img')">
+      </div>
+      <div class="form-group"><label>Ruta / URL de la Imagen</label><input type="text" id="prod-img" class="form-control" placeholder="/static/uploads/..." required></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateProduct()">GUARDAR PRODUCTO EN EL CATÁLOGO</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear Categoría -->
+  <div class="product-modal-backdrop" id="category-modal">
+    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('category-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ CREAR NUEVA CATEGORÍA</h3>
+      <div class="form-group"><label>Nombre</label><input type="text" id="cat-name" class="form-control" required></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="cat-desc" class="form-control"></div>
+      <div class="form-group">
+        <label>Subir Foto Local al Servidor</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'cat-img')">
+      </div>
+      <div class="form-group"><label>Ruta / URL Imagen Categoría</label><input type="text" id="cat-img" class="form-control" placeholder="/static/uploads/..." required></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateCategory()">GUARDAR CATEGORÍA EN EL SERVIDOR</button>
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/websocket.js"></script>
+  <script src="/static/js/admin-toon.js"></script>
+</body>
+</html>

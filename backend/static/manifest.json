@@ -1,0 +1,18 @@
+{
+  "short_name": "DondeDavid",
+  "name": "Donde David - Fresh & Tasty!",
+  "icons": [
+    {
+      "src": "/static/images/logo-donde-david.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/static/index.html",
+  "background_color": "#121824",
+  "theme_color": "#FFBC0D",
+  "display": "standalone",
+  "orientation": "portrait",
+  "description": "App oficial de Donde David Fresh & Tasty! Pedidos en mesa vía QR y Delivery."
+}

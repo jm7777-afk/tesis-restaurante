@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donde David UNIVERSE TOON'S - Panel Integrado Admin & Staff</title>
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: rgba(14, 9, 38, 0.95);
+      border-right: 1px solid var(--toon-border);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .sidebar-btn {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s;
+    }
+    .sidebar-btn.active, .sidebar-btn:hover {
+      background: var(--toon-card-hover);
+      border-color: var(--gold-accent);
+      color: var(--gold-accent);
+    }
+    .admin-content {
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .panel-section {
+      display: none;
+    }
+    .panel-section.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="toon-theme">
+
+  <div class="admin-layout">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div style="text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--toon-border);">
+        <span style="font-size: 2.2rem; display: block; margin-bottom: 0.2rem;">🍔</span>
+        <strong style="font-size: 1.1rem; color: var(--gold-accent);">Donde David</strong>
+        <div style="font-size: 0.7rem; color: var(--text-muted);">UNIVERSE TOON'S</div>
+      </div>
+
+      <button class="sidebar-btn active" onclick="switchAdminSection('dashboard')">📊 Dashboard</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('mesas')">🪑 Mesas & QR (1-20)</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('insumos')">🥩 Inventario Insumos</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('cocina')">👨‍🍳 Cocina KDS</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('caja')">💰 Caja POS & Turnos</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('mesero')">🛎️ Vista Mesero</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('promociones')">🎁 Promociones</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('reportes')">📈 Reportes & Excel</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('configuracion')">⚙️ Configuración</button>
+      <button class="sidebar-btn" onclick="switchAdminSection('auditoria')">📜 Auditoría & Logs</button>
+
+      <button class="btn-gold" style="margin-top: auto; background: rgba(239,68,68,0.2); color: var(--neon-red); border: 1px solid var(--neon-red);" onclick="Auth.logout()">🚪 Salir</button>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-content">
+
+      <!-- SECTION 1: DASHBOARD -->
+      <section id="sec-dashboard" class="panel-section active">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">📊 Dashboard General</h1>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem;">
+          <div class="toon-card">
+            <small style="color: var(--text-muted);">Ventas Hoy</small>
+            <h2 style="font-size: 1.8rem; color: var(--gold-accent);">$1,250.00</h2>
+          </div>
+          <div class="toon-card">
+            <small style="color: var(--text-muted);">Pedidos Hoy</small>
+            <h2 style="font-size: 1.8rem; color: #fff;">86</h2>
+          </div>
+          <div class="toon-card">
+            <small style="color: var(--text-muted);">Monto en Caja</small>
+            <h2 style="font-size: 1.8rem; color: var(--neon-green);">$950.50</h2>
+          </div>
+          <div class="toon-card">
+            <small style="color: var(--text-muted);">Stock Crítico Alert</small>
+            <h2 style="font-size: 1.8rem; color: var(--neon-red);">3 Prod.</h2>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+          <div class="toon-card">
+            <h3 style="font-size: 1.1rem; color: var(--gold-accent); margin-bottom: 1rem;">Ventas por Hora</h3>
+            <div style="display: flex; align-items: flex-end; gap: 1rem; height: 180px; padding-top: 1rem;">
+              <div style="flex:1; background: var(--gold-gradient); height: 40%; border-radius: 6px;"></div>
+              <div style="flex:1; background: var(--gold-gradient); height: 65%; border-radius: 6px;"></div>
+              <div style="flex:1; background: var(--gold-gradient); height: 90%; border-radius: 6px;"></div>
+              <div style="flex:1; background: var(--gold-gradient); height: 100%; border-radius: 6px;"></div>
+              <div style="flex:1; background: var(--gold-gradient); height: 75%; border-radius: 6px;"></div>
+            </div>
+          </div>
+          <div class="toon-card">
+            <h3 style="font-size: 1.1rem; color: var(--gold-accent); margin-bottom: 1rem;">Distribución</h3>
+            <p>🍔 Hamburguesas: 55%</p>
+            <p>🌭 Hot Dogs: 25%</p>
+            <p>🍟 Papas: 20%</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: MESAS & QR -->
+      <section id="sec-mesas" class="panel-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h1 style="font-size: 1.8rem; font-weight: 900;">🪑 Control de Mesas (1 - 20)</h1>
+          <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
+            <span style="color: var(--neon-green);">🟢 Libre</span>
+            <span style="color: var(--neon-red);">🔴 Ocupada</span>
+            <span style="color: var(--neon-blue);">🔵 Reservada</span>
+          </div>
+        </div>
+
+        <div class="mesas-grid" id="admin-mesas-grid"></div>
+
+        <!-- Generador QR Card -->
+        <div class="toon-card" style="margin-top: 2rem;">
+          <h2 style="font-size: 1.3rem; color: var(--gold-accent); margin-bottom: 1rem;">📱 Generador de Código QR de Mesa</h2>
+          <div style="display: flex; gap: 2rem; align-items: center;">
+            <div style="background: #fff; padding: 1rem; border-radius: 12px;">
+              <img id="qr-preview-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=Mesa3" style="width: 180px; height: 180px;">
+            </div>
+            <div>
+              <h3 id="qr-mesa-title" style="font-size: 1.4rem; margin-bottom: 0.5rem;">Mesa #3</h3>
+              <p style="color: var(--text-muted); margin-bottom: 1rem;" id="qr-mesa-url">http://localhost:8000/static/cliente/app.html?mesa=3</p>
+              <div style="display: flex; gap: 0.75rem;">
+                <button class="btn-gold" onclick="showToast('Imprimiendo QR de Mesa...', 'success')">🖨️ Imprimir QR</button>
+                <button class="btn-gold" style="background: #25D366; color: #fff;" onclick="showToast('Enviado por WhatsApp', 'success')">💬 Enviar WhatsApp</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: INSUMOS -->
+      <section id="sec-insumos" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">🥩 Inventario de Insumos</h1>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>Insumo</th><th>Stock Actual</th><th>Stock Mínimo</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="insumos-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 4: COCINA KDS -->
+      <section id="sec-cocina" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">👨‍🍳 Monitor KDS Cocina</h1>
+        <div class="kds-grid" id="admin-kds-grid"></div>
+      </section>
+
+      <!-- SECTION 5: CAJA POS -->
+      <section id="sec-caja" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">💰 Panel POS & Turnos de Caja</h1>
+        <div class="shift-status-bar">
+          <div><strong>Turno #1 Activo</strong> | Ventas: $1,250.00 (86 Pedidos)</div>
+          <button class="btn-gold" style="background: var(--neon-red); color: #fff;" onclick="showToast('Turno cerrado', 'info')">🔴 Cerrar Turno</button>
+        </div>
+      </section>
+
+      <!-- SECTION 6: MESERO -->
+      <section id="sec-mesero" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">🛎️ Vista de Mesero & Solicitudes</h1>
+        <div id="mesero-list-container"></div>
+      </section>
+
+      <!-- SECTION 7: PROMOCIONES -->
+      <section id="sec-promociones" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">🎁 Promociones & Cupones</h1>
+        <div id="promos-admin-list"></div>
+      </section>
+
+      <!-- SECTION 8: REPORTES -->
+      <section id="sec-reportes" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">📈 Reportes & Exportación</h1>
+        <button class="btn-gold" onclick="showToast('Descargando reporte Excel...', 'success')">📊 Exportar a Excel</button>
+      </section>
+
+      <!-- SECTION 9: CONFIGURACION -->
+      <section id="sec-configuracion" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">⚙️ Configuración del Negocio</h1>
+        <div class="form-group"><label>Nombre del Negocio</label><input type="text" class="form-control" value="Donde David Fresh & Tasty!"></div>
+        <div class="form-group"><label>Porcentaje IVA (%)</label><input type="text" class="form-control" value="16.0"></div>
+        <div class="form-group"><label>WhatsApp Oficial</label><input type="text" class="form-control" value="+502 4112 5554"></div>
+        <button class="btn-gold" onclick="showToast('Configuración guardada', 'success')">GUARDAR CAMBIOS</button>
+      </section>
+
+      <!-- SECTION 10: AUDITORIA -->
+      <section id="sec-auditoria" class="panel-section">
+        <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem;">📜 Logs de Auditoría</h1>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Acción</th><th>Usuario</th><th>Detalle</th><th>Fecha</th></tr></thead>
+            <tbody id="auditoria-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/websocket.js"></script>
+  <script src="/static/js/admin-toon.js"></script>
+</body>
+</html>

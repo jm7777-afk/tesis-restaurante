@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donde David - Fresh & Tasty! | El Sabor Toon Gourmet #1</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#FFBC0D">
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <style>
+    /* Top Urgency Bar */
+    .urgency-bar {
+      background: linear-gradient(90deg, #DA291C, #FFBC0D, #DA291C);
+      background-size: 200% 200%;
+      animation: gradientShift 4s ease infinite;
+      color: #000;
+      font-weight: 900;
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .landing-hero-pro {
+      padding: 3.5rem 1.5rem 3.5rem 1.5rem;
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(255, 188, 13, 0.18), transparent 75%);
+      position: relative;
+    }
+    
+    .trust-badges-row {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    .trust-badge-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--toon-border);
+      border-radius: 30px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body class="toon-theme">
+
+  <!-- Top Urgency Bar -->
+  <div class="urgency-bar">
+    <span>🔥 PROMO EXCLUSIVA WEB: 20% OFF CON EL CÓDIGO <u style="background: #000; color: #fff; padding: 0.1rem 0.4rem; border-radius: 4px;">TOON20</u></span>
+    <span style="background: #000; color: var(--gold-accent); padding: 0.2rem 0.6rem; border-radius: 6px;">EXPIRA EN: <strong id="countdown-timer">14:59</strong></span>
+  </div>
+
+  <!-- Header Global Con Logo Oficial -->
+  <header class="toon-header" style="justify-content: space-between; max-width: 1200px; margin: 0 auto; background: transparent; border-bottom: none; padding: 1.25rem 1.5rem;">
+    <a href="/" class="toon-brand">
+      <img src="/static/images/logo-donde-david.jpg" style="height: 52px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David Logo">
+      <span>DONDE DAVID <small style="color: var(--gold-accent); font-size: 0.75rem; display: block;">FRESH & TASTY!</small></span>
+    </a>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <a href="/static/cliente/app.html?mesa=5" class="btn-gold" style="padding: 0.5rem 1rem; text-decoration: none; font-size: 0.8rem;">🛵 PEDIR AHORA</a>
+      <button class="btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem; background: transparent; border: 1px solid var(--gold-accent); color: var(--gold-accent);" onclick="openModal('staff-login-modal')">🔑 PERSONAL</button>
+    </div>
+  </header>
+
+  <!-- Hero Section Con Psicología de Marketing -->
+  <section class="landing-hero-pro">
+    
+    <div style="margin-bottom: 1rem;">
+      <img src="/static/images/logo-donde-david.jpg" style="width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--gold-accent); box-shadow: 0 0 40px rgba(255, 188, 13, 0.6);" alt="Donde David Logo">
+    </div>
+
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255, 188, 13, 0.15); border: 1px solid var(--gold-accent); border-radius: 30px; padding: 0.4rem 1rem; margin-bottom: 1.25rem;">
+      <span style="color: var(--gold-accent); font-size: 1rem;">⭐⭐⭐⭐⭐</span>
+      <strong style="font-size: 0.85rem; color: #fff;">4.9/5 basado en +1,420 reseñas satisfechas</strong>
+    </div>
+
+    <h1 style="font-size: 3.2rem; font-weight: 900; background: linear-gradient(135deg, #FFBC0D, #ff4757); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0.5rem 0; line-height: 1.1;">
+      ¡LA EXPERIENCIA TOON GOURMET QUE PROVOCA A TU PALADAR!
+    </h1>
+    <p style="font-size: 1.25rem; color: #fff; max-width: 720px; margin: 0.8rem auto 2rem auto; font-weight: 600; line-height: 1.5;">
+      Hamburguesas artesanales de carne 100% de res, perros calientes cargados de toppings crocantes y malteadas cremosas. ¡Pide en mesa escaneando tu QR o recibe directo en tu puerta!
+    </p>
+
+    <!-- CTAs de Alto Impacto -->
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="/static/cliente/app.html?mesa=5" class="btn-gold" style="font-size: 1.15rem; padding: 1rem 2.2rem; text-decoration: none; box-shadow: 0 10px 30px rgba(255, 188, 13, 0.4);">
+        🛵 PEDIR DELIVERY (DESCUENTO ACTIVO)
+      </a>
+      <a href="/static/cliente/app.html?mesa=1" class="btn-gold" style="font-size: 1.15rem; padding: 1rem 2.2rem; text-decoration: none; background: linear-gradient(135deg, #00f5d4, #00b4d8); color: #000; box-shadow: 0 10px 30px rgba(0, 245, 212, 0.3);">
+        🍽️ ESCANEAR QR MESA EN EL LOCAL
+      </a>
+    </div>
+
+    <!-- Trust Badges de Garantía -->
+    <div class="trust-badges-row">
+      <div class="trust-badge-item">🥩 Carne 100% Res Premium</div>
+      <div class="trust-badge-item">⚡ Entrega en &lt; 30 Minutos</div>
+      <div class="trust-badge-item">🧀 Queso Cheddar Fundido</div>
+      <div class="trust-badge-item">📦 Empaque Térmico Anti-Enfrío</div>
+    </div>
+  </section>
+
+  <!-- Sección Publicaciones & Anuncios del Admin -->
+  <section class="landing-section" style="padding-top: 1rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h2 style="font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 0.4rem;">📰 NOVEDADES Y ANUNCIOS OFICIALES</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Lo más reciente del equipo de Donde David</p>
+    </div>
+
+    <div class="grid-3" id="public-publicaciones-grid">
+      <!-- Creados dinámicamente -->
+    </div>
+  </section>
+
+  <!-- Sección Menú Destacado en Vivo -->
+  <section class="landing-section" style="padding-top: 1rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h2 style="font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 0.4rem;">🔥 LOS MÁS PEDIDOS HOY</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Seleccionados de nuestra cocina directo para provocar tu antojo</p>
+    </div>
+
+    <div class="grid-3" id="public-products-preview">
+      <!-- Creados dinámicamente -->
+    </div>
+  </section>
+
+  <!-- Sección Historia & Redes Sociales -->
+  <section class="landing-section">
+    <div class="grid-3" style="margin-bottom: 3rem;">
+      
+      <!-- Historia -->
+      <div class="public-card" style="grid-column: span 2;">
+        <h2 style="font-size: 1.6rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">📖 NUESTRA HISTORIA</h2>
+        <p id="public-historia-text" style="color: var(--text-muted); line-height: 1.7; font-size: 1rem;">
+          Donde David nació de la pasión por crear hamburguesas artesanales gigantes y perros estilo Toon gourmet. ¡Combinamos ingredientes premium de primera calidad con una experiencia interactiva digital única en cada mesa!
+        </p>
+      </div>
+
+      <!-- Redes Sociales VIP -->
+      <div class="public-card">
+        <h2 style="font-size: 1.6rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">📲 ÚNETE A LA COMUNIDAD TOON</h2>
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1rem;">
+          <a href="#" id="pub-whatsapp" target="_blank" class="social-badge">
+            <span style="font-size: 1.3rem;">💬</span> <span id="pub-whatsapp-lbl">WhatsApp: +502 4112 5554</span>
+          </a>
+          <a href="#" id="pub-instagram" target="_blank" class="social-badge">
+            <span style="font-size: 1.3rem;">📸</span> <span>Instagram: @dondedavid</span>
+          </a>
+          <a href="#" id="pub-tiktok" target="_blank" class="social-badge">
+            <span style="font-size: 1.3rem;">🎵</span> <span>TikTok: @dondedavid</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sección Reseñas ⭐⭐⭐⭐⭐ -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h2 style="font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 0.4rem;">⭐⭐⭐⭐⭐ TESTIMONIOS VERIFICADOS DE COMENSALES</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Mira lo que dicen quienes ya disfrutaron la experiencia Donde David</p>
+    </div>
+
+    <div class="grid-3" id="public-resenas-grid">
+      <!-- Creadas dinámicamente -->
+    </div>
+  </section>
+
+  <!-- Modal Login Empleados / Admin -->
+  <div class="product-modal-backdrop" id="staff-login-modal">
+    <div class="product-modal-card" style="max-width: 420px; padding: 2rem;">
+      <button class="modal-close-btn" onclick="closeModal('staff-login-modal')">&times;</button>
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <img src="/static/images/logo-donde-david.jpg" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
+        <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.4rem;">ACCESO DE PERSONAL</h3>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Nombre de Usuario</label>
+          <input type="text" id="username" class="form-control" placeholder="admin / caja1 / mesero1" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-gold" style="width: 100%; margin-top: 1rem;">INGRESAR AL SISTEMA</button>
+      </form>
+
+      <div style="margin-top: 1.5rem; border-top: 1px dashed var(--toon-border); padding-top: 1rem;">
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-bottom: 0.5rem;">ACCESOS RÁPIDOS DEMO:</div>
+        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-gold" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;" onclick="quickLogin('admin', 'admin123', '/static/admin/index.html')">⚙️ Admin</button>
+          <button class="btn-gold" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;" onclick="quickLogin('caja1', 'caja123', '/static/caja/panel.html')">💰 Caja</button>
+          <button class="btn-gold" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;" onclick="quickLogin('delivery1', 'delivery123', '/static/mesero/panel.html')">🍽️ Mesero</button>
+          <button class="btn-gold" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;" onclick="quickLogin('cocina1', 'cocina123', '/static/cocina/monitor.html')">👨‍🍳 Cocina</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/websocket.js"></script>
+  <script>
+    let timerSeconds = 14 * 60 + 59;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadPublicInfo();
+      loadPublicResenas();
+      loadPublicPublicaciones();
+      loadPublicProductsPreview();
+      startCountdownTimer();
+
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        try {
+          const res = await Auth.login(user, pass);
+          showToast(`Bienvenido ${res.usuario.nombre}`, 'success');
+          setTimeout(() => redirectByRole(res.usuario.rol), 600);
+        } catch (err) {
+          showToast(err.message, 'danger');
+        }
+      });
+    });
+
+    async function loadPublicPublicaciones() {
+      try {
+        const res = await fetch("/api/v1/cliente/publicaciones");
+        if (res.ok) {
+          const list = await res.json();
+          renderPublicacionesGrid(list);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderPublicacionesGrid(list) {
+      const container = document.getElementById("public-publicaciones-grid");
+      if (!list || list.length === 0) {
+        container.innerHTML = `<div class="public-card" style="grid-column: span 3; text-align: center;"><h3 style="color:#fff;">¡Pronto publicaremos grandes sorpresas!</h3><p style="color:var(--text-muted)">Permanece atento a nuestras redes oficiales.</p></div>`;
+        return;
+      }
+
+      let html = "";
+      list.forEach(p => {
+        const img = p.imagen_url || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500";
+        html += `
+          <div class="public-card">
+            <img src="${img}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 0.85rem;">
+            <span class="badge" style="background: var(--gold-accent); color: #000; font-weight: 800; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 6px;">${p.autor || 'Donde David'}</span>
+            <h3 style="color: #fff; font-size: 1.15rem; margin: 0.5rem 0;">${p.titulo}</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">${p.contenido}</p>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function startCountdownTimer() {
+      setInterval(() => {
+        if (timerSeconds > 0) timerSeconds--;
+        const mins = Math.floor(timerSeconds / 60);
+        const secs = timerSeconds % 60;
+        document.getElementById("countdown-timer").innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    async function loadPublicProductsPreview() {
+      try {
+        const res = await fetch("/api/v1/cliente/productos");
+        if (res.ok) {
+          const prods = await res.json();
+          const topProds = prods.slice(0, 3);
+          let html = "";
+          topProds.forEach(p => {
+            const img = p.imagen_url || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500";
+            html += `
+              <div class="public-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <img src="${img}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 0.85rem;">
+                  <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 0.4rem 0;">${p.nombre}</h3>
+                  <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;">${p.descripcion || ''}</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px dashed var(--toon-border); padding-top: 0.75rem;">
+                  <strong style="font-size: 1.3rem; color: var(--gold-accent);">$${p.precio.toFixed(2)}</strong>
+                  <a href="/static/cliente/app.html?mesa=5" class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; text-decoration: none;">🛵 PEDIR AHORA</a>
+                </div>
+              </div>
+            `;
+          });
+          document.getElementById("public-products-preview").innerHTML = html;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadPublicInfo() {
+      try {
+        const res = await fetch("/api/v1/cliente/configuraciones-publicas");
+        if (res.ok) {
+          const cfg = await res.json();
+          if (cfg.historia_restaurante) document.getElementById("public-historia-text").innerText = cfg.historia_restaurante;
+          if (cfg.whatsapp_contacto) {
+            document.getElementById("pub-whatsapp").href = `https://wa.me/${cfg.whatsapp_contacto.replace(/[^0-9]/g, '')}`;
+            document.getElementById("pub-whatsapp-lbl").innerText = `WhatsApp: ${cfg.whatsapp_contacto}`;
+          }
+          if (cfg.instagram_link) document.getElementById("pub-instagram").href = cfg.instagram_link;
+          if (cfg.tiktok_link) document.getElementById("pub-tiktok").href = cfg.tiktok_link;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadPublicResenas() {
+      try {
+        const res = await fetch("/api/v1/cliente/resenas");
+        if (res.ok) {
+          const list = await res.json();
+          renderResenasGrid(list);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderResenasGrid(list) {
+      const container = document.getElementById("public-resenas-grid");
+      if (!list || list.length === 0) {
+        container.innerHTML = `<p style="color: var(--text-muted); grid-column: span 3; text-align: center;">No hay opiniones registradas aún.</p>`;
+        return;
+      }
+
+      let html = "";
+      list.forEach(r => {
+        const foto = r.foto_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150";
+        const stars = "⭐".repeat(r.estrellas || 5);
+        html += `
+          <div class="public-card">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <img src="${foto}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold-accent);">
+              <div>
+                <strong style="color: #fff; font-size: 1rem; display: block;">${r.nombre_cliente}</strong>
+                <span style="font-size: 0.8rem;">${stars}</span>
+              </div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; line-height: 1.4; margin: 0;">"${r.comentario}"</p>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add("open"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+    async function quickLogin(user, pass, redirectUrl) {
+      try {
+        await Auth.login(user, pass);
+        window.location.href = redirectUrl;
+      } catch (err) {
+        showToast(err.message, 'danger');
+      }
+    }
+
+    function redirectByRole(rol) {
+      if (rol === 'admin' || rol === 'supervisor') window.location.href = '/static/admin/index.html';
+      else if (rol === 'cocina') window.location.href = '/static/cocina/monitor.html';
+      else if (rol === 'caja') window.location.href = '/static/caja/panel.html';
+      else if (rol === 'mesero') window.location.href = '/static/mesero/panel.html';
+      else window.location.href = '/static/cliente/app.html?mesa=1';
+    }
+  </script>
+</body>
+</html>
