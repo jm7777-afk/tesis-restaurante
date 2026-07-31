@@ -24,6 +24,11 @@ def seed():
 
     db = SessionLocal()
     try:
+        # Si la base de datos ya está poblada, salir de inmediato de forma ultrarrápida
+        if db.query(Usuario).first():
+            print("[OK] Base de datos ya poblada previamente.")
+            return
+
         # 1. Configuración por defecto "Donde David"
         configs = [
             ("nombre_restaurante", "Donde David Fresh & Tasty!", "Nombre del negocio"),
@@ -42,8 +47,6 @@ def seed():
             c = db.query(Configuracion).filter(Configuracion.clave == clave).first()
             if not c:
                 db.add(Configuracion(clave=clave, valor=valor, descripcion=desc))
-            else:
-                pass
         db.commit()
 
         # 2. Usuarios del sistema
