@@ -20,7 +20,6 @@ from backend.app.models.resena import Resena
 
 def seed():
     print("Inicializando base de datos Donde David UNIVERSE TOON'S...")
-    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
@@ -36,6 +35,7 @@ def seed():
             ("whatsapp_contacto", "+502 4112 5554", "Número oficial WhatsApp"),
             ("instagram_link", "https://instagram.com/dondedavid", "Enlace a Instagram"),
             ("tiktok_link", "https://tiktok.com/@dondedavid", "Enlace a TikTok"),
+            ("tasa_cambio_bs", "36.50", "Tasa de cambio estándar en Bolívares"),
             ("historia_restaurante", "Donde David nació de la pasión por crear hamburguesas artesanales gigantes y perros estilo Toon gourmet. ¡Combinamos ingredientes premium de primera calidad con una experiencia interactiva digital única en cada mesa!", "Historia del restaurante")
         ]
         for clave, valor, desc in configs:
@@ -43,7 +43,7 @@ def seed():
             if not c:
                 db.add(Configuracion(clave=clave, valor=valor, descripcion=desc))
             else:
-                c.valor = valor
+                pass
         db.commit()
 
         # 2. Usuarios del sistema

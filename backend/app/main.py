@@ -15,11 +15,12 @@ from backend.app.api import auth, cliente, cocina, caja, admin, mesero
 from backend.app.websockets.manager import ws_manager
 from backend.scripts.seed_data import seed
 
-# Create DB tables
-Base.metadata.create_all(bind=engine)
-
-# Seed database on startup
-seed()
+# Create DB tables & Seed safely
+try:
+    Base.metadata.create_all(bind=engine)
+    seed()
+except Exception as e:
+    print(f"Aviso en inicio de base de datos: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
