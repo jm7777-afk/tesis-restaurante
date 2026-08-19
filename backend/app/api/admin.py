@@ -2,6 +2,7 @@ import os
 import shutil
 import uuid
 import json
+import asyncio
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
@@ -439,6 +440,9 @@ def create_categoria_admin(data: CategoriaCreate, db: Session = Depends(get_db))
     db.add(nueva)
     db.commit()
     db.refresh(nueva)
+    try:
+        asyncio.create_task(ws_manager.broadcast_event("PRODUCTOS_ACTUALIZADOS", {}))
+    except Exception: pass
     return nueva
 
 @router.delete("/categorias/{categoria_id}")
@@ -455,7 +459,7 @@ def list_productos_admin(db: Session = Depends(get_db)):
     return db.query(Producto).order_by(Producto.id.desc()).all()
 
 @router.post("/productos")
-def create_producto_admin(data: ProductoCreate, db: Session = Depends(get_db)):
+async def create_producto_admin(data: ProductoCreate, db: Session = Depends(get_db)):
     nuevo = Producto(
         nombre=data.nombre,
         descripcion=data.descripcion,
@@ -469,10 +473,13 @@ def create_producto_admin(data: ProductoCreate, db: Session = Depends(get_db)):
     db.add(nuevo)
     db.commit()
     db.refresh(nuevo)
+    try:
+        await ws_manager.broadcast_event("PRODUCTOS_ACTUALIZADOS", {"producto_id": nuevo.id, "nombre": nuevo.nombre})
+    except Exception: pass
     return nuevo
 
 @router.put("/productos/{producto_id}")
-def update_producto_admin(producto_id: int, data: ProductoUpdate, db: Session = Depends(get_db)):
+async def update_producto_admin(producto_id: int, data: ProductoUpdate, db: Session = Depends(get_db)):
     p = db.query(Producto).filter(Producto.id == producto_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -489,15 +496,21 @@ def update_producto_admin(producto_id: int, data: ProductoUpdate, db: Session = 
 
     db.commit()
     db.refresh(p)
+    try:
+        await ws_manager.broadcast_event("PRODUCTOS_ACTUALIZADOS", {"producto_id": p.id, "nombre": p.nombre})
+    except Exception: pass
     return p
 
 @router.delete("/productos/{producto_id}")
-def delete_producto_admin(producto_id: int, db: Session = Depends(get_db)):
+async def delete_producto_admin(producto_id: int, db: Session = Depends(get_db)):
     prod = db.query(Producto).filter(Producto.id == producto_id).first()
     if not prod:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     db.delete(prod)
     db.commit()
+    try:
+        await ws_manager.broadcast_event("PRODUCTOS_ACTUALIZADOS", {"producto_id": producto_id})
+    except Exception: pass
     return {"mensaje": "Producto eliminado"}
 
 # ==================== CONFIGURACIONES GLOBALES (HISTORIA & REDES) ====================

@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
   new WSClient((event, data) => {
     if (event === "CAMBIO_ESTADO_PEDIDO") {
       showToast(`Estado de pedido actualizado: ${data.nuevo_estado}`, "info");
+    } else if (event === "PRODUCTOS_ACTUALIZADOS" || event === "NUEVO_PRODUCTO") {
+      loadToonProducts();
+      loadToonCategories();
+      showToast("🍔 ¡Menú actualizado en tiempo real!", "info");
     }
   });
 });
@@ -614,3 +618,39 @@ async function loadHistorialPedidos() {
     console.error(err);
   }
 }
+
+async function loadToonCategories() {
+  try {
+    const res = await fetch("/api/v1/cliente/categorias");
+    if (res.ok) {
+      toonCategories = await res.json();
+      renderPhotoCategories();
+    }
+  } catch (err) {
+    console.error("Error al cargar categorías:", err);
+  }
+}
+
+async function loadToonProducts() {
+  try {
+    const res = await fetch("/api/v1/cliente/productos");
+    if (res.ok) {
+      toonProducts = await res.json();
+      renderToonProducts();
+    }
+  } catch (err) {
+    console.error("Error al cargar productos:", err);
+  }
+}
+
+async function loadGuiaItems() {
+  try {
+    const res = await fetch("/api/v1/cliente/guia?tipo=cliente");
+    if (res.ok) {
+      guiaItems = await res.json();
+    }
+  } catch (err) {
+    console.error("Error al cargar guía:", err);
+  }
+}
+
