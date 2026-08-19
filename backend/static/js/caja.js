@@ -371,11 +371,14 @@ async function submitPosOrderFast() {
   try {
     const res = await fetch("/api/v1/caja/crear-y-cobrar-rapido", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: Auth.getHeaders(),
       body: JSON.stringify(payload)
     });
 
-    if (!res.ok) throw new Error("Error al procesar pedido POS Touch");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al procesar pedido POS Touch");
+    }
     const data = await res.json();
     showToast(`⚡ Pedido y Factura ${data.factura_numero} emitida con éxito!`, "success");
     
@@ -525,10 +528,13 @@ async function submitAbrirTurno() {
   try {
     const res = await fetch("/api/v1/caja/abrir-turno", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: Auth.getHeaders(),
       body: JSON.stringify({ monto_apertura: monto })
     });
-    if (!res.ok) throw new Error("Error al abrir turno");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al abrir turno");
+    }
     showToast("🟢 Turno de caja abierto correctamente", "success");
     closeModal("open-shift-modal");
     loadShiftStatus();
@@ -542,10 +548,13 @@ async function submitCerrarTurno() {
   try {
     const res = await fetch("/api/v1/caja/cerrar-turno", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: Auth.getHeaders(),
       body: JSON.stringify({ monto_cierre: activeShift ? activeShift.total_ventas + activeShift.monto_apertura : 0.0 })
     });
-    if (!res.ok) throw new Error("Error al cerrar turno");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al cerrar turno");
+    }
     showToast("🔴 Turno cerrado exitosamente", "success");
     loadShiftStatus();
   } catch (err) {
@@ -591,7 +600,7 @@ async function submitPayment() {
   try {
     const res = await fetch(`/api/v1/caja/pedidos/${selectedOrderForPayment.id}/cobrar`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: Auth.getHeaders(),
       body: JSON.stringify({
         metodo_pago: method,
         monto_recibido: received,
