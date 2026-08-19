@@ -19,12 +19,25 @@ from backend.app.models.guia_item import GuiaItem
 from backend.app.models.resena import Resena
 
 def seed():
-    print("Inicializando base de datos Donde David UNIVERSE TOON'S...")
+    print("Inicializando base de datos Donde David...")
     Base.metadata.create_all(bind=engine)
+
+    # Migración automática de columnas para SQLite
+    from sqlalchemy import text
+    try:
+        with engine.connect() as conn:
+            try:
+                conn.execute(text("ALTER TABLE turnos ADD COLUMN efectivo_declarado NUMERIC(12, 2);"))
+            except Exception: pass
+            try:
+                conn.execute(text("ALTER TABLE turnos ADD COLUMN diferencia NUMERIC(12, 2);"))
+            except Exception: pass
+            conn.commit()
+    except Exception: pass
 
     db = SessionLocal()
     try:
-        # Si la base de datos ya está poblada, salir de inmediato de forma ultrarrápida
+        # Si la base de datos ya está poblada, salir de inmediato
         if db.query(Usuario).first():
             print("[OK] Base de datos ya poblada previamente.")
             return
