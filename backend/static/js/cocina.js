@@ -42,7 +42,12 @@ async function loadKDSOrders() {
 
 function renderKDSOrders() {
   const container = document.getElementById("kds-grid");
-  document.getElementById("kds-order-count").innerText = `Comandas activas: ${kdsOrders.length}`;
+  if (!container) return;
+
+  const countEl = document.getElementById("kds-order-count");
+  if (countEl) {
+    countEl.innerText = `Comandas activas: ${kdsOrders.length}`;
+  }
 
   if (kdsOrders.length === 0) {
     container.innerHTML = `
