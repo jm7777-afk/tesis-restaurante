@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#FFBC0D">
   <link rel="stylesheet" href="/static/css/global.css?v=2.0">
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/index.css?v=2.0">
   
   <!-- Driver.js CSS para Onboarding Tour de Clientes -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
@@ -131,34 +132,11 @@
     }
   </style>
 </head>
-<body class="toon-theme">
+<body class="toon-theme"><nav id="app-sidebar"></nav>
 
   <div class="app-container">
 
-    <!-- Header Banner Global Con Logo Oficial -->
-    <div class="brand-header-banner">
-      <div style="display: flex; align-items: center; gap: 0.6rem;">
-        <img src="/static/images/logo-donde-david.jpg" style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
-        <div>
-          <h1 style="font-size: 1.05rem; font-weight: 900; margin: 0; line-height: 1;">DONDE DAVID</h1>
-          <small style="color: var(--gold-accent); font-weight: 800; font-size: 0.65rem; letter-spacing: 0.5px;">FRESH & TASTY!</small>
-        </div>
-      </div>
-      <div style="display: flex; gap: 0.4rem; align-items: center;">
-        <!-- Botón Tour Interactivo -->
-        <button class="theme-toggle-btn" id="btn-client-tour" onclick="startClientTour(true)" title="Ver Tour Guiado de la App">
-          ❓ TOUR APP
-        </button>
-        <!-- Toggle Tema Modo Claro/Oscuro -->
-        <button class="theme-toggle-btn" onclick="toggleThemeMode()">
-          🌓 TEMA
-        </button>
-        <!-- Indicador de Mesa QR -->
-        <span class="badge-mesa-active" id="current-table-indicator" onclick="openQrScannerModal()">
-          📷 QR MESA #5
-        </span>
-      </div>
-    </div>
+<header id="app-header"></header>
 
     <!-- 1. SPLASH SCREEN -->
     <div id="screen-splash" class="screen active" style="text-align: center; padding: 3rem 1.5rem;">

@@ -10,13 +10,17 @@
 
 function toggleThemeMode() {
   const isLight = document.body.classList.contains("light-theme");
+  const msg = !isLight ? "☀️ Modo Claro Activado" : "🌙 Modo Oscuro Activado";
   if (isLight) {
     document.body.classList.remove("light-theme");
     localStorage.setItem("app_theme", "dark");
-    showToast("🌙 Modo Oscuro Activado", "info");
   } else {
     document.body.classList.add("light-theme");
     localStorage.setItem("app_theme", "light");
-    showToast("☀️ Modo Claro Activado", "info");
+  }
+  if (typeof showToast === "function") {
+    showToast(msg, "info");
+  } else {
+    console.log(msg);
   }
 }

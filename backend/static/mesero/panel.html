@@ -6,6 +6,7 @@
   <title>DONDE DAVID - Panel de Meseros & Atención al Salón</title>
   <link rel="stylesheet" href="/static/css/global.css?v=2.0">
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/index.css?v=2.0">
   <style>
     .mesero-layout {
       max-width: 1200px;
@@ -36,21 +37,10 @@
     }
   </style>
 </head>
-<body class="toon-theme">
+<body class="toon-theme"><nav id="app-sidebar"></nav>
 
   <!-- Header Mesero con Logo Oficial -->
-  <header class="toon-header" style="justify-content: space-between;">
-    <a href="#" class="toon-brand">
-      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--color-yellow);" alt="Donde David Logo">
-      <span style="font-family: var(--font-display); color: #FFFFFF;">DONDE DAVID - PANEL DE MESEROS</span>
-    </a>
-    <div style="display: flex; gap: 0.75rem; align-items: center;">
-      <button class="theme-toggle-btn" onclick="toggleThemeMode()">🌓 TEMA</button>
-      <button class="btn btn-outline" style="min-height: 38px; padding: 0.4rem 0.8rem; font-size: 0.78rem; border-color: var(--color-yellow); color: var(--color-yellow);" onclick="openModal('mesero-guide-modal')">❓ GUÍA MESEROS</button>
-      <span style="color: var(--color-yellow); font-weight: 800; font-size: 0.9rem;" id="mesero-name-label">Mesero Activo</span>
-      <button class="btn btn-cta" style="min-height: 38px; padding: 0.4rem 0.8rem; font-size: 0.78rem;" onclick="Auth.logout()">🚪 Salir</button>
-    </div>
-  </header>
+<header id="app-header"></header>
 
   <div class="mesero-layout">
 

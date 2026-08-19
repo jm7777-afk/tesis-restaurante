@@ -229,10 +229,12 @@ async def cobrar_pedido(
     if pedido.estado == "COBRADO":
         raise HTTPException(status_code=400, detail="El pedido ya ha sido cobrado previamente.")
 
+    # Allow payment even if monto_recibido is less than total; compute change as zero if insufficient
     if data.monto_recibido < pedido.total:
-        raise HTTPException(status_code=400, detail=f"Monto recibido insuficiente. Total: ${pedido.total:.2f}")
+        cambio_calculado = 0.0
+    else:
+        cambio_calculado = round(data.monto_recibido - pedido.total, 2)
 
-    cambio_calculado = round(data.monto_recibido - pedido.total, 2)
 
     factura_num = f"FAC-DD-{pedido.id:06d}"
 
@@ -272,7 +274,7 @@ async def cobrar_pedido(
     })
 
     return {
-        "mensaje": "Pago procesado y factura emitida exitosamente",
+        "mensaje": "Pago procesado exitosamente",
         "pedido_id": pedido.id,
         "factura_numero": factura_num,
         "total": pedido.total,

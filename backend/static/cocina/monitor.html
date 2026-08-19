@@ -6,23 +6,13 @@
   <title>Donde David - Monitor KDS de Cocina</title>
   <link rel="stylesheet" href="/static/css/global.css?v=2.0">
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/index.css?v=2.0">
   <link rel="stylesheet" href="/static/css/app-modules.css?v=2.0">
 </head>
-<body class="toon-theme">
+<body class="toon-theme"><nav id="app-sidebar"></nav>
 
   <!-- KDS Header -->
-  <header class="toon-header">
-    <a href="#" class="toon-brand">
-      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
-      <span>👨‍🍳 MONITOR KDS DE COCINA</span>
-    </a>
-    <div style="display: flex; gap: 0.75rem; align-items: center;">
-      <button class="theme-toggle-btn" onclick="toggleThemeMode()">🌓 TEMA</button>
-      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: transparent; border: 1px solid var(--gold-accent); color: var(--gold-accent);" onclick="openModal('cocina-guide-modal')">❓ GUÍA COCINA</button>
-      <span style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 800;" id="kds-order-count">Comandas activas: 0</span>
-      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="Auth.logout()">🚪 Salir</button>
-    </div>
-  </header>
+  <header id="app-header"></header>
 
   <div class="kds-container" style="padding: 1.5rem;">
     <div class="kds-grid" id="kds-grid">

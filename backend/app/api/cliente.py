@@ -1,7 +1,7 @@
 import json
 import random
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from backend.app.core.database import get_db
 from backend.app.core.security import get_current_user_optional, get_current_user
@@ -139,7 +139,7 @@ async def crear_pedido(
             )
         producto.stock -= item.cantidad
 
-        precio = producto.precio_promocion if (producto.precio_promocion and producto.precio_promocion > 0) else producto.precio
+        precio = float(producto.precio_promocion) if (producto.precio_promocion and producto.precio_promocion > 0) else float(producto.precio)
         subtotal_item = round(precio * item.cantidad, 2)
         subtotal_acumulado += subtotal_item
 
@@ -276,6 +276,36 @@ def verificar_otp_pedido(req: OTPVerifyRequest, db: Session = Depends(get_db)):
 def get_historial_pedidos(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     pedidos = db.query(Pedido).filter(Pedido.usuario_id == current_user.id).order_by(Pedido.fecha_creacion.desc()).all()
     return pedidos
+@router.post("/puntos/canjear")
+def canjear_puntos(
+    recompensa: str = Query(...),
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    # Define reward cost mapping (hardcoded)
+    reward_costs = {
+        "Papas Gratis": 100,
+        "Bebida Gratis": 50,
+        "Descuento 10%": 150,
+    }
+    if recompensa not in reward_costs:
+        raise HTTPException(status_code=400, detail="Recompensa no válida")
+    costo = reward_costs[recompensa]
+    if current_user.puntos_fidelidad < costo:
+        raise HTTPException(status_code=400, detail="Puntos insuficientes para canjear esta recompensa")
+    # Deduct points
+    current_user.puntos_fidelidad -= costo
+    # Log redemption
+    db.add(PuntosLog(
+        usuario_id=current_user.id,
+        puntos=-costo,
+        concepto=f"Canje de {recompensa}",
+        pedido_id=None
+    ))
+    db.commit()
+    db.refresh(current_user)
+    return {"mensaje": "Recompensa canjeada exitosamente", "puntos_restantes": current_user.puntos_fidelidad}
+
 
 @router.get("/puntos/historial")
 def get_puntos_historial(db: Session = Depends(get_db), current_user = Depends(get_current_user)):

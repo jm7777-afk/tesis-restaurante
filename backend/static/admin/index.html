@@ -6,6 +6,7 @@
   <title>Donde David - Panel de Administración General</title>
   <link rel="stylesheet" href="/static/css/global.css?v=2.0">
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/index.css">
   
   <!-- Driver.js CSS para Onboarding Tour Interactivo -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
@@ -62,31 +63,9 @@
     }
   </style>
 </head>
-<body class="toon-theme">
+<body class="toon-theme"><nav id="app-sidebar"></nav>
 
-  <!-- Navbar Admin con Selectores para Onboarding Tour -->
-  <header class="toon-header">
-    <div id="sidebar-branding" class="toon-brand" style="cursor: pointer;" onclick="switchTab('portal')">
-      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
-      <div>
-        <span style="display: block; line-height: 1;">DONDE DAVID ADMIN</span>
-        <small style="color: var(--gold-accent); font-size: 0.68rem; letter-spacing: 0.5px;">MARCA BLANCA SINGLE-TENANT</small>
-      </div>
-    </div>
-
-    <div style="display: flex; gap: 0.5rem; align-items: center;">
-      <!-- Ver Sitio Web Público -->
-      <a href="/static/index.html" target="_blank" class="btn-gold" id="btn-view-site" style="padding: 0.4rem 0.8rem; font-size: 0.78rem; text-decoration: none;">
-        🌐 VER SITIO WEB
-      </a>
-
-      <!-- Botón de Ayuda Tour Interactivo -->
-      <button class="theme-toggle-btn" id="btn-help-tour" onclick="startOnboardingTour(true)" title="Volver a ejecutar el Tour de Bienvenida">
-        ❓ TOUR BIENVENIDA
-      </button>
-
-      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;" onclick="Auth.logout()">🚪 SALIR</button>
-    </div>
+  <header id="app-header"></header>
   <!-- Layout con Nav Lateral para el Panel de Administración -->
   <div class="admin-sidebar-layout">
     

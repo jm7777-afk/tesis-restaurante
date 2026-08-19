@@ -37,10 +37,7 @@ def seed():
 
     db = SessionLocal()
     try:
-        # Si la base de datos ya está poblada, salir de inmediato
-        if db.query(Usuario).first():
-            print("[OK] Base de datos ya poblada previamente.")
-            return
+        # Ensure seeding runs idempotently; do not exit early
 
         # 1. Configuración por defecto "Donde David"
         configs = [
@@ -66,7 +63,8 @@ def seed():
         usuarios = [
             ("Admin", "Donde David", "admin@dondedavid.com", "099111222", "admin", "admin123", "admin", 0),
             ("Javier", "Mendoza", "javier@mail.com", "+502 5123 4567", "javier", "javier123", "cliente", 280),
-            ("María", "García", "caja@dondedavid.com", "099333444", "caja1", "caja123", "caja", 0),
+            ("María", "García", "caja2@dondedavid.com", "099333444", "caja", "caja123", "caja", 0),
+            ("Ana", "López", "caja@dondedavid.com", "099555777", "caja_user", "caja123", "caja", 0),
             ("Juan", "Pérez", "cocina@dondedavid.com", "099555666", "cocina1", "cocina123", "cocina", 0),
             ("Pedro", "Rojas", "delivery@dondedavid.com", "099777888", "delivery1", "delivery123", "mesero", 0)
         ]

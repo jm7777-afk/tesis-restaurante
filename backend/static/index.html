@@ -16,6 +16,7 @@
 
   <link rel="stylesheet" href="/static/css/global.css?v=2.0">
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/index.css">
 
   <style>
     /* Container System & Fluid Typography */
@@ -179,54 +180,7 @@
 <body class="toon-theme" style="background: var(--color-background); color: var(--color-text);">
 
   <!-- 1. STICKY HEADER -->
-  <header class="landing-header">
-    <div class="landing-container">
-      <div class="landing-nav-inner">
-        <!-- Logo -->
-        <a href="/" class="nav-brand">
-          <span class="logo-icon">🍔</span>
-          <div>
-            <span style="font-family: var(--font-display); font-size: 1.3rem;">DONDE DAVID</span>
-            <small style="display: block; font-size: 0.65rem; color: var(--color-yellow); font-weight: 800; letter-spacing: 0.5px;">FRESH & TASTY!</small>
-          </div>
-        </a>
-
-        <!-- Desktop Navigation -->
-        <ul class="landing-nav-links" style="display: none;">
-          <li><a href="#inicio">Inicio</a></li>
-          <li><a href="#menu">Menú</a></li>
-          <li><a href="#promos">Promociones</a></li>
-          <li><a href="#como-funciona">Cómo Pedir</a></li>
-          <li><a href="#qr-mesa">QR Mesa</a></li>
-          <li><a href="#opiniones">Reseñas</a></li>
-          <li><a href="#contacto">Contacto</a></li>
-        </ul>
-        <script>
-          if (window.innerWidth >= 900) {
-            document.querySelector('.landing-nav-links').style.display = 'flex';
-          }
-        </script>
-
-        <!-- Right Header Actions -->
-        <div style="display: flex; gap: 0.75rem; align-items: center;">
-          <button class="theme-toggle-btn" onclick="toggleThemeMode()" title="Cambiar Tema">🌓 TEMA</button>
-          
-          <a href="/static/cliente/app.html?mesa=5" class="btn btn-outline" style="min-height: 40px; padding: 0.4rem 0.9rem; font-size: 0.85rem;" title="Carrito de Compras">
-            🛒 <span id="landing-cart-count" class="badge badge-PENDIENTE" style="margin-left: 0.3rem;">0</span>
-          </a>
-
-          <a href="/login" class="btn btn-primary" style="min-height: 40px; padding: 0.4rem 1.1rem; font-size: 0.85rem;">
-            🔐 Empleados
-          </a>
-
-          <!-- Mobile Hamburger Toggle -->
-          <button class="btn btn-outline" style="min-height: 40px; padding: 0.4rem; display: inline-flex;" onclick="document.getElementById('mobile-drawer').classList.add('open')" aria-label="Abrir Menú">
-            ☰
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+  <header id="app-header"></header>
 
   <!-- MOBILE NAVIGATION DRAWER -->
   <div class="mobile-drawer" id="mobile-drawer">
@@ -501,6 +455,16 @@
     </section>
   </main>
 
+  <nav id="app-bottom-bar" class="bottom-bar">
+    <ul class="bottom-nav-links" style="list-style:none;display:flex;justify-content:space-around;margin:0;padding:0;">
+      <li><a href="#inicio"><span>🏠</span><br/>Inicio</a></li>
+      <li><a href="#menu"><span>🍔</span><br/>Menú</a></li>
+      <li><a href="#promos"><span>🔥</span><br/>Promos</a></li>
+      <li><a href="#qr-mesa"><span>📱</span><br/>QR</a></li>
+      <li><a href="#contacto"><span>📍</span><br/>Contacto</a></li>
+    </ul>
+  </nav>
+
   <!-- 12. FOOTER CON ACORDEONES RESPONSIVE -->
   <footer style="background: var(--color-navy); border-top: 1px solid var(--color-border); padding: 3rem 0 2rem; color: var(--color-text-secondary); font-size: 0.88rem;">
     <div class="landing-container">
@@ -563,19 +527,19 @@
         }
 
         grid.innerHTML = featured.map(p => `
-          <div class="product-card">
-            <div class="product-img-wrapper">
-              <img src="${p.imagen_url || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500'}" alt="${p.nombre}" class="product-img" loading="lazy">
-              <span class="product-price-tag">$${parseFloat(p.precio).toFixed(2)}</span>
+            <div class="card product-card fade-in">
+              <div class="product-img-wrapper">
+                <img src="${p.imagen_url || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500'}" alt="${p.nombre}" class="product-img" loading="lazy">
+                <span class="product-price-tag">$${parseFloat(p.precio).toFixed(2)}</span>
+              </div>
+              <div class="product-info">
+                <h3 class="product-title" style="color: #FFFFFF;">${p.nombre}</h3>
+                <p class="product-desc">${p.descripcion || 'Sin descripción'}</p>
+                <a href="/static/cliente/app.html?mesa=5" class="btn btn-cta" style="width: 100%; margin-top: auto; font-size: 0.9rem;">
+                  🛒 AGREGAR Y PEDIR
+                </a>
+              </div>
             </div>
-            <div class="product-info">
-              <h3 class="product-title" style="color: #FFFFFF;">${p.nombre}</h3>
-              <p class="product-desc">${p.descripcion || 'Sin descripción'}</p>
-              <a href="/static/cliente/app.html?mesa=5" class="btn btn-cta" style="width: 100%; margin-top: auto; font-size: 0.9rem;">
-                🛒 AGREGAR Y PEDIR
-              </a>
-            </div>
-          </div>
         `).join('');
       } catch (e) {
         console.error("Error al cargar favoritos en landing:", e);
@@ -596,7 +560,7 @@
         }
 
         grid.innerHTML = reviews.slice(0, 3).map(r => `
-          <div style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div class="card review-card fade-in" style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                 <span style="color: var(--color-yellow);">{"⭐".repeat(r.estrellas || 5)}</span>
@@ -620,5 +584,6 @@
       }
     }
   </script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
 </body>
 </html>
