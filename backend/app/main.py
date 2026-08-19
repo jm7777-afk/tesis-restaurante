@@ -10,6 +10,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse, Response, JSONResponse
 import uvicorn
 
+from sqlalchemy import text
 from backend.app.core.config import settings
 from backend.app.core.database import Base, engine, SessionLocal
 from backend.app.api import auth, cliente, cocina, caja, admin, mesero, setup
@@ -133,7 +134,7 @@ def health_check():
 def readiness_check():
     db = SessionLocal()
     try:
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception as e:
         db_status = f"error: {str(e)}"
