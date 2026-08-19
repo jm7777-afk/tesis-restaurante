@@ -89,14 +89,24 @@ def seed():
                 ))
         db.commit()
 
-        # 4. Insumos de Inventario
+        # 4. Insumos e Inventario de Ingredientes de Productos
         insumos_data = [
-            ("Carne de res 150g", 25.0, 10.0, "kg", "NORMAL"),
-            ("Pan de hamburguesa", 18.0, 20.0, "un", "CRITICO"),
-            ("Queso Amarillo", 5.0, 8.0, "kg", "CRITICO"),
-            ("Tocino", 2.0, 5.0, "kg", "CRITICO"),
-            ("Salsa BBQ", 2.0, 2.0, "lt", "NORMAL"),
-            ("Papas congeladas yellow", 15.0, 20.0, "kg", "NORMAL")
+            ("Carne de res gourmet 150g", 35.0, 10.0, "kg", "NORMAL"),
+            ("Pan de hamburguesa brioche", 18.0, 25.0, "un", "CRITICO"),
+            ("Queso Cheddar fundido", 6.0, 10.0, "kg", "CRITICO"),
+            ("Tocino ahumado crujiente", 3.0, 8.0, "kg", "CRITICO"),
+            ("Salchicha Gourmet Jumbo", 45.0, 15.0, "un", "NORMAL"),
+            ("Papas amarillas rústicas", 40.0, 15.0, "kg", "NORMAL"),
+            ("Tomate fresco", 12.0, 5.0, "kg", "NORMAL"),
+            ("Cebolla morada", 8.0, 4.0, "kg", "NORMAL"),
+            ("Pepinillos agridulces", 5.0, 3.0, "kg", "NORMAL"),
+            ("Salsa BBQ de la casa", 10.0, 3.0, "lt", "NORMAL"),
+            ("Salsa especial de la casa", 8.0, 2.0, "lt", "NORMAL"),
+            ("Maíz dulce gourmet", 6.0, 2.0, "kg", "NORMAL"),
+            ("Alitas de pollo frescas", 20.0, 8.0, "kg", "NORMAL"),
+            ("Helado de Vainilla", 15.0, 5.0, "lt", "NORMAL"),
+            ("Galletas Oreo paquetes", 30.0, 10.0, "un", "NORMAL"),
+            ("Sirope de Chocolate", 5.0, 2.0, "lt", "NORMAL")
         ]
         for nom, st_act, st_min, um, est in insumos_data:
             if not db.query(Insumo).filter(Insumo.nombre == nom).first():

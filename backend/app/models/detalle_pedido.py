@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from backend.app.core.database import Base
@@ -10,8 +10,8 @@ class DetallePedido(Base):
     pedido_id = Column(Integer, ForeignKey("pedidos.id"), nullable=False)
     producto_id = Column(Integer, ForeignKey("productos.id"), nullable=False)
     cantidad = Column(Integer, nullable=False, default=1)
-    precio_unitario = Column(Float, nullable=False)
-    subtotal = Column(Float, nullable=False)
+    precio_unitario = Column(Numeric(12, 2), nullable=False, default=0.00)
+    subtotal = Column(Numeric(12, 2), nullable=False, default=0.00)
     personalizaciones = Column(Text, nullable=True) # JSON string of custom options (e.g. extra cheese)
     estado = Column(String(30), default="PENDIENTE") # PENDIENTE, EN_PREPARACION, LISTO
     observaciones = Column(String(255), nullable=True)

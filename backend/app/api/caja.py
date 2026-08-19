@@ -37,7 +37,8 @@ def get_turno_activo(
 @router.post("/abrir-turno", response_model=TurnoOut)
 async def abrir_turno(
     data: TurnoApertura,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles(["admin", "supervisor", "caja"]))
 ):
     turno_existente = db.query(Turno).filter(Turno.activo == True).first()
     if turno_existente:
@@ -52,7 +53,7 @@ async def abrir_turno(
         total_ventas=0.0,
         total_pedidos=0,
         activo=True,
-        usuario_caja_id=1
+        usuario_caja_id=current_user.id
     )
     db.add(nuevo_turno)
     db.commit()
@@ -61,7 +62,8 @@ async def abrir_turno(
     await ws_manager.broadcast("TURNO_ACTUALIZADO", {
         "accion": "ABIERTO",
         "turno_id": nuevo_turno.id,
-        "numero_turno": nuevo_turno.numero_turno
+        "numero_turno": nuevo_turno.numero_turno,
+        "usuario": current_user.nombre
     })
 
     return nuevo_turno
@@ -69,7 +71,8 @@ async def abrir_turno(
 @router.post("/cerrar-turno", response_model=TurnoOut)
 async def cerrar_turno(
     data: TurnoCierre,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles(["admin", "supervisor", "caja"]))
 ):
     turno = db.query(Turno).filter(Turno.activo == True).order_by(Turno.id.desc()).first()
     if not turno:
@@ -86,7 +89,8 @@ async def cerrar_turno(
         "accion": "CERRADO",
         "turno_id": turno.id,
         "numero_turno": turno.numero_turno,
-        "total_ventas": turno.total_ventas
+        "total_ventas": turno.total_ventas,
+        "usuario": current_user.nombre
     })
 
     return turno
@@ -111,7 +115,11 @@ def get_pedidos_cobrados(
 
 # ==================== COBRO Y PEDIDO RÁPIDO EN CAJA POS ====================
 @router.post("/crear-y-cobrar-rapido")
-async def crear_y_cobrar_rapido(data: PedidoRapidoPOSCreate, db: Session = Depends(get_db)):
+async def crear_y_cobrar_rapido(
+    data: PedidoRapidoPOSCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles(["admin", "supervisor", "caja"]))
+):
     if not data.detalles or len(data.detalles) == 0:
         raise HTTPException(status_code=400, detail="Debe seleccionar al menos 1 producto.")
 
@@ -129,8 +137,12 @@ async def crear_y_cobrar_rapido(data: PedidoRapidoPOSCreate, db: Session = Depen
         if not producto:
             raise HTTPException(status_code=404, detail=f"Producto #{item.producto_id} no disponible.")
         
-        if producto.stock >= item.cantidad:
-            producto.stock -= item.cantidad
+        if producto.stock < item.cantidad:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Stock insuficiente para el producto '{producto.nombre}' (Disponible: {producto.stock}, Solicitado: {item.cantidad})."
+            )
+        producto.stock -= item.cantidad
 
         precio = producto.precio_promocion if (producto.precio_promocion and producto.precio_promocion > 0) else producto.precio
         subtotal_item = round(precio * item.cantidad, 2)
@@ -150,7 +162,7 @@ async def crear_y_cobrar_rapido(data: PedidoRapidoPOSCreate, db: Session = Depen
     total_final = round(subtotal_final + impuesto_monto, 2)
 
     if data.monto_recibido < total_final:
-        raise HTTPException(status_code=400, detail=f"Monto recibido (Q{data.monto_recibido:.2f}) insuficiente. Total: Q{total_final:.2f}")
+        raise HTTPException(status_code=400, detail=f"Monto recibido (${data.monto_recibido:.2f}) insuficiente. Total: ${total_final:.2f}")
 
     cambio_calculado = round(data.monto_recibido - total_final, 2)
 
@@ -169,6 +181,7 @@ async def crear_y_cobrar_rapido(data: PedidoRapidoPOSCreate, db: Session = Depen
         nit_cliente=data.nit_cliente or "CF",
         nombre_factura=data.nombre_factura or "Consumidor Final",
         turno_id=turno_id,
+        usuario_id=current_user.id,
         detalles=detalles_db
     )
 
@@ -206,7 +219,8 @@ async def crear_y_cobrar_rapido(data: PedidoRapidoPOSCreate, db: Session = Depen
 async def cobrar_pedido(
     pedido_id: int,
     data: CobrarPedidoRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles(["admin", "supervisor", "caja"]))
 ):
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
     if not pedido:

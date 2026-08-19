@@ -132,8 +132,12 @@ async def crear_pedido(
         if not producto:
             raise HTTPException(status_code=404, detail=f"Producto con ID {item.producto_id} no disponible.")
         
-        if producto.stock >= item.cantidad:
-            producto.stock -= item.cantidad
+        if producto.stock < item.cantidad:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Stock insuficiente para el producto '{producto.nombre}' (Disponible: {producto.stock}, Solicitado: {item.cantidad})."
+            )
+        producto.stock -= item.cantidad
 
         precio = producto.precio_promocion if (producto.precio_promocion and producto.precio_promocion > 0) else producto.precio
         subtotal_item = round(precio * item.cantidad, 2)

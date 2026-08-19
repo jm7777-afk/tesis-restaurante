@@ -4,8 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Donde David - Panel de Administración General</title>
-  <link rel="stylesheet" href="/static/css/global.css">
-  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <link rel="stylesheet" href="/static/css/global.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  
+  <!-- Driver.js CSS para Onboarding Tour Interactivo -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
+
   <style>
     .tab-nav {
       display: flex;
@@ -50,62 +54,147 @@
       padding: 1.25rem;
       border-radius: var(--radius-md);
     }
+    .wizard-step {
+      display: none;
+    }
+    .wizard-step.active {
+      display: block;
+    }
   </style>
 </head>
 <body class="toon-theme">
 
-  <!-- Navbar Admin con Logo Oficial -->
+  <!-- Navbar Admin con Selectores para Onboarding Tour -->
   <header class="toon-header">
-    <a href="#" class="toon-brand">
+    <div id="sidebar-branding" class="toon-brand" style="cursor: pointer;" onclick="switchTab('portal')">
       <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
-      <span>DONDE DAVID ADMIN PANEL</span>
-    </a>
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <span id="admin-user-label" style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 700;">Admin: Donde David</span>
-      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="Auth.logout()">🚪 Salir</button>
-    </div>
-  </header>
-
-  <div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
-
-    <!-- Navigation Tabs -->
-    <div class="tab-nav">
-      <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard & Métricas</button>
-      <button class="tab-btn" onclick="switchTab('productos')">🍔 Productos del Menú & Ingredientes</button>
-      <button class="tab-btn" onclick="switchTab('publicaciones')">📰 Publicaciones Web</button>
-      <button class="tab-btn" onclick="switchTab('promociones')">🔥 Promos ("BOOM! PROMO DEL DÍA")</button>
-      <button class="tab-btn" onclick="switchTab('guia')">🎬 Guía Interactiva & Carrusel</button>
-      <button class="tab-btn" onclick="switchTab('portal')">🌐 Portal Web, Tasa & Historia</button>
-      <button class="tab-btn" onclick="switchTab('resenas')">⭐ Reseñas de Clientes</button>
-      <button class="tab-btn" onclick="switchTab('mesas')">🍽️ Mesas & QR</button>
-      <button class="tab-btn" onclick="switchTab('inventario')">📦 Insumos e Inventario</button>
-      <button class="tab-btn" onclick="switchTab('categorias')">📂 Categorías</button>
-      <button class="tab-btn" onclick="switchTab('usuarios')">👥 Usuarios del Sistema</button>
+      <div>
+        <span style="display: block; line-height: 1;">DONDE DAVID ADMIN</span>
+        <small style="color: var(--gold-accent); font-size: 0.68rem; letter-spacing: 0.5px;">MARCA BLANCA SINGLE-TENANT</small>
+      </div>
     </div>
 
-    <!-- TAB 1: DASHBOARD -->
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <!-- Ver Sitio Web Público -->
+      <a href="/static/index.html" target="_blank" class="btn-gold" id="btn-view-site" style="padding: 0.4rem 0.8rem; font-size: 0.78rem; text-decoration: none;">
+        🌐 VER SITIO WEB
+      </a>
+
+      <!-- Botón de Ayuda Tour Interactivo -->
+      <button class="theme-toggle-btn" id="btn-help-tour" onclick="startOnboardingTour(true)" title="Volver a ejecutar el Tour de Bienvenida">
+        ❓ TOUR BIENVENIDA
+      </button>
+
+      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;" onclick="Auth.logout()">🚪 SALIR</button>
+    </div>
+  <!-- Layout con Nav Lateral para el Panel de Administración -->
+  <div class="admin-sidebar-layout">
+    
+    <!-- Sidebar Navegación Lateral -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-title">⚙️ MENÚ PRINCIPAL ADMIN</div>
+      <button class="admin-sidebar-btn active" id="btn-orders-panel" onclick="switchTab('dashboard')">📊 Dashboard & Métricas</button>
+      <button class="admin-sidebar-btn" id="nav-menu-items" onclick="switchTab('productos')">🍔 Productos & Ingredientes</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('inventario')">📦 Insumos e Inventario</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('promociones')">🔥 Promociones & Banners</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('publicaciones')">📰 Publicaciones Web</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('portal')">🌐 Portal, Tasa & Historia</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('mesas')">🍽️ Mesas & QR</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('categorias')">📂 Categorías de Menú</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('usuarios')">👥 Usuarios del Sistema</button>
+    </aside>
+
+    <!-- Contenido Principal Administrador -->
+    <main class="admin-main-content">
+
+    <!-- TAB 1: DASHBOARD & MÉTRICAS DE VENTAS -->
     <div id="tab-dashboard" class="tab-content active">
-      <div class="kpi-grid">
+      
+      <!-- KPI Grid: Ventas de Hoy, Semanales, Mensuales y Recaudación Total -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
         <div class="kpi-card">
-          <div style="font-size: 0.8rem; color: var(--text-muted);">Ventas Totales ($)</div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: var(--gold-accent);" id="stat-sales">$2,450.50</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">☀️ VENTAS DE HOY</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: var(--gold-accent);" id="stat-sales-today">$1,240.00</div>
+          <small style="color: var(--neon-green); font-weight: 800;">⚡ Operaciones del día</small>
         </div>
+
         <div class="kpi-card">
-          <div style="font-size: 0.8rem; color: var(--text-muted);">Insumos en Stock Crítico</div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: var(--neon-red);" id="stat-critical">3</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">📅 VENTAS DE LA SEMANA</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: #38bdf8;" id="stat-sales-week">$4,850.00</div>
+          <small style="color: var(--neon-green); font-weight: 800;" id="stat-pct-week">▲ +18.5% esta semana</small>
         </div>
+
         <div class="kpi-card">
-          <div style="font-size: 0.8rem; color: var(--text-muted);">Pedidos en Cocina</div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: var(--cyan-accent);" id="stat-cocina">12</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">📊 VENTAS MENSUALES</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: #a855f7;" id="stat-sales-month">$18,750.50</div>
+          <small style="color: var(--neon-green); font-weight: 800;" id="stat-pct-month">▲ +24.2% este mes</small>
         </div>
+
         <div class="kpi-card">
-          <div style="font-size: 0.8rem; color: var(--text-muted);">Mesas Ocupadas</div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: var(--neon-green);" id="stat-mesas">5 / 20</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">💰 RECAUDACIÓN TOTAL</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: var(--neon-green);" id="stat-sales-total">$18,750.50</div>
+          <small style="color: var(--text-muted);">Acumulado histórico</small>
         </div>
       </div>
 
-      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1.5rem;">
-        <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🏆 Top Productos Más Vendidos</h3>
+      <!-- Métricas Operativas & Resumen de Canales de Venta -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        
+        <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.25rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🛵 RESUMEN DE VENTAS POR CANAL Y PORCENTAJES</h3>
+          <div style="margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+              <span>🍽️ Ventas en Mesa (Vía QR)</span>
+              <strong style="color: var(--cyan-accent);" id="pct-canal-mesa">55%</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem;">
+              <div style="background: var(--cyan-accent); width: 55%; height: 100%;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+              <span>🛵 Pedidos por Delivery</span>
+              <strong style="color: var(--neon-red);" id="pct-canal-delivery">30%</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem;">
+              <div style="background: var(--neon-red); width: 30%; height: 100%;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+              <span>🛍️ Para Llevar / Mostrador</span>
+              <strong style="color: var(--gold-accent);" id="pct-canal-llevar">15%</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); height: 10px; border-radius: 5px; overflow: hidden;">
+              <div style="background: var(--gold-accent); width: 15%; height: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.25rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">⚡ OPERACIONES EN TIEMPO REAL</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem;">
+            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
+              <small style="color: var(--text-muted);">Ingredientes en Stock Crítico</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-red);" id="stat-critical">3 insumos</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
+              <small style="color: var(--text-muted);">Pedidos Activos Cocina</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent);" id="stat-cocina">12 pedidos</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
+              <small style="color: var(--text-muted);">Mesas Ocupadas</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-green);" id="stat-mesas">5 / 20</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
+              <small style="color: var(--text-muted);">Apertura de Caja</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent);" id="stat-caja">$950.50</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.5rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🏆 Top Productos e Ingredientes Más Vendidos</h3>
         <div id="top-products-container"></div>
       </div>
     </div>
@@ -181,29 +270,6 @@
       </div>
     </div>
 
-    <!-- TAB 5: GUÍA INTERACTIVA & CARRUSEL ADMIN -->
-    <div id="tab-guia" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <h2>🎬 GESTIÓN DEL CARRUSEL Y GUÍA DE CLIENTES</h2>
-        <button class="btn-gold" onclick="openModal('add-guia-modal')">➕ Agregar Diapositiva a la Guía</button>
-      </div>
-
-      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-          <thead>
-            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
-              <th style="padding: 0.75rem;">Contenido</th>
-              <th style="padding: 0.75rem;">Título</th>
-              <th style="padding: 0.75rem;">Descripción</th>
-              <th style="padding: 0.75rem;">Vista</th>
-              <th style="padding: 0.75rem;">Acción</th>
-            </tr>
-          </thead>
-          <tbody id="guia-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
     <!-- TAB 6: PORTAL WEB & TASA DE CAMBIO -->
     <div id="tab-portal" class="tab-content">
       <h2>🌐 TASA DE CAMBIO BCV/PARALELO Y CONFIGURACIÓN DEL PORTAL</h2>
@@ -243,26 +309,6 @@
       </div>
     </div>
 
-    <!-- TAB 7: RESEÑAS DE CLIENTES -->
-    <div id="tab-resenas" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <h2>⭐ RESEÑAS ⭐⭐⭐⭐⭐ DE CLIENTES</h2>
-        <button class="btn-gold" onclick="openModal('add-resena-modal')">➕ Agregar Reseña</button>
-      </div>
-
-      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-          <thead>
-            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
-              <th style="padding: 0.75rem;">Cliente</th>
-              <th style="padding: 0.75rem;">Estrellas</th>
-              <th style="padding: 0.75rem;">Comentario</th>
-              <th style="padding: 0.75rem;">Acción</th>
-            </tr>
-          </thead>
-          <tbody id="resenas-tbody"></tbody>
-        </table>
-      </div>
     </div>
 
     <!-- TAB 8: MESAS -->
@@ -336,6 +382,67 @@
       </div>
     </div>
 
+  </main>
+</div>
+
+  <!-- MODAL WIZARD: ASISTENTE DE CONFIGURACIÓN INICIAL -->
+  <div class="product-modal-backdrop" id="wizard-modal">
+    <div class="product-modal-card" style="max-width: 580px; padding: 2rem;">
+      <button class="modal-close-btn" onclick="closeModal('wizard-modal')">&times;</button>
+
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <span style="font-size: 2.5rem;">🚀</span>
+        <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--gold-accent); margin: 0.3rem 0 0 0;">CONFIGURACIÓN INICIAL DEL RESTAURANTE</h2>
+        <div style="font-size: 0.85rem; color: var(--text-muted);" id="wizard-step-title">Paso 1 de 4: Identidad y Moneda</div>
+      </div>
+
+      <!-- Paso 1: Identidad -->
+      <div class="wizard-step active" id="wiz-step-1">
+        <div class="form-group"><label>Nombre del Restaurante / Negocio</label><input type="text" id="wiz-nombre" class="form-control" value="Donde David Fresh & Tasty!"></div>
+        <div class="form-group"><label>Eslogan o Historia Corta</label><textarea id="wiz-historia" class="form-control" rows="2">Especialistas en hamburguesas artesanales gourmet y perros estilo Toon.</textarea></div>
+        <div style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;"><label>Tasa Inicial en Bolívares (Bs.)</label><input type="number" step="0.1" id="wiz-tasa" class="form-control" value="36.50"></div>
+          <div class="form-group" style="flex: 1;"><label>WhatsApp Oficial</label><input type="text" id="wiz-whatsapp" class="form-control" value="+502 4112 5554"></div>
+        </div>
+      </div>
+
+      <!-- Paso 2: Menú y Productos -->
+      <div class="wizard-step" id="wiz-step-2">
+        <h4 style="color: var(--gold-accent); margin-top: 0;">🍔 CATÁLOGO DE MENÚ Y EXTRAS</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Puedes precargar los productos iniciales o agregar el primer plato estrella de tu menú:</p>
+
+        <div class="form-group"><label>Nombre del Plato Principal</label><input type="text" id="wiz-prod-name" class="form-control" value="Hamburguesa Clásica Gourmet"></div>
+        <div style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;"><label>Precio ($ USD)</label><input type="number" step="0.5" id="wiz-prod-price" class="form-control" value="42.00"></div>
+          <div class="form-group" style="flex: 1;"><label>Ingredientes</label><input type="text" id="wiz-prod-ings" class="form-control" value="Carne 150g, Queso Cheddar, Tomate, Cebolla"></div>
+        </div>
+      </div>
+
+      <!-- Paso 3: Mesas y QR -->
+      <div class="wizard-step" id="wiz-step-3">
+        <h4 style="color: var(--gold-accent); margin-top: 0;">🍽️ DISTRIBUCIÓN DE MESAS Y CÓDIGOS QR</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">El sistema creará los códigos QR automáticos para tus mesas de salón:</p>
+        <div class="form-group"><label>Número de Mesas a Generar en Salón</label><input type="number" id="wiz-num-mesas" class="form-control" value="20"></div>
+      </div>
+
+      <!-- Paso 4: Usuarios del Sistema -->
+      <div class="wizard-step" id="wiz-step-4">
+        <h4 style="color: var(--gold-accent); margin-top: 0;">👥 USUARIOS Y ROLES DEL SISTEMA</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Se crearán automáticamente las cuentas de prueba para tu personal:</p>
+
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--toon-border); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
+          <div>⚙️ <strong>Admin:</strong> admin / admin123</div>
+          <div>💰 <strong>Caja POS:</strong> caja1 / caja123</div>
+          <div>👨‍🍳 <strong>Cocina KDS:</strong> cocina1 / cocina123</div>
+          <div>🍽️ <strong>Mesero:</strong> delivery1 / delivery123</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+        <button class="btn-gold" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);" id="wiz-btn-prev" onclick="wizardNav(-1)">← Anterior</button>
+        <button class="btn-gold" id="wiz-btn-next" onclick="wizardNav(1)">Siguiente →</button>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Crear Publicación Web -->
@@ -517,8 +624,91 @@
     </div>
   </div>
 
-  <script src="/static/js/auth.js"></script>
-  <script src="/static/js/websocket.js"></script>
-  <script src="/static/js/admin-toon.js"></script>
+  <!-- Driver.js Library script -->
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+  <script src="/static/js/theme-toggle.js?v=2.0"></script>
+  <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/websocket.js?v=2.0"></script>
+  <script src="/static/js/admin-toon.js?v=2.0"></script>
+
+  <!-- Script para Autodisparo del Tour Interactivo Driver.js -->
+  <script>
+    function startOnboardingTour(force = false) {
+      if (!window.driver || !window.driver.js) return;
+
+      const driverObj = window.driver.js.driver({
+        showProgress: true,
+        animate: true,
+        allowClose: true,
+        doneBtnText: '¡Entendido y Comenzar! 🚀',
+        nextBtnText: 'Siguiente →',
+        prevBtnText: '← Anterior',
+        onDestroyed: () => {
+          // Registrar en el backend tour_completed = true
+          fetch('/api/v1/admin/tour-completed', {
+            method: 'POST',
+            headers: Auth.getHeaders()
+          }).catch(err => console.error(err));
+        },
+        steps: [
+          {
+            element: '#sidebar-branding',
+            popover: {
+              title: '🖼️ Personalización de Marca',
+              description: 'Aquí puedes configurar la identidad comercial de tu restaurante: actualizar el logotipo, cambiar los banners y ajustar la paleta de colores de la web pública.',
+              side: 'bottom',
+              align: 'start'
+            }
+          },
+          {
+            element: '#nav-menu-items',
+            popover: {
+              title: '🍔 Gestión del Menú / Productos',
+              description: 'Desde este panel administras todo tu catálogo gastronómico: agregar categorías, registrar nuevos platos, ajustar precios e ingredientes editables.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#btn-view-site',
+            popover: {
+              title: '🌐 Ver Sitio Web Público',
+              description: 'Acceso directo en una nueva pestaña para previsualizar exactamente cómo ven tus clientes la página web de tu restaurante en vivo.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#btn-orders-panel',
+            popover: {
+              title: '📊 Panel de Pedidos y Métricas',
+              description: 'Monitor central donde visualizas en tiempo real el total de ventas, insumos críticos, pedidos en cocina y mesas ocupadas.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#btn-help-tour',
+            popover: {
+              title: '❓ Botón de Ayuda del Tour',
+              description: 'Puedes hacer clic en este icono en cualquier momento para volver a ejecutar este Tour Interactivo de Bienvenida.',
+              side: 'bottom',
+              align: 'end'
+            }
+          }
+        ]
+      });
+
+      driverObj.drive();
+    }
+
+    // Comprobar si tour_completed === false para disparar el tour automáticamente
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = Auth.getUser();
+      if (user && user.tour_completed === false) {
+        setTimeout(() => startOnboardingTour(false), 800);
+      }
+    });
+  </script>
 </body>
 </html>

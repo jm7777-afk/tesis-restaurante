@@ -37,6 +37,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+function showScreen(screenId) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const target = document.getElementById(screenId);
+  if (target) target.classList.add("active");
+
+  document.querySelectorAll(".nav-item, .side-nav-item").forEach(n => n.classList.remove("active"));
+  const idxMap = { 'screen-home': 0, 'screen-categorias': 1, 'screen-carrito': 2, 'screen-historial': 3, 'screen-perfil': 4 };
+  const idx = idxMap[screenId];
+  if (idx !== undefined) {
+    const items = document.querySelectorAll(".nav-item, .side-nav-item");
+    if (items[idx]) items[idx].classList.add("active");
+  }
+
+  if (screenId === "screen-historial") loadHistorialPedidos();
+}
+
 async function loadConfigPublica() {
   try {
     const res = await fetch("/api/v1/cliente/configuraciones-publicas");
@@ -71,102 +87,44 @@ async function loadPromocionesToon() {
 }
 
 function renderPromoBanner() {
-  if (!toonPromos[currentPromoIndex]) return;
-  const p = toonPromos[currentPromoIndex];
-  document.getElementById("promo-title").innerText = p.titulo;
-  document.getElementById("promo-desc").innerText = p.descripcion || '';
-  document.getElementById("promo-price").innerHTML = `BOOM! ${p.descuento_pct ? `-${p.descuento_pct}% OFF` : ''} <span style="font-size: 0.85rem; background: #000; padding: 0.2rem 0.5rem; border-radius: 6px;">CÓDIGO: ${p.codigo_cupon || 'PROMO'}</span>`;
-}
+  const container = document.getElementById("home-promo-banner-container");
+  if (!container) return;
 
-async function loadGuiaItems() {
-  try {
-    const res = await fetch("/api/v1/cliente/guia");
-    if (res.ok) {
-      guiaItems = await res.json();
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function openGuiaModal() {
-  if (!guiaItems || guiaItems.length === 0) {
-    showToast("Guía no disponible en este momento.", "warning");
+  if (!toonPromos || toonPromos.length === 0) {
+    container.innerHTML = `
+      <div style="background: linear-gradient(135deg, #ff4757, #ffb703); border-radius: var(--radius-md); padding: 1.25rem; color: #fff; box-shadow: 0 10px 25px rgba(255,71,87,0.4);">
+        <span style="font-size: 0.75rem; font-weight: 900; background: #000; padding: 0.2rem 0.6rem; border-radius: 20px;">BOOM! 🔥 PROMO DEL DÍA</span>
+        <h3 style="font-size: 1.3rem; font-weight: 900; margin-top: 0.4rem;" id="promo-title">COMBO EXPLOSIVO TOON</h3>
+        <p style="font-size: 0.85rem; opacity: 0.95;" id="promo-desc">2 HAMBURGUESAS + PAPAS FRITAS + 2 REFRESCOS</p>
+        <div style="font-size: 1.5rem; font-weight: 900; margin-top: 0.5rem;" id="promo-price">$15.00 <span style="font-size: 0.85rem; background: #000; padding: 0.2rem 0.5rem; border-radius: 6px;">CÓDIGO: TOON20</span></div>
+      </div>
+    `;
     return;
   }
-  currentGuiaIndex = 0;
-  renderGuiaSlide();
-  document.getElementById("guia-modal").classList.add("open");
-}
 
-function closeGuiaModal() {
-  document.getElementById("guia-modal").classList.remove("open");
-}
-
-function renderGuiaSlide() {
-  if (!guiaItems[currentGuiaIndex]) return;
-  const item = guiaItems[currentGuiaIndex];
-  const container = document.getElementById("guia-carousel-container");
-
-  let mediaTag = "";
-  if (item.tipo_media === "video" || item.media_url.endsWith(".mp4")) {
-    mediaTag = `<video src="${item.media_url}" class="carousel-slide-media" controls autoplay muted loop></video>`;
-  } else {
-    mediaTag = `<img src="${item.media_url}" class="carousel-slide-media" alt="${item.titulo}">`;
-  }
+  const p = toonPromos[currentPromoIndex];
+  const bgImg = p.banner_url || p.imagen_url || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800";
 
   container.innerHTML = `
-    ${mediaTag}
-    <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--gold-accent); margin: 0.85rem 0 0.4rem 0;">${item.titulo}</h3>
-    <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; margin: 0;">${item.descripcion || ''}</p>
+    <div style="position: relative; border-radius: var(--radius-md); overflow: hidden; height: 190px; border: 2px solid var(--gold-accent); box-shadow: 0 10px 25px rgba(255,183,3,0.4); cursor: pointer;" onclick="showScreen('screen-menu')">
+      <img src="${bgImg}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65);" alt="${p.titulo}">
+      <div style="position: absolute; inset: 0; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(8,12,20,0.9) 0%, transparent 60%);">
+        <div>
+          <span style="font-size: 0.75rem; font-weight: 900; background: var(--neon-red); color: #fff; padding: 0.25rem 0.65rem; border-radius: 20px;">
+            🔥 PROMO ADMIN ${p.descuento_pct ? `(-${p.descuento_pct}% OFF)` : ''}
+          </span>
+          <h3 style="font-size: 1.3rem; font-weight: 900; color: #fff; margin-top: 0.4rem; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">${p.titulo}</h3>
+          <p style="font-size: 0.85rem; color: #cbd5e1; margin-top: 0.1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.descripcion || ''}</p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="background: rgba(0,0,0,0.75); border: 1px solid var(--gold-accent); color: var(--gold-accent); padding: 0.25rem 0.65rem; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">
+            CÓDIGO: ${p.codigo_cupon || 'PROMO'}
+          </span>
+          <button class="btn-gold" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">⚡ VER PROMO</button>
+        </div>
+      </div>
+    </div>
   `;
-
-  document.getElementById("guia-slide-indicator").innerText = `${currentGuiaIndex + 1} / ${guiaItems.length}`;
-}
-
-function nextGuiaSlide() {
-  currentGuiaIndex = (currentGuiaIndex + 1) % guiaItems.length;
-  renderGuiaSlide();
-}
-
-function prevGuiaSlide() {
-  currentGuiaIndex = (currentGuiaIndex - 1 + guiaItems.length) % guiaItems.length;
-  renderGuiaSlide();
-}
-
-function showScreen(screenId) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  const target = document.getElementById(screenId);
-  if (target) target.classList.add("active");
-
-  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-  if (screenId === "screen-home") document.querySelectorAll(".nav-item")[0]?.classList.add("active");
-  else if (screenId === "screen-categorias") document.querySelectorAll(".nav-item")[1]?.classList.add("active");
-  else if (screenId === "screen-carrito") document.querySelectorAll(".nav-item")[2]?.classList.add("active");
-  else if (screenId === "screen-historial") document.querySelectorAll(".nav-item")[3]?.classList.add("active");
-  else if (screenId === "screen-perfil") document.querySelectorAll(".nav-item")[4]?.classList.add("active");
-
-  if (screenId === "screen-historial") loadHistorialPedidos();
-}
-
-async function loadToonCategories() {
-  try {
-    const res = await fetch("/api/v1/cliente/categorias");
-    toonCategories = await res.json();
-    renderPhotoCategories();
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function loadToonProducts() {
-  try {
-    const res = await fetch("/api/v1/cliente/productos");
-    toonProducts = await res.json();
-    renderToonProducts();
-  } catch (err) {
-    console.error(err);
-  }
 }
 
 function renderPhotoCategories() {
@@ -252,6 +210,64 @@ function filterMenuProducts() {
   document.getElementById("menu-products-grid").innerHTML = html;
 }
 
+function getCategoryExtrasList(catId) {
+  const catObj = toonCategories.find(c => c.id === catId);
+  const catName = catObj ? catObj.nombre.toLowerCase() : "";
+
+  if (catName.includes("hamburguesa")) {
+    return [
+      { id: "extra-queso", name: "Extra Queso Cheddar", price: 1.0 },
+      { id: "extra-tocino", name: "Extra Tocino Crujiente", price: 1.5 },
+      { id: "extra-carne", name: "Extra Carne 150g Gourmet", price: 2.5 },
+      { id: "extra-aros", name: "Extra Aros de Cebolla", price: 1.2 }
+    ];
+  } else if (catName.includes("hot") || catName.includes("perro")) {
+    return [
+      { id: "extra-tocino", name: "Extra Tocino Troceado", price: 1.5 },
+      { id: "extra-queso", name: "Extra Queso Fundido", price: 1.0 },
+      { id: "extra-maiz", name: "Extra Maíz Dulce", price: 0.8 },
+      { id: "extra-papitas", name: "Extra Papitas Crocantes", price: 0.75 }
+    ];
+  } else if (catName.includes("papa")) {
+    return [
+      { id: "extra-cheddar", name: "Extra Baño de Queso Cheddar", price: 1.0 },
+      { id: "extra-tocino", name: "Extra Tocino Troceado", price: 1.5 },
+      { id: "extra-bbq", name: "Extra Salsa BBQ Especial", price: 0.75 },
+      { id: "extra-jalapeno", name: "Extra Jalapeños Picantes", price: 0.8 }
+    ];
+  } else if (catName.includes("bebida") || catName.includes("malteada")) {
+    return [
+      { id: "extra-hielo", name: "Extra Hielo Helado", price: 0.0 },
+      { id: "extra-sirope", name: "Extra Sirope (Chocolate/Caramelo)", price: 0.75 },
+      { id: "extra-tamano", name: "Agrandar a Tamaño Gigante", price: 1.5 }
+    ];
+  } else if (catName.includes("alita")) {
+    return [
+      { id: "extra-salsa-bbq", name: "Extra Salsa BBQ de la Casa", price: 1.0 },
+      { id: "extra-salsa-habanero", name: "Extra Salsa Picante Habanero", price: 1.0 },
+      { id: "extra-ranch", name: "Extra Dressing Creamy Ranch", price: 1.0 }
+    ];
+  } else if (catName.includes("postre")) {
+    return [
+      { id: "extra-chispas", name: "Extra Chispas de Chocolate", price: 0.75 },
+      { id: "extra-bola-helado", name: "Extra Bola de Helado Vainilla", price: 1.5 },
+      { id: "extra-sirope-fresa", name: "Extra Sirope de Fresa", price: 0.8 }
+    ];
+  } else if (catName.includes("combo")) {
+    return [
+      { id: "combo-papas", name: "Agrandar Papas Fritas a Tamaño Familiar", price: 1.5 },
+      { id: "combo-bebida", name: "Agrandar Refrescos a 1 Litro", price: 1.0 },
+      { id: "combo-postre", name: "Añadir Postre Helado Toon", price: 2.0 }
+    ];
+  } else {
+    return [
+      { id: "extra-queso", name: "Extra Queso", price: 1.0 },
+      { id: "extra-tocino", name: "Extra Tocino", price: 1.5 },
+      { id: "extra-salsa", name: "Extra Salsa Especial de la Casa", price: 0.75 }
+    ];
+  }
+}
+
 function openProductModal(prodId) {
   currentSelectedModalProduct = toonProducts.find(p => p.id === prodId);
   if (!currentSelectedModalProduct) return;
@@ -262,33 +278,52 @@ function openProductModal(prodId) {
   document.getElementById("modal-product-title").innerText = currentSelectedModalProduct.nombre;
   document.getElementById("modal-product-price").innerHTML = formatPriceDual(currentSelectedModalProduct.precio);
   document.getElementById("modal-product-desc").innerText = currentSelectedModalProduct.descripcion || '';
+  if (document.getElementById("modal-product-notes")) document.getElementById("modal-product-notes").value = "";
 
-  // Render Dynamic Ingredients if available
-  const container = document.getElementById("modal-ingredients-container");
-  let ings = ["Carne 150g", "Queso Cheddar", "Tomate", "Cebolla Morada"];
+  // 1. Renderizar Todos los Ingredientes del Producto (para remover / mantener)
+  const ingContainer = document.getElementById("modal-ingredients-list");
+  let defaultIngredients = ["Carne 150g", "Queso Cheddar", "Tomate", "Cebolla Morada", "Pepinillos", "Salsa Especial"];
   if (currentSelectedModalProduct.ingredientes_json) {
     try {
-      ings = JSON.parse(currentSelectedModalProduct.ingredientes_json);
+      const parsed = JSON.parse(currentSelectedModalProduct.ingredientes_json);
+      if (Array.isArray(parsed) && parsed.length > 0) defaultIngredients = parsed;
     } catch(e){}
+  } else if (currentSelectedModalProduct.descripcion) {
+    const splitDesc = currentSelectedModalProduct.descripcion.split(/[,+]/).map(s => s.trim()).filter(s => s.length > 2);
+    if (splitDesc.length > 1) defaultIngredients = splitDesc;
   }
 
-  let html = `<div class="option-group-title">🛠️ REMOVER INGREDIENTES</div>`;
-  ings.forEach((ing, i) => {
-    html += `
-      <label class="custom-checkbox-label">
-        <span>❌ Sin ${ing}</span>
-        <input type="checkbox" class="dyn-ing-no" value="Sin ${ing}">
-      </label>
-    `;
-  });
+  if (ingContainer) {
+    let ingHtml = "";
+    defaultIngredients.forEach((ing, i) => {
+      ingHtml += `
+        <label class="ing-toggle-item">
+          <span>✔️ Con ${ing}</span>
+          <input type="checkbox" class="dyn-ing-check" data-name="${ing}" checked>
+        </label>
+      `;
+    });
+    ingContainer.innerHTML = ingHtml;
+  }
 
-  html += `<div class="option-group-title">🧀 EXTRAS RECOMENDADOS</div>
-    <label class="custom-checkbox-label"><span>Extra Queso Cheddar (+$1.00 / Bs. ${(1.0 * tasaCambioBs).toFixed(2)})</span><input type="checkbox" id="modal-opt-extra-queso" value="1.0"></label>
-    <label class="custom-checkbox-label"><span>Extra Tocino Crujiente (+$1.50 / Bs. ${(1.5 * tasaCambioBs).toFixed(2)})</span><input type="checkbox" id="modal-opt-extra-tocino" value="1.5"></label>
-    <label class="custom-checkbox-label"><span>Extra Carne 150g (+$2.50 / Bs. ${(2.5 * tasaCambioBs).toFixed(2)})</span><input type="checkbox" id="modal-opt-extra-carne" value="2.5"></label>
-  `;
+  // 2. Renderizar Extras Recomendados Dinámicos según la Categoría del Producto
+  const extContainer = document.getElementById("modal-extras-list");
+  const catExtras = getCategoryExtrasList(currentSelectedModalProduct.categoria_id);
+  if (extContainer) {
+    let extHtml = "";
+    catExtras.forEach((ext, idx) => {
+      const bsVal = (ext.price * tasaCambioBs).toFixed(2);
+      const priceTxt = ext.price > 0 ? `(+$${ext.price.toFixed(2)} / Bs. ${bsVal})` : '(GRATIS)';
+      extHtml += `
+        <label class="extra-item-row">
+          <span>➕ ${ext.name} <small style="color: var(--gold-accent); font-weight:800;">${priceTxt}</small></span>
+          <input type="checkbox" class="dyn-extra-check" data-name="${ext.name}" data-price="${ext.price}">
+        </label>
+      `;
+    });
+    extContainer.innerHTML = extHtml;
+  }
 
-  container.innerHTML = html;
   document.getElementById("product-detail-modal").classList.add("open");
 }
 
@@ -307,13 +342,24 @@ function addModalProductToCart() {
   let extraPrice = 0.0;
   let opts = [];
 
-  document.querySelectorAll(".dyn-ing-no:checked").forEach(cb => {
-    opts.push(cb.value);
+  // Registrar ingredientes removidos (desmarcados)
+  document.querySelectorAll(".dyn-ing-check:not(:checked)").forEach(cb => {
+    const ingName = cb.getAttribute("data-name");
+    opts.push(`Sin ${ingName}`);
   });
 
-  if (document.getElementById("modal-opt-extra-queso")?.checked) { opts.push("Extra Queso"); extraPrice += 1.0; }
-  if (document.getElementById("modal-opt-extra-tocino")?.checked) { opts.push("Extra Tocino"); extraPrice += 1.5; }
-  if (document.getElementById("modal-opt-extra-carne")?.checked) { opts.push("Extra Carne"); extraPrice += 2.5; }
+  // Registrar extras agregados (marcados)
+  document.querySelectorAll(".dyn-extra-check:checked").forEach(cb => {
+    const extName = cb.getAttribute("data-name");
+    const price = parseFloat(cb.getAttribute("data-price")) || 0.0;
+    opts.push(`+ ${extName}`);
+    extraPrice += price;
+  });
+
+  const notesInput = document.getElementById("modal-product-notes");
+  if (notesInput && notesInput.value.trim() !== "") {
+    opts.push(`Nota: ${notesInput.value.trim()}`);
+  }
 
   const unitPrice = currentSelectedModalProduct.precio + extraPrice;
 
@@ -334,7 +380,28 @@ function addModalProductToCart() {
 
 function updateCartNavBadge() {
   const totalCount = toonCart.reduce((sum, item) => sum + item.cantidad, 0);
-  document.getElementById("nav-cart-badge").innerText = totalCount;
+  const totalSum = toonCart.reduce((sum, item) => sum + item.subtotal, 0);
+
+  const badgeEl = document.getElementById("nav-cart-badge");
+  if (badgeEl) badgeEl.innerText = totalCount;
+
+  // Carrito Flotante de Alta Visibilidad
+  const floatWidget = document.getElementById("floating-cart-btn");
+  if (floatWidget) {
+    if (totalCount > 0) {
+      floatWidget.style.display = "flex";
+      floatWidget.innerHTML = `
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span style="font-size:1.25rem;">🛒</span>
+          <span>VER MI PEDIDO</span>
+          <span class="floating-cart-badge">${totalCount} ${totalCount === 1 ? 'ítem' : 'ítems'}</span>
+        </div>
+        <div style="font-size:1.15rem; font-weight:900; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.6);">$${totalSum.toFixed(2)}</div>
+      `;
+    } else {
+      floatWidget.style.display = "none";
+    }
+  }
 }
 
 function renderToonCart() {

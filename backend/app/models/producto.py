@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from backend.app.core.database import Base
@@ -9,8 +9,8 @@ class Producto(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(150), nullable=False)
     descripcion = Column(String(500), nullable=True)
-    precio = Column(Float, nullable=False)
-    precio_promocion = Column(Float, nullable=True)
+    precio = Column(Numeric(12, 2), nullable=False, default=0.00)
+    precio_promocion = Column(Numeric(12, 2), nullable=True)
     stock = Column(Integer, default=50)
     stock_minimo = Column(Integer, default=5)
     imagen_url = Column(String(500), nullable=True)

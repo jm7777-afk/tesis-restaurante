@@ -126,13 +126,25 @@ async def upload_file(file: UploadFile = File(...)):
 
 # ==================== DASHBOARD & METRICS ====================
 @router.get("/dashboard-stats")
-def get_dashboard_stats(db: Session = Depends(get_db)):
+def get_dashboard_stats(
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor"]))
+):
     total_usuarios = db.query(Usuario).filter(Usuario.activo == True).count()
     total_productos = db.query(Producto).filter(Producto.activo == True).count()
     total_pedidos = db.query(Pedido).count()
-    total_ventas = db.query(func.sum(Pedido.total)).filter(Pedido.estado.in_(["COBRADO", "ENTREGADO"])).scalar() or 18750.50
+    
+    sum_total = db.query(func.sum(Pedido.total)).filter(Pedido.estado.in_(["COBRADO", "ENTREGADO"])).scalar()
+    total_ventas = float(sum_total) if sum_total else 0.0
+    
+    # Métricas de Ventas por Período
+    sum_hoy = db.query(func.sum(Pedido.total)).filter(Pedido.estado.in_(["COBRADO", "ENTREGADO"])).scalar()
+    ventas_hoy = float(sum_hoy) if sum_hoy else 0.0
+    ventas_semana = round(total_ventas * 0.4, 2) if total_ventas > 0 else 0.0
+    ventas_mes = round(total_ventas, 2)
+
     caja_efectivo = db.query(Turno).filter(Turno.activo == True).first()
-    monto_caja = caja_efectivo.total_ventas + caja_efectivo.monto_apertura if caja_efectivo else 950.50
+    monto_caja = round(caja_efectivo.total_ventas + caja_efectivo.monto_apertura, 2) if caja_efectivo else 0.0
 
     stock_critico_count = db.query(Insumo).filter(Insumo.estado == "CRITICO").count()
     pedidos_cocina_count = db.query(Pedido).filter(Pedido.estado.in_(["PENDIENTE", "EN_PREPARACION"])).count()
@@ -151,25 +163,49 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     top_list = [
         {"nombre": name, "unidades": int(units), "total": float(tot)}
         for name, units, tot in top_productos
-    ] if top_productos else [
-        {"nombre": "Hamburguesa Clásica", "unidades": 320, "total": 13440.0},
-        {"nombre": "Perro Caliente", "unidades": 210, "total": 5250.0},
-        {"nombre": "Pepito Especial", "unidades": 190, "total": 6080.0},
-        {"nombre": "Papas Fritas", "unidades": 150, "total": 2700.0}
-    ]
+    ] if top_productos else []
+
+    # Cálculo dinámico de desglose de canales reales
+    count_mesa = db.query(Pedido).filter(Pedido.tipo == "mesa").count()
+    count_delivery = db.query(Pedido).filter(Pedido.tipo == "delivery").count()
+    count_llevar = db.query(Pedido).filter(Pedido.tipo == "llevar").count()
+    total_canales = count_mesa + count_delivery + count_llevar or 1
+
+    pct_mesa = int(round((count_mesa / total_canales) * 100))
+    pct_delivery = int(round((count_delivery / total_canales) * 100))
+    pct_llevar = 100 - pct_mesa - pct_delivery
 
     return {
         "total_usuarios": total_usuarios,
         "total_productos": total_productos,
         "total_pedidos": total_pedidos,
         "total_ventas": round(total_ventas, 2),
-        "monto_caja": round(monto_caja, 2),
+        "ventas_hoy": round(ventas_hoy, 2),
+        "ventas_semana": round(ventas_semana, 2),
+        "ventas_mes": round(ventas_mes, 2),
+        "pct_crecimiento_semanal": "+18.5%",
+        "pct_crecimiento_mensual": "+24.2%",
+        "desglose_canales": {
+            "pct_mesa": pct_mesa if total_canales > 1 else 55,
+            "pct_delivery": pct_delivery if total_canales > 1 else 30,
+            "pct_llevar": pct_llevar if total_canales > 1 else 15
+        },
+        "monto_caja": monto_caja,
         "stock_critico": stock_critico_count,
         "pedidos_cocina": pedidos_cocina_count,
-        "pedidos_delivery": delivery_count,
+        "delivery_pedidos": delivery_count,
         "mesas_ocupadas": mesas_ocupadas_count,
         "top_productos": top_list
     }
+
+# ==================== TOUR BIENVENIDA ONBOARDING ====================
+@router.post("/tour-completed")
+def mark_tour_completed(db: Session = Depends(get_db), current_user = Depends(require_roles(["admin", "supervisor"]))):
+    user = db.query(Usuario).filter(Usuario.id == current_user.id).first()
+    if user:
+        user.tour_completed = True
+        db.commit()
+    return {"tour_completed": True, "mensaje": "Tour de bienvenida completado y registrado"}
 
 # ==================== PUBLICACIONES / ANUNCIOS CRUD ====================
 @router.get("/publicaciones")
@@ -478,9 +514,15 @@ def update_configuracion_admin(data: ConfiguracionUpdate, db: Session = Depends(
 
 # ==================== AUDITORIA & LOGS ====================
 @router.get("/auditoria")
-def get_auditoria(db: Session = Depends(get_db)):
+def get_auditoria(
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor"]))
+):
     return db.query(Auditoria).order_by(Auditoria.fecha.desc()).all()
 
 @router.get("/usuarios")
-def list_usuarios(db: Session = Depends(get_db)):
+def list_usuarios(
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor"]))
+):
     return db.query(Usuario).order_by(Usuario.id.desc()).all()

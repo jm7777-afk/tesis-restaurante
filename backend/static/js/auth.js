@@ -6,9 +6,12 @@ const Auth = {
     const userStr = localStorage.getItem("user");
     return userStr ? JSON.parse(userStr) : null;
   },
-  setAuth(token, user) {
+  setToken(token) {
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+  },
+  setAuth(token, user) {
+    if (token) localStorage.setItem("token", token);
+    if (user) localStorage.setItem("user", JSON.stringify(user));
   },
   logout() {
     localStorage.removeItem("token");

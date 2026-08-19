@@ -3,32 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FastFood Cocina - Monitor KDS</title>
-  <link rel="stylesheet" href="/static/css/global.css">
-  <link rel="stylesheet" href="/static/css/app-modules.css">
+  <title>Donde David - Monitor KDS de Cocina</title>
+  <link rel="stylesheet" href="/static/css/global.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/app-modules.css?v=2.0">
 </head>
-<body>
+<body class="toon-theme">
 
   <!-- KDS Header -->
-  <header class="navbar">
-    <a href="#" class="nav-brand">
-      <span class="logo-icon" style="background: linear-gradient(135deg, #ef4444, #f59e0b);">👨‍🍳</span>
-      <span>Monitor de Cocina (KDS)</span>
+  <header class="toon-header">
+    <a href="#" class="toon-brand">
+      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
+      <span>👨‍🍳 MONITOR KDS DE COCINA</span>
     </a>
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <span style="font-size: 0.9rem; color: var(--text-muted);" id="kds-order-count">Comandas activas: 0</span>
-      <button class="btn btn-outline" onclick="Auth.logout()">🚪 Salir</button>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <button class="theme-toggle-btn" onclick="toggleThemeMode()">🌓 TEMA</button>
+      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: transparent; border: 1px solid var(--gold-accent); color: var(--gold-accent);" onclick="openModal('cocina-guide-modal')">❓ GUÍA COCINA</button>
+      <span style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 800;" id="kds-order-count">Comandas activas: 0</span>
+      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="Auth.logout()">🚪 Salir</button>
     </div>
   </header>
 
-  <div class="kds-container">
+  <div class="kds-container" style="padding: 1.5rem;">
     <div class="kds-grid" id="kds-grid">
       <!-- Dynamic Order Cards populated via JS -->
     </div>
   </div>
 
-  <script src="/static/js/auth.js"></script>
-  <script src="/static/js/websocket.js"></script>
-  <script src="/static/js/cocina.js"></script>
+  <!-- MODAL GUÍA DE USO DE COCINA KDS -->
+  <div class="product-modal-backdrop" id="cocina-guide-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.75rem;">
+      <button class="modal-close-btn" onclick="closeModal('cocina-guide-modal')">&times;</button>
+      <span style="font-size: 2.5rem; text-align: center; display: block;">👨‍🍳</span>
+      <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent); text-align: center; margin-top: 0.3rem;">GUÍA DE USO MONITOR KDS COCINA</h3>
+      
+      <div style="font-size: 0.85rem; line-height: 1.6; color: #fff; margin-top: 1rem;">
+        <p><strong>1. Notificaciones en Tiempo Real:</strong> Cada vez que un cliente en mesa o la caja registradora ingrese un pedido nuevo, sonará una alerta sonora automática y la tarjeta aparecerá en vivo en la pantalla.</p>
+        <p><strong>2. Detalle de Preparación:</strong> Cada tarjeta muestra la mesa, el tiempo transcurrido (cambia a rojo tras 15 min), los ítems solicitados y las personalizaciones requeridas (ej. <em>Sin cebolla, Extra Tocino</em>).</p>
+        <p><strong>3. Marcar Listo:</strong> Al finalizar la preparación del plato, presiona el botón 🟢 <em>MARCAR LISTO</em> para despachar el pedido a los garzones.</p>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; margin-top: 1.25rem;" onclick="closeModal('cocina-guide-modal')">✅ ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="/static/js/theme-toggle.js?v=2.0"></script>
+  <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/websocket.js?v=2.0"></script>
+  <script src="/static/js/cocina.js?v=2.0"></script>
 </body>
 </html>

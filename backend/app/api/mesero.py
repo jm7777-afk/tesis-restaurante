@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from backend.app.core.database import get_db
+from backend.app.core.security import require_roles
 from backend.app.models.pedido import Pedido
 from backend.app.models.mesa import Mesa
 from backend.app.schemas.schemas import PedidoOut, CambiarMesaRequest
@@ -11,11 +12,17 @@ from backend.app.websockets.manager import ws_manager
 router = APIRouter(prefix="/mesero", tags=["Panel de Meseros"])
 
 @router.get("/mesas")
-def get_mesas_mesero(db: Session = Depends(get_db)):
+def get_mesas_mesero(
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor", "mesero", "caja"]))
+):
     return db.query(Mesa).order_by(Mesa.numero_mesa.asc()).all()
 
 @router.get("/pedidos-activos", response_model=List[PedidoOut])
-def get_pedidos_activos_mesero(db: Session = Depends(get_db)):
+def get_pedidos_activos_mesero(
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor", "mesero", "caja"]))
+):
     return db.query(Pedido).filter(
         Pedido.estado.in_(["PENDIENTE", "EN_PREPARACION", "LISTO"])
     ).order_by(Pedido.fecha_creacion.asc()).all()
@@ -24,7 +31,8 @@ def get_pedidos_activos_mesero(db: Session = Depends(get_db)):
 async def cambiar_mesa_pedido(
     pedido_id: int,
     data: CambiarMesaRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor", "mesero", "caja"]))
 ):
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
     if not pedido:
@@ -59,7 +67,8 @@ async def cambiar_mesa_pedido(
         "pedido_id": pedido.id,
         "nuevo_estado": pedido.estado,
         "numero_mesa": pedido.numero_mesa,
-        "accion": "CAMBIO_MESA"
+        "accion": "CAMBIO_MESA",
+        "mesero": user.nombre
     })
 
     return {
@@ -69,7 +78,11 @@ async def cambiar_mesa_pedido(
     }
 
 @router.post("/pedidos/{pedido_id}/marcar-entregado")
-async def marcar_pedido_entregado(pedido_id: int, db: Session = Depends(get_db)):
+async def marcar_pedido_entregado(
+    pedido_id: int, 
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor", "mesero", "caja"]))
+):
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
     if not pedido:
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
@@ -80,7 +93,8 @@ async def marcar_pedido_entregado(pedido_id: int, db: Session = Depends(get_db))
     await ws_manager.broadcast("CAMBIO_ESTADO_PEDIDO", {
         "pedido_id": pedido.id,
         "nuevo_estado": "ENTREGADO",
-        "numero_mesa": pedido.numero_mesa
+        "numero_mesa": pedido.numero_mesa,
+        "mesero": user.nombre
     })
 
-    return {"mensaje": f"Pedido #{pedido.id} marcado como ENTREGADO por el mesero."}
+    return {"mensaje": f"Pedido #{pedido.id} marcado como ENTREGADO por el mesero {user.nombre}."}

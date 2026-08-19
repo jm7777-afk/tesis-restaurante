@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, Boolean
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from backend.app.core.database import Base
@@ -12,11 +12,11 @@ class Pedido(Base):
     tipo = Column(String(30), default="mesa") # mesa, llevar, delivery
     modo_pago = Column(String(30), default="PAGAR_ANTES") # PAGAR_ANTES, PAGAR_DESPUES (Cuenta Abierta)
     estado = Column(String(30), default="PENDIENTE") # PENDIENTE, EN_PREPARACION, LISTO, COBRADO, ENTREGADO, CANCELADO
-    subtotal = Column(Float, nullable=False)
-    impuesto = Column(Float, nullable=False) # 16% IVA
-    costo_empaque = Column(Float, default=0.0)
-    descuento = Column(Float, default=0.0)
-    total = Column(Float, nullable=False)
+    subtotal = Column(Numeric(12, 2), nullable=False, default=0.00)
+    impuesto = Column(Numeric(12, 2), nullable=False, default=0.00) # 16% IVA
+    costo_empaque = Column(Numeric(12, 2), default=0.00)
+    descuento = Column(Numeric(12, 2), default=0.00)
+    total = Column(Numeric(12, 2), nullable=False, default=0.00)
     observaciones = Column(Text, nullable=True)
     
     # Campos exclusivos para Delivery & OTP
@@ -29,8 +29,8 @@ class Pedido(Base):
     fecha_creacion = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     fecha_entrega = Column(DateTime, nullable=True)
     metodo_pago = Column(String(50), nullable=True) # Efectivo, Tarjeta, QR, Puntos
-    monto_recibido = Column(Float, nullable=True)
-    cambio = Column(Float, nullable=True)
+    monto_recibido = Column(Numeric(12, 2), nullable=True)
+    cambio = Column(Numeric(12, 2), nullable=True)
     factura_numero = Column(String(50), nullable=True)
     nit_cliente = Column(String(50), default="CF")
     nombre_factura = Column(String(100), default="Consumidor Final")

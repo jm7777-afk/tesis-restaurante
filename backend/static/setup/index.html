@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Instalación Inicial del Sistema | Setup Wizard</title>
+  <link rel="stylesheet" href="/static/css/global.css">
+  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <style>
+    body.setup-body {
+      background: #080c14;
+      background-image: radial-gradient(circle at 50% 30%, rgba(255, 183, 3, 0.15), transparent 70%);
+      color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      margin: 0;
+    }
+    .setup-card {
+      background: #101726;
+      border: 2px solid var(--gold-accent);
+      border-radius: 24px;
+      max-width: 640px;
+      width: 100%;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      position: relative;
+    }
+    .setup-progress {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .setup-progress::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--toon-border);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+    .progress-step-node {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #080c14;
+      border: 2px solid var(--toon-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      z-index: 2;
+      transition: all 0.3s;
+    }
+    .progress-step-node.active {
+      border-color: var(--gold-accent);
+      background: var(--gold-accent);
+      color: #000;
+      box-shadow: 0 0 15px var(--gold-accent);
+    }
+    .progress-step-node.completed {
+      border-color: var(--cyan-accent);
+      background: var(--cyan-accent);
+      color: #000;
+    }
+    .wiz-form-step {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .wiz-form-step.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="setup-body">
+
+  <div class="setup-card">
+    
+    <!-- Branding Header -->
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <span style="font-size: 3rem;">🚀</span>
+      <h1 style="font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #ffb703, #00f5d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0.3rem 0 0 0;">
+        INSTALACIÓN Y CONFIGURACIÓN INICIAL
+      </h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">Sistema de Gestión para Restaurantes Single-Tenant / Marca Blanca</p>
+    </div>
+
+    <!-- Indicador de Progreso -->
+    <div class="setup-progress">
+      <div class="progress-step-node active" id="node-1">1</div>
+      <div class="progress-step-node" id="node-2">2</div>
+      <div class="progress-step-node" id="node-3">3</div>
+      <div class="progress-step-node" id="node-4">4</div>
+    </div>
+
+    <form id="setup-form">
+      
+      <!-- PASO 1: DATOS DE MARCA -->
+      <div class="wiz-form-step active" id="step-1">
+        <h3 style="color: var(--gold-accent); font-weight: 900; margin-top: 0; margin-bottom: 1rem;">1. DATOS Y PALETA DE COLORES DE LA MARCA</h3>
+        
+        <div class="form-group">
+          <label>Nombre Comercial del Restaurante *</label>
+          <input type="text" id="nombre_restaurante" class="form-control" placeholder="Ej. Restaurante Don David Gourmet" value="Donde David - Fresh & Tasty!" required>
+        </div>
+
+        <div class="form-group">
+          <label>Logo Oficial (URL o Imagen)</label>
+          <input type="text" id="logo_url" class="form-control" placeholder="/static/images/logo-donde-david.jpg" value="/static/images/logo-donde-david.jpg">
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+          <div class="form-group">
+            <label style="font-size: 0.75rem;">Color Primario</label>
+            <input type="color" id="color_primario" class="form-control" style="height: 42px; padding: 0.2rem;" value="#ffb703">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.75rem;">Color Secundario</label>
+            <input type="color" id="color_secundario" class="form-control" style="height: 42px; padding: 0.2rem;" value="#ff8800">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.75rem;">Color Acento</label>
+            <input type="color" id="color_acento" class="form-control" style="height: 42px; padding: 0.2rem;" value="#00f5d4">
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: DATOS DE CONTACTO Y UBICACIÓN -->
+      <div class="wiz-form-step" id="step-2">
+        <h3 style="color: var(--gold-accent); font-weight: 900; margin-top: 0; margin-bottom: 1rem;">2. CONTACTO, UBICACIÓN Y HORARIOS</h3>
+        
+        <div class="form-group">
+          <label>Teléfono Principal de Atención</label>
+          <input type="text" id="telefono" class="form-control" placeholder="+502 5123 4567" value="+502 5123 4567">
+        </div>
+
+        <div class="form-group">
+          <label>WhatsApp Oficial para Pedidos</label>
+          <input type="text" id="whatsapp" class="form-control" placeholder="+502 4112 5554" value="+502 4112 5554">
+        </div>
+
+        <div class="form-group">
+          <label>Dirección Física del Local</label>
+          <input type="text" id="direccion" class="form-control" placeholder="Av. Principal #12-34, Zona Gourmet" value="Av. Reforma 12-34, Zona 9">
+        </div>
+
+        <div class="form-group">
+          <label>Horario Comercial de Atención</label>
+          <input type="text" id="horario" class="form-control" placeholder="Lunes a Domingo: 11:00 AM - 11:00 PM" value="Lunes a Domingo: 11:00 AM - 11:00 PM">
+        </div>
+      </div>
+
+      <!-- PASO 3: CUENTA SUPERADMIN MAESTRA -->
+      <div class="wiz-form-step" id="step-3">
+        <h3 style="color: var(--gold-accent); font-weight: 900; margin-top: 0; margin-bottom: 1rem;">3. CREACIÓN DE CUENTA MAESTRA SUPERADMIN</h3>
+        
+        <div style="display: flex; gap: 0.75rem;">
+          <div class="form-group" style="flex: 1;">
+            <label>Nombre *</label>
+            <input type="text" id="admin_nombre" class="form-control" placeholder="Javier" value="Administrador" required>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Apellido *</label>
+            <input type="text" id="admin_apellido" class="form-control" placeholder="Mendoza" value="Donde David" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Correo Electrónico *</label>
+          <input type="email" id="admin_email" class="form-control" placeholder="admin@dondedavid.com" value="admin@dondedavid.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>Nombre de Usuario Master *</label>
+          <input type="text" id="admin_usuario" class="form-control" placeholder="admin" value="admin" required>
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña Maestra *</label>
+          <input type="password" id="admin_password" class="form-control" placeholder="••••••••" value="admin123" required>
+        </div>
+      </div>
+
+      <!-- PASO 4: CONFIRMACIÓN Y BLOQUEO -->
+      <div class="wiz-form-step" id="step-4">
+        <h3 style="color: var(--cyan-accent); font-weight: 900; margin-top: 0; margin-bottom: 1rem;">4. CONFIRMACIÓN Y BLOQUEO DE SEGURIDAD</h3>
+        
+        <div style="background: rgba(0, 245, 212, 0.08); border: 1px solid var(--cyan-accent); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem;">
+          <h4 style="color: var(--cyan-accent); margin: 0 0 0.5rem 0;">🔒 Candado de Instalación Única</h4>
+          <p style="font-size: 0.85rem; color: #fff; line-height: 1.5; margin: 0;">
+            Al presionar el botón de instalación, el sistema creará el archivo de seguridad <strong>installed.lock</strong> y marcará <code>is_installed = 1</code> en la base de datos.
+            La ruta <code>/setup</code> quedará <strong>bloqueada permanentemente</strong> contra accesos no autorizados.
+          </p>
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;" id="wiz-summary-box">
+          <!-- Resumen dinámico -->
+        </div>
+      </div>
+
+      <!-- Botones de Navegación del Wizard -->
+      <div style="display: flex; justify-content: space-between; margin-top: 2rem; border-top: 1px dashed var(--toon-border); padding-top: 1.25rem;">
+        <button type="button" class="btn-gold" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);" id="btn-prev" onclick="navWiz(-1)">← Anterior</button>
+        <button type="button" class="btn-gold" id="btn-next" onclick="navWiz(1)">Siguiente →</button>
+      </div>
+
+    </form>
+
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script>
+    let currentStep = 1;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Verificar si ya está instalado al cargar la página
+      try {
+        const res = await fetch("/api/v1/setup/status");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.is_installed) {
+            alert("Acceso 403 Forbidden: El sistema ya se encuentra instalado.");
+            window.location.href = "/static/admin/index.html";
+          }
+        }
+      } catch (err) {}
+
+      updateWizUI();
+    });
+
+    function navWiz(delta) {
+      if (delta === 1 && !validateStep(currentStep)) return;
+
+      currentStep += delta;
+      if (currentStep < 1) currentStep = 1;
+      if (currentStep > 4) {
+        submitInstaller();
+        return;
+      }
+      updateWizUI();
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        const name = document.getElementById("nombre_restaurante").value;
+        if (!name) { alert("Ingresa el nombre del restaurante"); return false; }
+      } else if (step === 3) {
+        const email = document.getElementById("admin_email").value;
+        const user = document.getElementById("admin_usuario").value;
+        const pass = document.getElementById("admin_password").value;
+        if (!email || !user || !pass) { alert("Completa los datos obligatorios del Administrador"); return false; }
+      }
+      return true;
+    }
+
+    function updateWizUI() {
+      document.querySelectorAll(".wiz-form-step").forEach((s, idx) => {
+        s.classList.toggle("active", idx + 1 === currentStep);
+      });
+
+      document.querySelectorAll(".progress-step-node").forEach((node, idx) => {
+        node.classList.remove("active", "completed");
+        if (idx + 1 === currentStep) node.classList.add("active");
+        else if (idx + 1 < currentStep) node.classList.add("completed");
+      });
+
+      document.getElementById("btn-prev").style.display = currentStep === 1 ? "none" : "inline-block";
+      document.getElementById("btn-next").innerText = currentStep === 4 ? "🚀 EJECUTAR INSTALACIÓN Y BLOQUEAR" : "Siguiente →";
+
+      if (currentStep === 4) {
+        const name = document.getElementById("nombre_restaurante").value;
+        const user = document.getElementById("admin_usuario").value;
+        const email = document.getElementById("admin_email").value;
+        document.getElementById("wiz-summary-box").innerHTML = `
+          <div>🏢 <strong>Negocio:</strong> ${name}</div>
+          <div>👤 <strong>Usuario SuperAdmin:</strong> ${user} (${email})</div>
+          <div>🎨 <strong>Colores:</strong> Primario <span style="color:${document.getElementById("color_primario").value}">██</span>, Secundario <span style="color:${document.getElementById("color_secundario").value}">██</span></div>
+        `;
+      }
+    }
+
+    async function submitInstaller() {
+      const payload = {
+        nombre_restaurante: document.getElementById("nombre_restaurante").value,
+        logo_url: document.getElementById("logo_url").value,
+        color_primario: document.getElementById("color_primario").value,
+        color_secundario: document.getElementById("color_secundario").value,
+        color_acento: document.getElementById("color_acento").value,
+        telefono: document.getElementById("telefono").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        direccion: document.getElementById("direccion").value,
+        horario: document.getElementById("horario").value,
+        admin_nombre: document.getElementById("admin_nombre").value,
+        admin_apellido: document.getElementById("admin_apellido").value,
+        admin_email: document.getElementById("admin_email").value,
+        admin_usuario: document.getElementById("admin_usuario").value,
+        admin_password: document.getElementById("admin_password").value
+      };
+
+      try {
+        const res = await fetch("/api/v1/setup/install", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Error en la instalación");
+        }
+
+        const data = await res.json();
+        
+        // Guardar token JWT e iniciar sesión de inmediato
+        if (data.access_token) {
+          Auth.setAuth(data.access_token, data.usuario);
+        }
+
+        alert("🎉 ¡Instalación única completada con éxito! El sistema ha bloqueado la ruta /setup y activado tu cuenta de Administrador.");
+        window.location.href = "/static/admin/index.html";
+      } catch (err) {
+        alert(`Error: ${err.message}`);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Donde David - Panel de Atencion y Meseros</title>
-  <link rel="stylesheet" href="/static/css/global.css">
-  <link rel="stylesheet" href="/static/css/toon-theme.css">
+  <title>DONDE DAVID - Panel de Meseros & Atención al Salón</title>
+  <link rel="stylesheet" href="/static/css/global.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
   <style>
     .mesero-layout {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 1.25rem;
+      padding: 1.5rem;
     }
     .mesas-grid-mesero {
       display: grid;
@@ -19,19 +19,20 @@
       margin-bottom: 2rem;
     }
     .mesa-card-mesero {
-      background: var(--toon-card);
-      border: 1px solid var(--toon-border);
+      background: var(--color-dark);
+      border: 2px solid var(--color-border);
       border-radius: var(--radius-md);
-      padding: 1rem;
+      padding: 1.1rem;
       text-align: center;
-      transition: all 0.2s;
+      transition: all var(--transition-base);
     }
     .mesa-card-mesero.OCUPADA {
-      border-color: var(--neon-red);
-      background: rgba(255, 71, 87, 0.08);
+      border-color: var(--color-red);
+      background: rgba(242, 29, 29, 0.1);
     }
     .mesa-card-mesero.LIBRE {
-      border-color: var(--neon-green);
+      border-color: var(--color-success);
+      background: rgba(34, 197, 94, 0.1);
     }
   </style>
 </head>
@@ -40,49 +41,69 @@
   <!-- Header Mesero con Logo Oficial -->
   <header class="toon-header" style="justify-content: space-between;">
     <a href="#" class="toon-brand">
-      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--gold-accent);" alt="Donde David">
-      <span>PANEL DE MESEROS & ATENCIÓN</span>
+      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--color-yellow);" alt="Donde David Logo">
+      <span style="font-family: var(--font-display); color: #FFFFFF;">DONDE DAVID - PANEL DE MESEROS</span>
     </a>
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <span style="color: var(--gold-accent); font-weight: 800; font-size: 0.9rem;" id="mesero-name-label">Mesero: Pedro Rojas</span>
-      <button class="btn-gold" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="Auth.logout()">🚪 Salir</button>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <button class="theme-toggle-btn" onclick="toggleThemeMode()">🌓 TEMA</button>
+      <button class="btn btn-outline" style="min-height: 38px; padding: 0.4rem 0.8rem; font-size: 0.78rem; border-color: var(--color-yellow); color: var(--color-yellow);" onclick="openModal('mesero-guide-modal')">❓ GUÍA MESEROS</button>
+      <span style="color: var(--color-yellow); font-weight: 800; font-size: 0.9rem;" id="mesero-name-label">Mesero Activo</span>
+      <button class="btn btn-cta" style="min-height: 38px; padding: 0.4rem 0.8rem; font-size: 0.78rem;" onclick="Auth.logout()">🚪 Salir</button>
     </div>
   </header>
 
   <div class="mesero-layout">
 
     <!-- Distribución de Mesas en Vivo -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-      <h2 style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0;">🍽️ ESTADO Y REASIGNACIÓN DE MESAS</h2>
-      <button class="btn-gold" onclick="loadMeseroData()">🔄 ACTUALIZAR MESAS</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: #FFFFFF; margin: 0;">🍽️ ESTADO Y REASIGNACIÓN DE MESAS</h2>
+      <button class="btn btn-primary" onclick="loadMeseroData()">🔄 ACTUALIZAR MESAS</button>
     </div>
 
     <div class="mesas-grid-mesero" id="mesero-mesas-grid"></div>
 
     <!-- Pedidos Activos de Meseros -->
-    <h2 style="font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 1rem;">📋 PEDIDOS ACTIVOS PARA SERVIR EN MESA</h2>
+    <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: #FFFFFF; margin-bottom: 1.25rem;">📋 PEDIDOS ACTIVOS PARA SERVIR EN MESA</h2>
     <div id="mesero-pedidos-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;"></div>
 
+  </div>
+
+  <!-- MODAL GUÍA DE MESEROS -->
+  <div class="product-modal-backdrop" id="mesero-guide-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.75rem;">
+      <button class="modal-close-btn" onclick="closeModal('mesero-guide-modal')">&times;</button>
+      <span style="font-size: 2.5rem; text-align: center; display: block;">🍽️</span>
+      <h3 style="font-size: 1.3rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); text-align: center; margin-top: 0.3rem;">GUÍA DE USO PANEL DE MESEROS</h3>
+      
+      <div style="font-size: 0.85rem; line-height: 1.6; color: #FFFFFF; margin-top: 1rem;">
+        <p><strong>1. Estado del Salón:</strong> Visualiza en tiempo real qué mesas están LIBRES (verde), OCUPADAS (rojo) o RESERVADAS (azul).</p>
+        <p><strong>2. Reasignación de Mesa:</strong> Si un cliente se cambia de lugar en el salón, presiona el botón 🔄 <em>CAMBIAR MESA</em> en su pedido para transferir su comanda a la nueva mesa libre sin perder el consumo acumulado.</p>
+        <p><strong>3. Servir en Mesa:</strong> Cuando la cocina marque los platos como listos, recibirás la notificación para llevar el pedido al comensal.</p>
+      </div>
+
+      <button class="btn btn-cta" style="width: 100%; margin-top: 1.25rem;" onclick="closeModal('mesero-guide-modal')">✅ ENTENDIDO</button>
+    </div>
   </div>
 
   <!-- Modal Cambiar de Mesa -->
   <div class="product-modal-backdrop" id="cambiar-mesa-modal">
     <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
       <button class="modal-close-btn" onclick="closeModal('cambiar-mesa-modal')">&times;</button>
-      <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🔄 REASIGNAR MESA DE PEDIDO</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted);" id="swap-order-label">Pedido #0 en Mesa actual</p>
+      <h3 style="font-size: 1.3rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0;">🔄 REASIGNAR MESA DE PEDIDO</h3>
+      <p style="font-size: 0.85rem; color: var(--color-text-secondary);" id="swap-order-label">Pedido #0 en Mesa actual</p>
       
       <div class="form-group">
         <label>Seleccionar Nueva Mesa Disponible</label>
         <select id="swap-nueva-mesa-select" class="form-control"></select>
       </div>
 
-      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCambiarMesa()">🔄 CONFIRMAR CAMBIO DE MESA</button>
+      <button class="btn btn-cta" style="width: 100%; margin-top: 1rem;" onclick="submitCambiarMesa()">🔄 CONFIRMAR CAMBIO DE MESA</button>
     </div>
   </div>
 
-  <script src="/static/js/auth.js"></script>
-  <script src="/static/js/websocket.js"></script>
-  <script src="/static/js/mesero.js"></script>
+  <script src="/static/js/theme-toggle.js?v=2.0"></script>
+  <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/websocket.js?v=2.0"></script>
+  <script src="/static/js/mesero.js?v=2.0"></script>
 </body>
 </html>

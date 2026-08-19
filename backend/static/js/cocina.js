@@ -46,76 +46,108 @@ function renderKDSOrders() {
 
   if (kdsOrders.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">
-        <span style="font-size: 3rem;">✨</span>
-        <h2 style="margin-top: 1rem;">No hay comandas pendientes</h2>
-        <p>¡Buen trabajo! La cocina está despejada.</p>
+      <div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--color-text-secondary);">
+        <span style="font-size: 3.5rem;">✨</span>
+        <h2 style="margin-top: 1rem; color: #FFFFFF; font-weight: 800;">No hay comandas pendientes</h2>
+        <p style="color: var(--color-text-secondary);">¡Excelente trabajo! La cocina está al día.</p>
       </div>
     `;
     return;
   }
 
-  let html = "";
-  kdsOrders.forEach(order => {
-    const elapsedMinutes = getElapsedMinutes(order.fecha_creacion);
-    const isUrgent = elapsedMinutes >= 15;
-    const timerClass = isUrgent ? 'timer-badge timer-urgent' : 'timer-badge';
+  // Clasificación en 3 columnas KDS
+  const pendientes = kdsOrders.filter(o => o.estado === "PENDIENTE");
+  const preparando = kdsOrders.filter(o => o.estado === "EN_PREPARACION");
+  const listos = kdsOrders.filter(o => o.estado === "LISTO");
 
-    let itemsHtml = "";
-    order.detalles.forEach(d => {
-      let customText = "";
-      if (d.personalizaciones) {
-        try {
-          const parsed = JSON.parse(d.personalizaciones);
-          if (parsed.opciones && parsed.opciones.length > 0) {
-            customText += `<br><small style="color: var(--accent);">+ ${parsed.opciones.join(', ')}</small>`;
+  function buildColumnHtml(title, icon, ordersList, bgBadge, nextStatus, nextBtnLabel, btnClass) {
+    let orderCardsHtml = "";
+    if (ordersList.length === 0) {
+      orderCardsHtml = `<div style="text-align: center; padding: 2rem; color: var(--color-text-secondary); font-size: 0.85rem; border: 1px dashed var(--color-border); border-radius: var(--radius-sm);">Sin comandas</div>`;
+    } else {
+      ordersList.forEach(order => {
+        const elapsedMinutes = getElapsedMinutes(order.fecha_creacion);
+        const isUrgent = elapsedMinutes >= 15;
+        const timerClass = isUrgent ? 'timer-badge timer-urgent' : 'timer-badge';
+        const urgentBorder = isUrgent ? 'urgent' : '';
+
+        let itemsHtml = "";
+        order.detalles.forEach(d => {
+          let customText = "";
+          if (d.personalizaciones) {
+            try {
+              const parsed = JSON.parse(d.personalizaciones);
+              if (parsed.opciones && parsed.opciones.length > 0) {
+                customText += `<br><small style="color: var(--color-yellow); font-weight: 700;">+ ${parsed.opciones.join(', ')}</small>`;
+              }
+            } catch(e) {}
           }
-        } catch(e) {}
-      }
-      if (d.observaciones) {
-        customText += `<br><small style="color: var(--danger);">Nota: ${d.observaciones}</small>`;
-      }
+          if (d.observaciones) {
+            customText += `<br><small style="color: var(--color-red); font-weight: 700;">⚠️ Nota: ${d.observaciones}</small>`;
+          }
 
-      itemsHtml += `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px dashed var(--border-color);">
-          <div>
-            <strong>${d.cantidad}x ${d.producto ? d.producto.nombre : 'Producto'}</strong>
-            ${customText}
+          itemsHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px dashed rgba(226, 232, 240, 0.15);">
+              <div>
+                <strong style="color: #FFFFFF; font-size: 0.95rem;">${d.cantidad}x ${d.producto ? d.producto.nombre : 'Producto'}</strong>
+                ${customText}
+              </div>
+              <button class="btn btn-outline" style="min-height: 32px; padding: 0.2rem 0.5rem; font-size: 0.72rem;" onclick="updateItemStatus(${d.id}, '${d.estado === 'LISTO' ? 'PENDIENTE' : 'LISTO'}')">
+                ${d.estado === 'LISTO' ? '✅ Listo' : '⏳ Pendiente'}
+              </button>
+            </div>
+          `;
+        });
+
+        orderCardsHtml += `
+          <div class="kds-card status-${order.estado} ${urgentBorder}" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">#${order.id} - ${order.numero_mesa}</h3>
+              <span class="${timerClass}">⏱️ ${elapsedMinutes}m</span>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: var(--radius-sm); margin: 0.5rem 0;">
+              ${itemsHtml}
+            </div>
+
+            ${nextStatus ? `
+              <button class="btn ${btnClass}" style="width: 100%; margin-top: auto;" onclick="updateOrderStatus(${order.id}, '${nextStatus}')">
+                ${nextBtnLabel}
+              </button>
+            ` : `
+              <div style="text-align: center; font-size: 0.8rem; color: var(--color-success); font-weight: 800; padding: 0.4rem; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+                ✅ DESPACHADO / ESPERANDO MESERO
+              </div>
+            `}
           </div>
-          <button class="btn btn-outline" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="updateItemStatus(${d.id}, '${d.estado === 'LISTO' ? 'PENDIENTE' : 'LISTO'}')">
-            ${d.estado === 'LISTO' ? '✅ Listo' : '⏳ Pendiente'}
-          </button>
-        </div>
-      `;
-    });
+        `;
+      });
+    }
 
-    html += `
-      <div class="kds-card status-${order.estado}">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="font-size: 1.2rem; font-weight: 700;">#${order.id} - ${order.numero_mesa}</h3>
-          <span class="${timerClass}">⏱️ Hace ${elapsedMinutes} min</span>
+    return `
+      <div style="background: rgba(7, 26, 61, 0.6); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.6rem;">
+          <h2 style="font-size: 1.1rem; font-weight: 900; color: #FFFFFF; display: flex; align-items: center; gap: 0.5rem;">
+            <span>${icon}</span> <span>${title}</span>
+          </h2>
+          <span style="background: ${bgBadge}; color: #000; font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.65rem; border-radius: 20px;">${ordersList.length}</span>
         </div>
-
-        <div style="background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: var(--radius-sm); margin: 0.5rem 0;">
-          ${itemsHtml}
-        </div>
-
-        <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-          ${order.estado === 'PENDIENTE' ? `
-            <button class="btn btn-primary" style="flex: 1;" onclick="updateOrderStatus(${order.id}, 'EN_PREPARACION')">
-              🔥 Iniciar Prep.
-            </button>
-          ` : ''}
-          
-          <button class="btn btn-success" style="flex: 1;" onclick="updateOrderStatus(${order.id}, 'LISTO')">
-            ✅ Marcar Todo Listo
-          </button>
+        <div>
+          ${orderCardsHtml}
         </div>
       </div>
     `;
-  });
+  }
 
-  container.innerHTML = html;
+  const htmlHtml = `
+    <div class="kds-columns-layout" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+      ${buildColumnHtml("RECIBIDOS", "📥", pendientes, "var(--color-yellow)", "EN_PREPARACION", "🔥 INICIAR PREPARACIÓN", "btn-cta")}
+      ${buildColumnHtml("PREPARANDO", "👨‍🍳", preparando, "var(--color-primary)", "LISTO", "✅ MARCAR PEDIDO LISTO", "btn-success")}
+      ${buildColumnHtml("LISTOS", "🏁", listos, "var(--color-success)", null, null, null)}
+    </div>
+  `;
+
+  container.innerHTML = htmlHtml;
 }
 
 function getElapsedMinutes(dateStr) {

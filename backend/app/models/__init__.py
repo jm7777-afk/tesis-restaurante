@@ -12,6 +12,7 @@ from backend.app.models.puntos_log import PuntosLog
 from backend.app.models.guia_item import GuiaItem
 from backend.app.models.resena import Resena
 from backend.app.models.publicacion import Publicacion
+from backend.app.models.movimiento_inventario import MovimientoInventario
 
 __all__ = [
     "Usuario",
@@ -27,5 +28,6 @@ __all__ = [
     "PuntosLog",
     "GuiaItem",
     "Resena",
-    "Publicacion"
+    "Publicacion",
+    "MovimientoInventario"
 ]

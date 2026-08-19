@@ -17,5 +17,6 @@ class Usuario(Base):
     pedidos_count = Column(Integer, default=6)
     total_gastado = Column(Float, default=345.0)
     direccion_default = Column(String(255), default="Av. Reforma 12-34, Zona 9")
+    tour_completed = Column(Boolean, default=False)
     activo = Column(Boolean, default=True)
     fecha_creacion = Column(DateTime, default=lambda: datetime.now(timezone.utc))
