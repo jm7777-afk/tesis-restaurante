@@ -144,14 +144,14 @@ async def crear_y_cobrar_rapido(
             )
         producto.stock -= item.cantidad
 
-        precio = producto.precio_promocion if (producto.precio_promocion and producto.precio_promocion > 0) else producto.precio
-        subtotal_item = round(precio * item.cantidad, 2)
+        precio_num = float(producto.precio_promocion) if (producto.precio_promocion and float(producto.precio_promocion) > 0) else float(producto.precio)
+        subtotal_item = round(precio_num * item.cantidad, 2)
         subtotal_acumulado += subtotal_item
 
         detalle = DetallePedido(
             producto_id=producto.id,
             cantidad=item.cantidad,
-            precio_unitario=precio,
+            precio_unitario=precio_num,
             subtotal=subtotal_item,
             estado="PENDIENTE"
         )

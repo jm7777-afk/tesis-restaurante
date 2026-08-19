@@ -196,7 +196,7 @@ async def crear_pedido(
             pts_earned = int(total_final)
             user_db.puntos_fidelidad += pts_earned
             user_db.pedidos_count += 1
-            user_db.total_gastado = round(user_db.total_gastado + total_final, 2)
+            user_db.total_gastado = round(float(user_db.total_gastado or 0.0) + float(total_final), 2)
             db.add(PuntosLog(
                 usuario_id=user_db.id,
                 puntos=pts_earned,
