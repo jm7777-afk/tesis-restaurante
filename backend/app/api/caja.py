@@ -89,7 +89,7 @@ async def cerrar_turno(
         "accion": "CERRADO",
         "turno_id": turno.id,
         "numero_turno": turno.numero_turno,
-        "total_ventas": turno.total_ventas,
+        "total_ventas": float(turno.total_ventas or 0.0),
         "usuario": current_user.nombre
     })
 
@@ -194,7 +194,8 @@ async def crear_y_cobrar_rapido(
     db.commit()
 
     if turno_activo:
-        turno_activo.total_ventas = round(turno_activo.total_ventas + total_final, 2)
+        current_ventas = float(turno_activo.total_ventas or 0.0)
+        turno_activo.total_ventas = round(current_ventas + float(total_final), 2)
         turno_activo.total_pedidos += 1
         db.commit()
 
@@ -259,7 +260,8 @@ async def cobrar_pedido(
     turno_activo = db.query(Turno).filter(Turno.activo == True).first()
     if turno_activo:
         pedido.turno_id = turno_activo.id
-        turno_activo.total_ventas = round(turno_activo.total_ventas + pedido.total, 2)
+        current_ventas = float(turno_activo.total_ventas or 0.0)
+        turno_activo.total_ventas = round(current_ventas + float(pedido.total), 2)
         turno_activo.total_pedidos += 1
 
     db.commit()
