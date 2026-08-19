@@ -343,17 +343,24 @@
       </div>
     </div>
 
-    <!-- TAB 11: USUARIOS -->
+    <!-- TAB 11: USUARIOS Y PERSONAL -->
     <div id="tab-usuarios" class="tab-content">
-      <h2>👥 USUARIOS DEL SISTEMA</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h2 style="margin: 0;">👥 USUARIOS Y PERSONAL DEL SISTEMA</h2>
+        <button class="btn-gold" onclick="openCreateUserModal()">➕ CREAR NUEVO USUARIO / PERSONAL</button>
+      </div>
       <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto; margin-top: 1rem;">
         <table style="width: 100%; border-collapse: collapse; text-align: left;">
           <thead>
             <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
-              <th style="padding: 0.75rem;">Nombre</th>
+              <th style="padding: 0.75rem;">ID</th>
+              <th style="padding: 0.75rem;">Nombre Completo</th>
               <th style="padding: 0.75rem;">Usuario</th>
               <th style="padding: 0.75rem;">Email</th>
+              <th style="padding: 0.75rem;">Teléfono</th>
               <th style="padding: 0.75rem;">Rol</th>
+              <th style="padding: 0.75rem;">Estado</th>
+              <th style="padding: 0.75rem;">Acciones</th>
             </tr>
           </thead>
           <tbody id="users-tbody"></tbody>
@@ -518,7 +525,33 @@
           <option value="delivery">🛵 Solo en Delivery</option>
         </select>
       </div>
-      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateGuia()">GUARDAR EN EL CARRUSEL</button>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateGuia()">GUARDAR EN LA GUÍA INTERACTIVA</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear/Editar Usuario del Personal (REQUERIMIENTO #1) -->
+  <div class="product-modal-backdrop" id="user-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('user-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;" id="user-modal-title">👤 CREAR NUEVO USUARIO / PERSONAL</h3>
+      <input type="hidden" id="user-edit-id">
+      <div class="form-group"><label>Nombre</label><input type="text" id="user-nombre" class="form-control" placeholder="Ej. Juan" required></div>
+      <div class="form-group"><label>Apellido</label><input type="text" id="user-apellido" class="form-control" placeholder="Ej. Pérez" required></div>
+      <div class="form-group"><label>Nombre de Usuario (Login)</label><input type="text" id="user-username" class="form-control" placeholder="Ej. juan_cocina" required></div>
+      <div class="form-group"><label>Correo Electrónico</label><input type="email" id="user-email" class="form-control" placeholder="juan@dondedavid.com" required></div>
+      <div class="form-group"><label>Teléfono</label><input type="text" id="user-telefono" class="form-control" placeholder="+502 9999 8888"></div>
+      <div class="form-group">
+        <label>Rol en el Sistema</label>
+        <select id="user-rol" class="form-control" required>
+          <option value="admin">👑 Administrador</option>
+          <option value="caja">💵 Caja Registradora (POS)</option>
+          <option value="cocina">🍳 Cocina (Monitor KDS)</option>
+          <option value="mesero">🤵 Mesero / Atención Salón</option>
+          <option value="cliente">📱 Cliente</option>
+        </select>
+      </div>
+      <div class="form-group"><label id="user-pwd-label">Contraseña</label><input type="password" id="user-password" class="form-control" placeholder="••••••••"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitUserForm()">💾 GUARDAR USUARIO</button>
     </div>
   </div>
 

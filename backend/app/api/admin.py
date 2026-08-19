@@ -533,9 +533,78 @@ def get_auditoria(
 ):
     return db.query(Auditoria).order_by(Auditoria.fecha.desc()).all()
 
+class UsuarioCreateAdmin(BaseModel):
+    nombre: str
+    apellido: str
+    email: str
+    telefono: Optional[str] = None
+    nombre_usuario: str
+    password: str
+    rol: str = "mesero"
+    activo: Optional[bool] = True
+
+class UsuarioUpdateAdmin(BaseModel):
+    nombre: Optional[str] = None
+    apellido: Optional[str] = None
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    rol: Optional[str] = None
+    password: Optional[str] = None
+    activo: Optional[bool] = None
+
 @router.get("/usuarios")
 def list_usuarios(
     db: Session = Depends(get_db),
     user = Depends(require_roles(["admin", "supervisor"]))
 ):
     return db.query(Usuario).order_by(Usuario.id.desc()).all()
+
+@router.post("/usuarios")
+def create_usuario_admin(
+    data: UsuarioCreateAdmin,
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor"]))
+):
+    if db.query(Usuario).filter(Usuario.nombre_usuario == data.nombre_usuario).first():
+        raise HTTPException(status_code=400, detail=f"El nombre de usuario '{data.nombre_usuario}' ya existe.")
+    if db.query(Usuario).filter(Usuario.email == data.email).first():
+        raise HTTPException(status_code=400, detail=f"El correo '{data.email}' ya está registrado.")
+    
+    nuevo = Usuario(
+        nombre=data.nombre,
+        apellido=data.apellido,
+        email=data.email,
+        telefono=data.telefono,
+        nombre_usuario=data.nombre_usuario,
+        contraseña_hash=get_password_hash(data.password),
+        rol=data.rol,
+        activo=data.activo if data.activo is not None else True
+    )
+    db.add(nuevo)
+    db.commit()
+    db.refresh(nuevo)
+    return nuevo
+
+@router.put("/usuarios/{usuario_id}")
+def update_usuario_admin(
+    usuario_id: int,
+    data: UsuarioUpdateAdmin,
+    db: Session = Depends(get_db),
+    user = Depends(require_roles(["admin", "supervisor"]))
+):
+    u = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not u:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    if data.nombre is not None: u.nombre = data.nombre
+    if data.apellido is not None: u.apellido = data.apellido
+    if data.email is not None: u.email = data.email
+    if data.telefono is not None: u.telefono = data.telefono
+    if data.rol is not None: u.rol = data.rol
+    if data.activo is not None: u.activo = data.activo
+    if data.password and data.password.strip():
+        u.contraseña_hash = get_password_hash(data.password)
+    
+    db.commit()
+    db.refresh(u)
+    return u

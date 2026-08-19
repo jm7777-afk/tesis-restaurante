@@ -79,16 +79,33 @@ function renderKDSOrders() {
         let itemsHtml = "";
         order.detalles.forEach(d => {
           let customText = "";
+          // Muestra de Ingredientes Base del Producto
+          if (d.producto && d.producto.ingredientes_json) {
+            try {
+              const ingList = typeof d.producto.ingredientes_json === 'string' 
+                ? JSON.parse(d.producto.ingredientes_json) 
+                : d.producto.ingredientes_json;
+              if (Array.isArray(ingList) && ingList.length > 0) {
+                customText += `<br><small style="color: #94A3B8; font-size: 0.78rem;">🥩 <em>Ingredientes: ${ingList.join(', ')}</em></small>`;
+              } else if (typeof ingList === 'string' && ingList.trim()) {
+                customText += `<br><small style="color: #94A3B8; font-size: 0.78rem;">🥩 <em>Ingredientes: ${ingList}</em></small>`;
+              }
+            } catch(e) {
+              if (typeof d.producto.ingredientes_json === 'string' && d.producto.ingredientes_json.trim()) {
+                customText += `<br><small style="color: #94A3B8; font-size: 0.78rem;">🥩 <em>Ingredientes: ${d.producto.ingredientes_json}</em></small>`;
+              }
+            }
+          }
           if (d.personalizaciones) {
             try {
               const parsed = JSON.parse(d.personalizaciones);
               if (parsed.opciones && parsed.opciones.length > 0) {
-                customText += `<br><small style="color: var(--color-yellow); font-weight: 700;">+ ${parsed.opciones.join(', ')}</small>`;
+                customText += `<br><small style="color: var(--brand-orange); font-weight: 800;">✨ Modificaciones: ${parsed.opciones.join(', ')}</small>`;
               }
             } catch(e) {}
           }
           if (d.observaciones) {
-            customText += `<br><small style="color: var(--color-red); font-weight: 700;">⚠️ Nota: ${d.observaciones}</small>`;
+            customText += `<br><small style="color: var(--brand-red); font-weight: 800;">⚠️ Nota Cliente: ${d.observaciones}</small>`;
           }
 
           itemsHtml += `

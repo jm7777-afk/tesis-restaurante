@@ -88,20 +88,37 @@ async function loadUsers() {
   }
 }
 
+let currentLoadedUsers = [];
+
 function renderUsers(users) {
+  currentLoadedUsers = users;
   const tbody = document.getElementById("users-tbody");
+  if (!tbody) return;
   let html = "";
   users.forEach(u => {
+    const roleBadges = {
+      'admin': '<span class="badge badge-PENDIENTE" style="background: var(--brand-orange);">👑 Admin</span>',
+      'caja': '<span class="badge badge-EN_PREPARACION" style="background: var(--brand-blue);">💵 Caja</span>',
+      'cocina': '<span class="badge badge-LISTO" style="background: var(--brand-yellow); color: #000;">🍳 Cocina</span>',
+      'mesero': '<span class="badge badge-ENTREGADO">🤵 Mesero</span>',
+      'cliente': '<span class="badge badge-CANCELADO">📱 Cliente</span>'
+    };
+    const roleBadge = roleBadges[u.rol] || `<span class="badge">${u.rol}</span>`;
+
     html += `
       <tr>
         <td>#${u.id}</td>
         <td><strong>${u.nombre} ${u.apellido}</strong></td>
-        <td>${u.nombre_usuario}</td>
+        <td><code>${u.nombre_usuario}</code></td>
         <td>${u.email}</td>
-        <td><span class="badge badge-EN_PREPARACION">${u.rol}</span></td>
-        <td>${u.activo ? '🟢 Activo' : '🔴 Inactivo'}</td>
+        <td>${u.telefono || '-'}</td>
+        <td>${roleBadge}</td>
+        <td>${u.activo ? '<span style="color: var(--brand-green); font-weight: 800;">🟢 Activo</span>' : '<span style="color: var(--brand-red); font-weight: 800;">🔴 Inactivo</span>'}</td>
         <td>
-          <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="deleteUser(${u.id})">Desactivar</button>
+          <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-right: 0.3rem;" onclick="openEditUserModal(${u.id})">✏️ Editar</button>
+          <button class="btn ${u.activo ? 'btn-danger' : 'btn-success'}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="toggleUserActive(${u.id}, ${!u.activo})">
+            ${u.activo ? '🚫 Desactivar' : '✅ Activar'}
+          </button>
         </td>
       </tr>
     `;
@@ -109,30 +126,94 @@ function renderUsers(users) {
   tbody.innerHTML = html;
 }
 
-async function submitCreateUser(e) {
-  e.preventDefault();
+function openCreateUserModal() {
+  document.getElementById("user-modal-title").innerText = "👤 CREAR NUEVO USUARIO / PERSONAL";
+  document.getElementById("user-edit-id").value = "";
+  document.getElementById("user-nombre").value = "";
+  document.getElementById("user-apellido").value = "";
+  document.getElementById("user-username").value = "";
+  document.getElementById("user-username").disabled = false;
+  document.getElementById("user-email").value = "";
+  document.getElementById("user-telefono").value = "";
+  document.getElementById("user-rol").value = "mesero";
+  document.getElementById("user-password").value = "";
+  document.getElementById("user-pwd-label").innerText = "Contraseña";
+  document.getElementById("user-password").required = true;
+  document.getElementById("user-modal").classList.add("open");
+}
+
+function openEditUserModal(userId) {
+  const u = currentLoadedUsers.find(x => x.id === userId);
+  if (!u) return;
+  document.getElementById("user-modal-title").innerText = `✏️ EDITAR USUARIO #${u.id} (${u.nombre_usuario})`;
+  document.getElementById("user-edit-id").value = u.id;
+  document.getElementById("user-nombre").value = u.nombre || "";
+  document.getElementById("user-apellido").value = u.apellido || "";
+  document.getElementById("user-username").value = u.nombre_usuario || "";
+  document.getElementById("user-username").disabled = true;
+  document.getElementById("user-email").value = u.email || "";
+  document.getElementById("user-telefono").value = u.telefono || "";
+  document.getElementById("user-rol").value = u.rol || "mesero";
+  document.getElementById("user-password").value = "";
+  document.getElementById("user-pwd-label").innerText = "Nueva Contraseña (dejar en blanco para no cambiar)";
+  document.getElementById("user-password").required = false;
+  document.getElementById("user-modal").classList.add("open");
+}
+
+async function submitUserForm() {
+  const editId = document.getElementById("user-edit-id").value;
+  const isEdit = !!editId;
+
   const payload = {
-    nombre: document.getElementById("user-name").value,
-    apellido: document.getElementById("user-lastname").value,
+    nombre: document.getElementById("user-nombre").value,
+    apellido: document.getElementById("user-apellido").value,
     email: document.getElementById("user-email").value,
+    telefono: document.getElementById("user-telefono").value,
     nombre_usuario: document.getElementById("user-username").value,
-    password: document.getElementById("user-password").value,
-    rol: document.getElementById("user-role").value,
-    activo: true
+    rol: document.getElementById("user-rol").value
   };
 
+  const pwd = document.getElementById("user-password").value;
+  if (pwd && pwd.trim()) {
+    payload.password = pwd.trim();
+  }
+
+  if (!isEdit && (!pwd || !pwd.trim())) {
+    showToast("Por favor ingresa una contraseña para el usuario", "warning");
+    return;
+  }
+
   try {
-    const res = await fetch("/api/v1/admin/usuarios", {
-      method: "POST",
+    const url = isEdit ? `/api/v1/admin/usuarios/${editId}` : "/api/v1/admin/usuarios";
+    const method = isEdit ? "PUT" : "POST";
+    const res = await fetch(url, {
+      method: method,
       headers: Auth.getHeaders(),
       body: JSON.stringify(payload)
     });
+
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.detail);
+      throw new Error(err.detail || "Error al guardar usuario");
     }
-    showToast("Usuario creado con éxito", "success");
+
+    showToast(isEdit ? "Usuario actualizado correctamente" : "Usuario creado con éxito", "success");
     closeModal("user-modal");
+    loadUsers();
+  } catch (err) {
+    showToast(err.message, "danger");
+  }
+}
+
+async function toggleUserActive(userId, newActive) {
+  try {
+    const res = await fetch(`/api/v1/admin/usuarios/${userId}`, {
+      method: "PUT",
+      headers: Auth.getHeaders(),
+      body: JSON.stringify({ activo: newActive })
+    });
+    if (!res.ok) throw new Error("Error al cambiar estado del usuario");
+    showToast(`Usuario ${newActive ? 'activado' : 'desactivado'} con éxito`, "info");
     loadUsers();
   } catch (err) {
     showToast(err.message, "danger");
