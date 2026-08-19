@@ -20,7 +20,8 @@ from backend.scripts.seed_data import seed
 
 # Create DB tables & Seed safely
 try:
-    Base.metadata.drop_all(bind=engine)
+    if os.getenv("TESTING") == "true":
+        Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     seed()
 except Exception as e:

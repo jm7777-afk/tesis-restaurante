@@ -2,7 +2,14 @@ import sys
 import os
 import unittest
 
+os.environ["TESTING"] = "true"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from backend.app.core.database import Base, engine
+from backend.scripts.seed_data import seed
+Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(bind=engine)
+seed()
 
 from fastapi.testclient import TestClient
 from backend.app.main import app
