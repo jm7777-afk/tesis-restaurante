@@ -230,17 +230,19 @@ async def cobrar_pedido(
     if pedido.estado == "COBRADO":
         raise HTTPException(status_code=400, detail="El pedido ya ha sido cobrado previamente.")
 
+    ped_total = float(pedido.total or 0.0)
+    recibido = float(data.monto_recibido or 0.0)
+
     # Allow payment even if monto_recibido is less than total; compute change as zero if insufficient
-    if data.monto_recibido < pedido.total:
+    if recibido < ped_total:
         cambio_calculado = 0.0
     else:
-        cambio_calculado = round(data.monto_recibido - pedido.total, 2)
-
+        cambio_calculado = round(recibido - ped_total, 2)
 
     factura_num = f"FAC-DD-{pedido.id:06d}"
 
     pedido.metodo_pago = data.metodo_pago
-    pedido.monto_recibido = data.monto_recibido
+    pedido.monto_recibido = recibido
     pedido.cambio = cambio_calculado
     pedido.nit_cliente = data.nit_cliente or "CF"
     pedido.nombre_factura = data.nombre_factura or "Consumidor Final"
@@ -261,7 +263,7 @@ async def cobrar_pedido(
     if turno_activo:
         pedido.turno_id = turno_activo.id
         current_ventas = float(turno_activo.total_ventas or 0.0)
-        turno_activo.total_ventas = round(current_ventas + float(pedido.total), 2)
+        turno_activo.total_ventas = round(current_ventas + ped_total, 2)
         turno_activo.total_pedidos += 1
 
     db.commit()
@@ -269,7 +271,7 @@ async def cobrar_pedido(
     await ws_manager.broadcast("PAGO_CONFIRMADO", {
         "pedido_id": pedido.id,
         "numero_mesa": pedido.numero_mesa,
-        "total": pedido.total,
+        "total": ped_total,
         "factura_numero": factura_num,
         "metodo_pago": data.metodo_pago,
         "cambio": cambio_calculado
@@ -279,8 +281,8 @@ async def cobrar_pedido(
         "mensaje": "Pago procesado exitosamente",
         "pedido_id": pedido.id,
         "factura_numero": factura_num,
-        "total": pedido.total,
-        "monto_recibido": data.monto_recibido,
+        "total": ped_total,
+        "monto_recibido": recibido,
         "cambio": cambio_calculado,
         "metodo_pago": data.metodo_pago
     }
@@ -312,10 +314,10 @@ def get_factura_pedido(pedido_id: int, db: Session = Depends(get_db)):
         "direccion_delivery": pedido.direccion_delivery,
         "telefono_delivery": pedido.telefono_delivery,
         "detalles": detalles_list,
-        "subtotal": pedido.subtotal,
-        "impuesto_iva": pedido.impuesto,
-        "total": pedido.total,
+        "subtotal": float(pedido.subtotal or 0.0),
+        "impuesto_iva": float(pedido.impuesto or 0.0),
+        "total": float(pedido.total or 0.0),
         "metodo_pago": pedido.metodo_pago or "Efectivo",
-        "monto_recibido": pedido.monto_recibido or pedido.total,
-        "cambio": pedido.cambio or 0.0
+        "monto_recibido": float(pedido.monto_recibido or pedido.total or 0.0),
+        "cambio": float(pedido.cambio or 0.0)
     }
