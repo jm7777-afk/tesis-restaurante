@@ -16,19 +16,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has("mesa")) {
     currentDetectedMesa = urlParams.get("mesa");
-    document.getElementById("current-table-indicator").innerText = `📱 QR MESA #${currentDetectedMesa}`;
-    document.getElementById("checkout-mesa-name").innerText = `Mesa #${currentDetectedMesa}`;
+    if (document.getElementById("current-table-indicator")) {
+      document.getElementById("current-table-indicator").innerText = `📱 QR MESA #${currentDetectedMesa}`;
+    }
+    if (document.getElementById("checkout-mesa-name")) {
+      document.getElementById("checkout-mesa-name").innerText = `Mesa #${currentDetectedMesa}`;
+    }
   } else {
-    document.getElementById("current-table-indicator").innerText = `📱 QR RESTAURANTE`;
-    document.getElementById("checkout-mesa-name").innerText = `Mesa por defecto #1`;
     currentDetectedMesa = "1";
   }
 
-  loadConfigPublica();
-  loadToonCategories();
-  loadToonProducts();
-  loadGuiaItems();
-  loadPromocionesToon();
+  // ⚡ PETICIONES PARALELAS Y OPTIMIZADAS (Promise.all)
+  Promise.all([
+    loadConfigPublica(),
+    loadToonCategories(),
+    loadToonProducts(),
+    loadGuiaItems(),
+    loadPromocionesToon()
+  ]).then(() => {
+    console.log("⚡ Carga paralela optimizada completada.");
+  }).catch(err => {
+    console.error("Error en peticiones iniciales:", err);
+  });
 
   new WSClient((event, data) => {
     if (event === "CAMBIO_ESTADO_PEDIDO") {
@@ -46,12 +55,20 @@ function showScreen(screenId) {
   const target = document.getElementById(screenId);
   if (target) target.classList.add("active");
 
-  document.querySelectorAll(".nav-item, .side-nav-item").forEach(n => n.classList.remove("active"));
-  const idxMap = { 'screen-home': 0, 'screen-categorias': 1, 'screen-carrito': 2, 'screen-historial': 3, 'screen-perfil': 4 };
-  const idx = idxMap[screenId];
-  if (idx !== undefined) {
-    const items = document.querySelectorAll(".nav-item, .side-nav-item");
-    if (items[idx]) items[idx].classList.add("active");
+  // Resalte activo en la barra inferior (.bottom-bar li a)
+  document.querySelectorAll(".bottom-bar li a, .nav-item").forEach(n => n.classList.remove("active"));
+  const idMap = {
+    'screen-home': 'nav-link-home',
+    'screen-categorias': 'nav-link-menu',
+    'screen-menu': 'nav-link-menu',
+    'screen-carrito': 'nav-link-cart',
+    'screen-historial': 'nav-link-historial',
+    'screen-perfil': 'nav-link-perfil'
+  };
+  const targetLinkId = idMap[screenId];
+  if (targetLinkId) {
+    const el = document.getElementById(targetLinkId);
+    if (el) el.classList.add("active");
   }
 
   if (screenId === "screen-historial") loadHistorialPedidos();
