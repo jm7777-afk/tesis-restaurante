@@ -13,9 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Listen to WebSocket events
   new WSClient((event, data) => {
-    if (event === "NUEVO_PEDIDO") {
+    if (event === "NUEVO_PEDIDO" || event === "PAGO_CONFIRMADO") {
       playChimeSound();
-      showToast(`¡Nuevo pedido de ${data.numero_mesa}!`, "warning");
+      showToast(`¡Nuevo pedido / pago de ${data.numero_mesa || 'Caja'}!`, "warning");
       loadKDSOrders();
     } else if (event === "CAMBIO_ESTADO_PEDIDO") {
       loadKDSOrders();
@@ -61,7 +61,7 @@ function renderKDSOrders() {
   }
 
   // Clasificación en 3 columnas KDS
-  const pendientes = kdsOrders.filter(o => o.estado === "PENDIENTE");
+  const pendientes = kdsOrders.filter(o => o.estado === "PENDIENTE" || o.estado === "COBRADO");
   const preparando = kdsOrders.filter(o => o.estado === "EN_PREPARACION");
   const listos = kdsOrders.filter(o => o.estado === "LISTO");
 

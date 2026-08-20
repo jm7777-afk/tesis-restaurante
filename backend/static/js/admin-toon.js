@@ -935,25 +935,144 @@ async function deleteCategoria(id) {
   }
 }
 
+let currentLoadedUsers = [];
+
 async function loadUsers() {
   try {
-    const res = await fetch("/api/v1/admin/usuarios");
+    const res = await fetch("/api/v1/admin/usuarios", { headers: Auth.getHeaders() });
     if (res.ok) {
-      const users = await res.json();
-      let html = "";
-      users.forEach(u => {
-        html += `
-          <tr style="border-bottom: 1px solid var(--toon-border);">
-            <td style="padding: 0.75rem; font-weight: 700; color: #fff;">${u.nombre} ${u.apellido}</td>
-            <td style="padding: 0.75rem;">${u.nombre_usuario}</td>
-            <td style="padding: 0.75rem; color: var(--text-muted);">${u.email}</td>
-            <td style="padding: 0.75rem;"><span class="badge" style="background: var(--cyan-accent); color: #000; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">${u.rol}</span></td>
-          </tr>
-        `;
-      });
-      document.getElementById("users-tbody").innerHTML = html;
+      currentLoadedUsers = await res.json();
+      renderUsers(currentLoadedUsers);
     }
   } catch (err) {
     console.error(err);
+  }
+}
+
+function renderUsers(users) {
+  const tbody = document.getElementById("users-tbody");
+  if (!tbody) return;
+  let html = "";
+  users.forEach(u => {
+    const roleBadges = {
+      'admin': '<span class="badge" style="background: var(--neon-red); color: #fff; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">👑 Admin</span>',
+      'caja': '<span class="badge" style="background: #38bdf8; color: #000; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">💵 Caja</span>',
+      'cocina': '<span class="badge" style="background: var(--gold-accent); color: #000; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">🍳 Cocina</span>',
+      'mesero': '<span class="badge" style="background: #a855f7; color: #fff; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">🤵 Mesero</span>',
+      'cliente': '<span class="badge" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">📱 Cliente</span>'
+    };
+    const roleBadge = roleBadges[u.rol] || `<span class="badge">${u.rol}</span>`;
+
+    html += `
+      <tr style="border-bottom: 1px solid var(--toon-border);">
+        <td style="padding: 0.75rem; font-weight: 700; color: #fff;">${u.nombre} ${u.apellido}</td>
+        <td style="padding: 0.75rem;"><code>${u.nombre_usuario}</code></td>
+        <td style="padding: 0.75rem; color: var(--text-muted);">${u.email}</td>
+        <td style="padding: 0.75rem;">${u.telefono || '-'}</td>
+        <td style="padding: 0.75rem;">${roleBadge}</td>
+        <td style="padding: 0.75rem;">${u.activo ? '<span style="color: var(--neon-green); font-weight: 800;">🟢 Activo</span>' : '<span style="color: var(--neon-red); font-weight: 800;">🔴 Inactivo</span>'}</td>
+        <td style="padding: 0.75rem; display: flex; gap: 0.4rem;">
+          <button class="btn-gold" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="openEditUserModal(${u.id})">✏️ Editar</button>
+          <button class="btn-gold" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; background: ${u.activo ? 'var(--neon-red)' : 'var(--neon-green)'}; color: #fff;" onclick="toggleUserActive(${u.id}, ${!u.activo})">
+            ${u.activo ? '🚫 Desactivar' : '✅ Activar'}
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+function openCreateUserModal() {
+  document.getElementById("user-modal-title").innerText = "👤 CREAR NUEVO USUARIO / PERSONAL";
+  document.getElementById("user-edit-id").value = "";
+  document.getElementById("user-nombre").value = "";
+  document.getElementById("user-apellido").value = "";
+  document.getElementById("user-username").value = "";
+  document.getElementById("user-username").disabled = false;
+  document.getElementById("user-email").value = "";
+  document.getElementById("user-telefono").value = "";
+  document.getElementById("user-rol").value = "mesero";
+  document.getElementById("user-password").value = "";
+  document.getElementById("user-pwd-label").innerText = "Contraseña";
+  document.getElementById("user-password").required = true;
+  openModal("user-modal");
+}
+
+function openEditUserModal(userId) {
+  const u = currentLoadedUsers.find(x => x.id === userId);
+  if (!u) return;
+  document.getElementById("user-modal-title").innerText = `✏️ EDITAR USUARIO #${u.id} (${u.nombre_usuario})`;
+  document.getElementById("user-edit-id").value = u.id;
+  document.getElementById("user-nombre").value = u.nombre || "";
+  document.getElementById("user-apellido").value = u.apellido || "";
+  document.getElementById("user-username").value = u.nombre_usuario || "";
+  document.getElementById("user-username").disabled = true;
+  document.getElementById("user-email").value = u.email || "";
+  document.getElementById("user-telefono").value = u.telefono || "";
+  document.getElementById("user-rol").value = u.rol || "mesero";
+  document.getElementById("user-password").value = "";
+  document.getElementById("user-pwd-label").innerText = "Nueva Contraseña (dejar en blanco para conservar actual)";
+  document.getElementById("user-password").required = false;
+  openModal("user-modal");
+}
+
+async function submitUserForm() {
+  const editId = document.getElementById("user-edit-id").value;
+  const isEdit = !!editId;
+
+  const payload = {
+    nombre: document.getElementById("user-nombre").value,
+    apellido: document.getElementById("user-apellido").value,
+    email: document.getElementById("user-email").value,
+    telefono: document.getElementById("user-telefono").value,
+    nombre_usuario: document.getElementById("user-username").value,
+    rol: document.getElementById("user-rol").value
+  };
+
+  const pwd = document.getElementById("user-password").value;
+  if (pwd && pwd.trim()) {
+    payload.password = pwd.trim();
+  }
+
+  if (!isEdit && (!pwd || !pwd.trim())) {
+    showToast("Por favor ingresa una contraseña para el usuario", "warning");
+    return;
+  }
+
+  try {
+    const url = isEdit ? `/api/v1/admin/usuarios/${editId}` : "/api/v1/admin/usuarios";
+    const method = isEdit ? "PUT" : "POST";
+    const res = await fetch(url, {
+      method: method,
+      headers: Auth.getHeaders(),
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error al guardar usuario");
+    }
+
+    showToast(isEdit ? "Usuario actualizado correctamente" : "Usuario creado con éxito", "success");
+    closeModal("user-modal");
+    loadUsers();
+  } catch (err) {
+    showToast(err.message, "danger");
+  }
+}
+
+async function toggleUserActive(userId, newActive) {
+  try {
+    const res = await fetch(`/api/v1/admin/usuarios/${userId}`, {
+      method: "PUT",
+      headers: Auth.getHeaders(),
+      body: JSON.stringify({ activo: newActive })
+    });
+    if (!res.ok) throw new Error("Error al cambiar estado del usuario");
+    showToast(`Usuario ${newActive ? 'activado' : 'desactivado'} con éxito`, "info");
+    loadUsers();
+  } catch (err) {
+    showToast(err.message, "danger");
   }
 }

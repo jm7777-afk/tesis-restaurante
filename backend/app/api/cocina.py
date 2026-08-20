@@ -14,11 +14,11 @@ router = APIRouter(prefix="/cocina", tags=["Cocina / KDS"])
 @router.get("/pedidos", response_model=List[PedidoOut])
 def get_pedidos_cocina(
     db: Session = Depends(get_db),
-    user = Depends(require_roles(["admin", "supervisor", "cocina"]))
+    user = Depends(require_roles(["admin", "supervisor", "cocina", "caja", "mesero"]))
 ):
-    # Retrieve active orders for kitchen (PENDIENTE, EN_PREPARACION, LISTO)
+    # Retrieve active orders for kitchen (PENDIENTE, COBRADO, EN_PREPARACION, LISTO)
     return db.query(Pedido).filter(
-        Pedido.estado.in_(["PENDIENTE", "EN_PREPARACION", "LISTO"])
+        Pedido.estado.in_(["PENDIENTE", "COBRADO", "EN_PREPARACION", "LISTO"])
     ).order_by(Pedido.fecha_creacion.asc()).all()
 
 @router.put("/pedidos/{pedido_id}/estado")
@@ -26,9 +26,9 @@ async def actualizar_estado_pedido(
     pedido_id: int, 
     estado: str, 
     db: Session = Depends(get_db),
-    user = Depends(require_roles(["admin", "supervisor", "cocina"]))
+    user = Depends(require_roles(["admin", "supervisor", "cocina", "caja", "mesero"]))
 ):
-    valid_estados = ["PENDIENTE", "EN_PREPARACION", "LISTO", "ENTREGADO", "CANCELADO"]
+    valid_estados = ["PENDIENTE", "COBRADO", "EN_PREPARACION", "LISTO", "ENTREGADO", "CANCELADO"]
     if estado not in valid_estados:
         raise HTTPException(status_code=400, detail=f"Estado inválido. Opciones: {valid_estados}")
 
@@ -42,7 +42,7 @@ async def actualizar_estado_pedido(
     
     # Update individual items state if marking entire order
     for detalle in pedido.detalles:
-        if estado == "EN_PREPARACION" and detalle.estado == "PENDIENTE":
+        if (estado == "EN_PREPARACION" or estado == "COBRADO") and detalle.estado in ["PENDIENTE", "COBRADO"]:
             detalle.estado = "EN_PREPARACION"
         elif estado == "LISTO":
             detalle.estado = "LISTO"
@@ -64,7 +64,7 @@ async def actualizar_estado_detalle(
     detalle_id: int, 
     estado: str, 
     db: Session = Depends(get_db),
-    user = Depends(require_roles(["admin", "supervisor", "cocina"]))
+    user = Depends(require_roles(["admin", "supervisor", "cocina", "caja", "mesero"]))
 ):
     detalle = db.query(DetallePedido).filter(DetallePedido.id == detalle_id).first()
     if not detalle:
