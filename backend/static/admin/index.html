@@ -49,6 +49,9 @@
     @media (max-width: 900px) {
       .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
     .kpi-card {
       background: var(--toon-card);
       border: 1px solid var(--toon-border);
@@ -66,16 +69,23 @@
 <body class="toon-theme"><nav id="app-sidebar"></nav>
 
   <header id="app-header"></header>
+  
+
+
   <!-- Layout con Nav Lateral para el Panel de Administración -->
   <div class="admin-sidebar-layout">
     
-    <!-- Sidebar Navegación Lateral -->
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar-title">⚙️ MENÚ PRINCIPAL ADMIN</div>
+    <!-- Sidebar Navegación Lateral Deslizable (Estilo Hamburger Cashea) -->
+    <aside class="admin-sidebar" id="admin-sidebar-drawer">
+      <div style="display: flex; justify-content: space-between; align-items: center;" class="admin-sidebar-title">
+        <span>⚙️ MENÚ PRINCIPAL ADMIN</span>
+        <button id="admin-hamburger-btn" style="background: none; border: none; color: var(--gold-accent); font-size: 1.4rem; cursor: pointer;" onclick="toggleAdminDrawer()">☰</button>
+      </div>
       <button class="admin-sidebar-btn active" id="btn-orders-panel" onclick="switchTab('dashboard')">📊 Dashboard & Métricas</button>
       <button class="admin-sidebar-btn" id="nav-menu-items" onclick="switchTab('productos')">🍔 Productos & Ingredientes</button>
       <button class="admin-sidebar-btn" onclick="switchTab('inventario')">📦 Insumos e Inventario</button>
       <button class="admin-sidebar-btn" onclick="switchTab('promociones')">🔥 Promociones & Banners</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('resenas')">⭐ Calificaciones de Clientes</button>
       <button class="admin-sidebar-btn" onclick="switchTab('publicaciones')">📰 Publicaciones Web</button>
       <button class="admin-sidebar-btn" onclick="switchTab('portal')">🌐 Portal, Tasa & Historia</button>
       <button class="admin-sidebar-btn" onclick="switchTab('mesas')">🍽️ Mesas & QR</button>
@@ -83,14 +93,38 @@
       <button class="admin-sidebar-btn" onclick="switchTab('usuarios')">👥 Usuarios del Sistema</button>
     </aside>
 
-    <!-- Contenido Principal Administrador -->
-    <main class="admin-main-content">
+    <!-- Contenido Principal Administrador con Soporte Touch Swipe -->
+    <main class="admin-main-content" id="admin-main-container">
 
-    <!-- TAB 1: DASHBOARD & MÉTRICAS DE VENTAS -->
+    <!-- TAB 1: DASHBOARD & MÉTRICAS DE VENTAS CON FILTROS -->
     <div id="tab-dashboard" class="tab-content active">
       
+      <!-- Barra de Filtros de Ventas por Categoría y Método de Pago (Estilo Cashea) -->
+      <div style="background: var(--toon-card); border: 1px solid var(--gold-accent); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.2rem;">🔍</span>
+          <strong style="color: var(--gold-accent); font-size: 0.95rem;">FILTROS DE RECAUDACIÓN Y VENTAS:</strong>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <select id="filter-metrics-category" class="form-control" style="width: auto; min-width: 180px; font-weight: 700;" onchange="applyAdminMetricFilters()">
+            <option value="todas">🍔 Categoría: Todas (Comida, Postres, Bebidas)</option>
+            <option value="comidas">🍔 Solo Comidas Principal</option>
+            <option value="postres">🍰 Solo Postres & Dulces</option>
+            <option value="bebidas">🥤 Solo Bebidas & Refrescos</option>
+          </select>
+
+          <select id="filter-metrics-payment" class="form-control" style="width: auto; min-width: 180px; font-weight: 700;" onchange="applyAdminMetricFilters()">
+            <option value="todos">💵 Pago: Todos los Métodos</option>
+            <option value="Efectivo">💵 Efectivo ($ USD / Bs.)</option>
+            <option value="Pago Móvil">📱 Pago Móvil / Transferencia</option>
+            <option value="Tarjeta">💳 Tarjeta Débito / Crédito</option>
+            <option value="Divisas">💰 Divisas USD</option>
+          </select>
+        </div>
+      </div>
+
       <!-- KPI Grid: Ventas de Hoy, Semanales, Mensuales y Recaudación Total -->
-      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+      <div class="kpi-grid" style="margin-bottom: 1.5rem;">
         <div class="kpi-card">
           <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">☀️ VENTAS DE HOY</div>
           <div style="font-size: 1.6rem; font-weight: 900; color: var(--gold-accent);" id="stat-sales-today">$1,240.00</div>
@@ -155,8 +189,8 @@
               <small style="color: var(--text-muted);">Ingredientes en Stock Crítico</small>
               <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-red);" id="stat-critical">3 insumos</div>
             </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
-              <small style="color: var(--text-muted);">Pedidos Activos Cocina</small>
+            <div style="background: rgba(0, 245, 212, 0.08); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--cyan-accent); cursor: pointer;" onclick="openRealtimeOpsModal()">
+              <small style="color: var(--cyan-accent); font-weight: 800;">⚡ Pedidos Activos (Toca para ver)</small>
               <div style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent);" id="stat-cocina">12 pedidos</div>
             </div>
             <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
@@ -171,6 +205,34 @@
         </div>
 
       </div>
+
+  <!-- MODAL DE OPERACIONES EN TIEMPO REAL (PEDIDOS EN ESPERA, SALIDOS, TIEMPO, MESAS, MONTO EN CAJA) -->
+  <div class="product-modal-backdrop" id="realtime-ops-modal">
+    <div class="product-modal-card" style="max-width: 520px; padding: 1.75rem;">
+      <button class="modal-close-btn" onclick="closeModal('realtime-ops-modal')">&times;</button>
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <span style="font-size: 2.5rem;">⚡</span>
+        <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent); margin-top: 0.3rem;">OPERACIONES EN TIEMPO REAL</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Monitoreo en vivo de comandas, tiempos de cocina, mesas ocupadas y saldo de caja.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid var(--toon-border);">
+          <small style="color: var(--text-muted);">🍽️ Mesas Ocupadas</small>
+          <div style="font-size: 1.2rem; font-weight: 900; color: var(--neon-green);" id="modal-ops-mesas">5 / 20 Mesas</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid var(--toon-border);">
+          <small style="color: var(--text-muted);">💰 Monto en Caja</small>
+          <div style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent);" id="modal-ops-caja">$950.50</div>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">🔥 DESGLOSE DE COMANDAS EN COCINA:</h4>
+      <div id="modal-ops-orders-list" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+  </div>
 
       <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.5rem;">
         <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🏆 Top Productos e Ingredientes Más Vendidos</h3>
@@ -364,6 +426,31 @@
             </tr>
           </thead>
           <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 12: CALIFICACIONES Y RESEÑAS ENVIADAS POR CLIENTES -->
+    <div id="tab-resenas" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="margin: 0; font-weight: 900; color: var(--gold-accent);">⭐ CALIFICACIONES Y RESEÑAS DE CLIENTES</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">Visualiza y gestiona las puntuaciones enviadas por los comensales al finalizar sus pedidos.</p>
+        </div>
+        <button class="btn-gold" onclick="openModal('resena-modal')">➕ Nueva Reseña Destacada</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Cliente</th>
+              <th style="padding: 0.75rem;">Calificación</th>
+              <th style="padding: 0.75rem;">Comentario / Opinión</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="resenas-tbody"></tbody>
         </table>
       </div>
     </div>
@@ -636,10 +723,23 @@
     </div>
   </div>
 
+  <!-- Modal Crear Reseña -->
+  <div class="product-modal-backdrop" id="resena-modal">
+    <div class="product-modal-card" style="max-width: 440px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('resena-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">⭐ AGREGAR RESEÑA DESTACADA</h3>
+      <div class="form-group"><label>Nombre del Cliente</label><input type="text" id="res-nombre" class="form-control" placeholder="Ej. Ana María"></div>
+      <div class="form-group"><label>Estrellas (1 a 5)</label><input type="number" min="1" max="5" id="res-estrellas" class="form-control" value="5"></div>
+      <div class="form-group"><label>Comentario / Opinión</label><textarea id="res-comentario" class="form-control" rows="3" placeholder="Excelente atención..."></textarea></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateResena()">GUARDAR RESEÑA EN EL SISTEMA</button>
+    </div>
+  </div>
+
   <!-- Driver.js Library script -->
   <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
   <script src="/static/js/theme-toggle.js?v=2.0"></script>
   <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
   <script src="/static/js/websocket.js?v=2.0"></script>
   <script src="/static/js/admin-toon.js?v=2.0"></script>
 

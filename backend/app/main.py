@@ -152,4 +152,4 @@ def readiness_check():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     is_dev = os.getenv("ENVIRONMENT", "development").lower() == "development"
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port, reload=is_dev)
+    uvicorn.run("backend.app.main:app", host="0.0.0.0", port= 5000, reload=is_dev)

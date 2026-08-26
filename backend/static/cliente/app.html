@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
   <link rel="stylesheet" href="/static/css/index.css?v=2.0">
   
+  <!-- Leaflet Maps CSS & JS para Ubicación Exacta de Delivery -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Driver.js CSS para Onboarding Tour de Clientes -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
   <!-- HTML5 QR Code Scanner para Cámara Real -->
@@ -141,12 +144,9 @@
 <header id="app-header"></header>
 
     <!-- 1. SPLASH SCREEN -->
-    <div id="screen-splash" class="screen active" style="text-align: center; padding: 3rem 1.5rem;">
+    <div id="screen-splash" class="screen" style="text-align: center; padding: 3rem 1.5rem;">
       <div style="margin-top: 1rem;">
-        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600" style="width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--gold-accent); box-shadow: 0 0 30px rgba(255,188,13,0.6); object-fit: cover;" alt="Hamburguesa Donde David">
-        <h1 style="font-size: 2.1rem; font-weight: 900; background: linear-gradient(135deg, #ffb703, #ff4757); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 1rem;">
-          Donde David
-        </h1>
+        <img src="/static/img/logo.png" style="max-width: 440px; width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 0 35px rgba(255,188,13,0.85)); margin-bottom: 0.75rem;" alt="Donde David Logo Oficial">
         <p style="font-size: 0.95rem; color: var(--gold-accent); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Fresh & Tasty!</p>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">SISTEMA DIGITAL DE PEDIDOS QR & DELIVERY</p>
       </div>
@@ -158,8 +158,45 @@
     </div>
 
     <!-- 2. HOME SCREEN -->
-    <div id="screen-home" class="screen" style="padding: 1.25rem;">
-      
+    <div id="screen-home" class="screen active" style="padding: 1.25rem;">
+
+      <!-- Tarjeta de Bienvenida & Puntos / Modo Invitado Flash -->
+      <div class="points-welcome-card" id="home-welcome-points-card">
+        <div>
+          <div style="font-size: 0.78rem; color: var(--gold-accent); font-weight: 800; text-transform: uppercase;">¡BIENVENIDO A DONDE DAVID!</div>
+          <div style="font-size: 0.92rem; font-weight: 900; color: #fff; margin-top: 0.15rem;" id="home-welcome-subtitle">🎁 Pide como invitado o inicia sesión para ganar puntos</div>
+        </div>
+        <div style="display: flex; gap: 0.4rem;">
+          <button style="background: rgba(255,255,255,0.08); border: 1px solid var(--gold-accent); color: #fff; font-weight: 800; padding: 0.4rem 0.7rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer;" onclick="openModal('client-login-modal')">
+            🔑 INICIAR SESIÓN
+          </button>
+          <button style="background: var(--gold-gradient); border: none; color: #000; font-weight: 900; padding: 0.4rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; box-shadow: 0 4px 15px rgba(255,188,13,0.3);" onclick="openModal('client-register-modal')">
+            +50 PTS 🎁
+          </button>
+        </div>
+      </div>
+
+      <!-- ALGORITMO: ⚡ REPETIR PEDIDO ANTERIOR CON 1-CLIC (USUARIOS AUTENTICADOS) -->
+      <div id="reorder-algorithm-container" style="display: none; background: linear-gradient(135deg, rgba(0,245,212,0.12), rgba(255,183,3,0.15)); border: 1.5px solid var(--cyan-accent); border-radius: 16px; padding: 1.1rem; margin-bottom: 1.25rem; box-shadow: 0 8px 25px rgba(0,245,212,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.78rem; color: var(--cyan-accent); font-weight: 900; letter-spacing: 0.5px;">⚡ REPETIR TU PEDIDO FAVORITO ANTERIOR</span>
+          <span style="font-size: 0.75rem; background: var(--cyan-accent); color: #000; padding: 0.15rem 0.55rem; border-radius: 20px; font-weight: 900;">1-CLIC</span>
+        </div>
+        <div style="font-size: 0.95rem; font-weight: 900; color: #fff; margin-bottom: 0.2rem;" id="reorder-items-summary">Hamburguesa Doble Toon + Papas con Queso</div>
+        <small style="color: var(--text-muted); display: block; margin-bottom: 0.75rem;">Repite tu pedido sin volver a buscar los platillos.</small>
+        <button class="btn-gold" style="width: 100%; padding: 0.75rem; font-weight: 900; font-size: 0.95rem; background: linear-gradient(135deg, #00f5d4, #00b4d8); color: #000;" onclick="repeatLastOrderOneClick()">
+          ⚡ REPETIR ESTE PEDIDO AHORA ($<span id="reorder-price-val">0.00</span>)
+        </button>
+      </div>
+
+      <!-- ALGORITMO: 💡 SUGERENCIAS PERSONALIZADAS SEGÚN HISTORIAL -->
+      <div id="smart-recommendations-container" style="display: none; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 900; color: var(--gold-accent); margin: 0 0 0.75rem 0;">💡 SUGERIDOS PARA TI SEGÚN TUS GUSTOS</h3>
+        <div style="display: flex; gap: 0.85rem; overflow-x: auto; padding-bottom: 0.5rem;" id="smart-recommendations-grid">
+          <!-- Creados dinámicamente -->
+        </div>
+      </div>
+
       <!-- Trust Badges Bar en Mesa -->
       <div style="display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1rem; padding-bottom: 0.2rem;">
         <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; white-space: nowrap; color: #fff;">🥩 Carne 100% Res</span>
@@ -167,21 +204,29 @@
         <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; white-space: nowrap; color: #fff;">📱 Pedido Directo Cocina</span>
       </div>
 
-      <!-- Hero Promo Banner Carrusel Editable -->
-      <div style="background: linear-gradient(135deg, #ff4757, #ffb703); border-radius: var(--radius-md); padding: 1.25rem; color: #fff; margin-bottom: 1.5rem; box-shadow: 0 10px 25px rgba(255,71,87,0.4);" id="home-promo-banner-container">
-        <span style="font-size: 0.75rem; font-weight: 900; background: #000; padding: 0.2rem 0.6rem; border-radius: 20px;">BOOM! 🔥 PROMO DEL DÍA</span>
-        <h3 style="font-size: 1.3rem; font-weight: 900; margin-top: 0.4rem;" id="promo-title">COMBO EXPLOSIVO TOON</h3>
-        <p style="font-size: 0.85rem; opacity: 0.95;" id="promo-desc">2 HAMBURGUESAS + PAPAS FRITAS + 2 REFRESCOS</p>
-        <div style="font-size: 1.5rem; font-weight: 900; margin-top: 0.5rem;" id="promo-price">$15.00 <span style="font-size: 0.8rem; text-decoration: line-through; opacity: 0.7;">$20.00</span></div>
+      <!-- CARRUSEL INTERACTIVO DE FOTOS DE PRODUCTOS QUE ABRE EL MODAL AL HACER CLIC -->
+      <div id="home-promo-banner-container" style="margin-bottom: 1.25rem;">
+        <!-- Generado dinámicamente con fotos de productos -->
       </div>
 
-      <!-- Categorías con Iconos Vectoriales -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: #fff;">CATEGORÍAS</h3>
-        <small style="color: var(--gold-accent); cursor: pointer;" onclick="showScreen('screen-categorias')">Ver todas →</small>
+      <!-- Tarjeta de Tasa del Día BCV (Estilo Gusticos) -->
+      <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--toon-border); margin-bottom: 1.25rem; padding: 0.75rem 1.1rem; border-radius: 14px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Tasa Oficial del Día BCV</span>
+          <div style="font-size: 1.1rem; font-weight: 900; color: var(--gold-accent);">Bs. 36.50 / USD</div>
+        </div>
+        <span style="font-size: 1.8rem;">📈</span>
       </div>
-      <div class="category-photo-grid" id="home-categories-grid">
-        <!-- Creadas dinámicamente -->
+
+      <!-- 📌 CATEGORÍAS DESLIZABLES EN LA PARTE SUPERIOR (INTEGRADO TOTALMENTE AL TEMA OSCURO CASHEA) -->
+      <div style="position: sticky; top: 60px; z-index: 99; background: rgba(11, 14, 23, 0.95); backdrop-filter: blur(14px); margin: 0 -1.25rem 1.25rem -1.25rem; padding: 0.75rem 1.25rem 0.5rem 1.25rem; border-bottom: 1px solid var(--toon-border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.8rem; font-weight: 900; color: var(--gold-accent); letter-spacing: 0.6px; text-transform: uppercase;">🍔 CATEGORÍAS DEL MENÚ</span>
+          <small style="color: var(--cyan-accent); font-weight: 800; cursor: pointer; font-size: 0.75rem;" onclick="showScreen('screen-categorias')">Ver todas →</small>
+        </div>
+        <div id="home-categories-grid">
+          <!-- Creadas dinámicamente -->
+        </div>
       </div>
 
       <!-- Productos con Fotos apetitosas -->
@@ -218,7 +263,7 @@
         <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 900; border-top: 1px dashed var(--toon-border); padding-top: 0.75rem; color: var(--gold-accent);"><span>TOTAL GENERAL</span><span id="cart-total">$0.00</span></div>
       </div>
 
-      <button class="btn-gold" style="width: 100%; font-size: 1.15rem;" onclick="showScreen('screen-checkout')">IR A CHECKOUT Y CONFIRMAR</button>
+      <button class="btn-gold" style="width: 100%; font-size: 1.15rem;" onclick="openOrderModalityModal()">🚀 CONTINUAR Y ELEGIR MODALIDAD</button>
     </div>
 
     <!-- 6. CHECKOUT COMPLETO (QR MESA VS DELIVERY) -->
@@ -254,22 +299,29 @@
         </div>
       </div>
 
-      <!-- Sección exclusiva para DELIVERY -->
-      <div id="section-checkout-delivery" style="display: none; background: rgba(255, 71, 87, 0.1); border: 1px solid var(--neon-red); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
-        <h4 style="color: var(--neon-red); font-weight: 800; margin-top: 0; font-size: 0.95rem;">🛵 DATOS DE ENVÍO A DOMICILIO</h4>
+      <!-- Sección exclusiva para DELIVERY - ULTRA SENCILLA CON 1 BOTÓN DE UBICACIÓN -->
+      <div id="section-checkout-delivery" style="display: none; background: rgba(0, 245, 212, 0.08); border: 1.5px solid var(--cyan-accent); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+        <h4 style="color: var(--cyan-accent); font-weight: 900; margin-top: 0; font-size: 1rem;">🛵 DATOS Y UBICACIÓN PARA DELIVERY</h4>
         
         <div class="form-group" style="margin-bottom: 0.75rem;">
-          <label>Nombre Completo de quien recibe</label>
-          <input type="text" id="deliv-nombre" class="form-control" placeholder="Ej. Juan Pérez" value="Javier Mendoza">
+          <label style="color: var(--text-primary); font-size: 0.82rem;">Nombre Completo de quien recibe</label>
+          <input type="text" id="deliv-nombre" class="form-control" placeholder="Ej. Juan Pérez">
         </div>
         <div class="form-group" style="margin-bottom: 0.75rem;">
-          <label>Teléfono de Contacto (SMS / WhatsApp)</label>
-          <input type="text" id="deliv-telefono" class="form-control" placeholder="+502 5123 4567" value="+502 5123 4567">
+          <label style="color: var(--text-primary); font-size: 0.82rem;">Teléfono de Contacto (WhatsApp)</label>
+          <input type="text" id="deliv-telefono" class="form-control" placeholder="+58 414 123 4567">
         </div>
-        <div class="form-group" style="margin-bottom: 0;">
-          <label>Dirección exacta de Entrega</label>
-          <textarea id="deliv-direccion" class="form-control" rows="2" placeholder="Calle, Avenida, Edificio, Apartamento, Puntos de referencia">Av. Reforma 12-34, Zona 9, Apt 4B</textarea>
+
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.82rem;">Dirección o Referencia de Entrega</label>
+          <textarea id="deliv-direccion" class="form-control" rows="2" placeholder="Ej. Av. Principal, Res. Las Palmeras, Apto 3B (o presiona el botón abajo)"></textarea>
         </div>
+
+        <!-- BOTÓN ULTRA SENCILLO DE UBICACIÓN EN 1-CLIC -->
+        <button class="btn-gold" style="width: 100%; padding: 0.85rem; font-size: 0.95rem; background: linear-gradient(135deg, #00f5d4, #00b4d8); color: #000; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="getDeviceGPSLocation()">
+          <span>📍 USAR MI UBICACIÓN ACTUAL DEL CELULAR</span>
+        </button>
+        <div id="gps-status-badge" style="font-size: 0.82rem; color: var(--cyan-accent); font-weight: 800; display: none; margin-top: 0.6rem; text-align: center;"></div>
       </div>
 
       <div class="form-group">
@@ -293,7 +345,8 @@
         <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;" id="track-order-status">EN PREPARACIÓN</div>
         <p style="color: var(--text-muted); font-size: 0.85rem;" id="track-order-info">Tu pedido ya está siendo preparado por nuestros cocineros.</p>
 
-        <button class="btn-gold" style="width: 100%; margin-top: 1.5rem;" onclick="showScreen('screen-home')">VER MÁS PRODUCTOS O CONTINUAR</button>
+        <button class="btn-gold" style="width: 100%; margin-top: 1.25rem; background: linear-gradient(135deg, #00f5d4, #00b4d8); color: #000; font-weight: 900;" onclick="openServiceRatingModal()">⭐ DEJAR MI CALIFICACIÓN DEL SERVICIO</button>
+        <button class="btn-gold" style="width: 100%; margin-top: 0.75rem;" onclick="showScreen('screen-home')">VER MÁS PRODUCTOS O CONTINUAR</button>
       </div>
     </div>
 
@@ -303,15 +356,129 @@
       <div id="historial-orders-list"></div>
     </div>
 
-    <!-- 9. PERFIL DE USUARIO -->
+    <!-- 9. PERFIL DE USUARIO, ALGORITMO Y REGISTRO DE CLIENTES -->
     <div id="screen-perfil" class="screen" style="padding: 1.25rem;">
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div style="width: 76px; height: 76px; border-radius: 50%; background: var(--gold-gradient); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; color: #000; font-weight: 900; margin-bottom: 0.5rem; box-shadow: 0 0 20px rgba(255,183,3,0.4);">JM</div>
-        <h2 style="font-size: 1.3rem; font-weight: 900;" id="profile-name">Javier Mendoza</h2>
-        <p style="color: var(--text-muted); font-size: 0.85rem;" id="profile-email">javier@mail.com</p>
+      
+      <!-- Encabezado de Usuario / Invitado -->
+      <div id="profile-info-card" style="text-align: center; margin-bottom: 1.25rem;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--gold-gradient); display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #000; font-weight: 900; margin: 0 auto 0.5rem auto; box-shadow: 0 0 25px rgba(255,183,3,0.4);" id="profile-avatar">👤</div>
+        <h2 style="font-size: 1.35rem; font-weight: 900; color: #fff; margin: 0;" id="profile-name">Cliente Invitado</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;" id="profile-email">Navegando en modo pedido flash</p>
       </div>
 
-      <button class="btn-gold" style="width: 100%; background: rgba(255, 71, 87, 0.2); color: var(--neon-red); border: 1px solid var(--neon-red);" onclick="Auth.logout()">🚪 Cerrar Sesión</button>
+      <!-- Tarjeta de Puntos Acumulados -->
+      <div style="background: linear-gradient(135deg, rgba(255,183,3,0.18), rgba(0,245,212,0.12)); border: 1.5px solid var(--gold-accent); border-radius: 16px; padding: 1.1rem; margin-bottom: 1.25rem; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
+        <span style="font-size: 0.78rem; color: var(--gold-accent); font-weight: 800; text-transform: uppercase;">MIS PUNTOS DE FIDELIDAD:</span>
+        <div style="font-size: 2.2rem; font-weight: 900; color: #fff; margin-top: 0.15rem;" id="profile-points-display">50 Puntos 🏆</div>
+        <small style="color: var(--cyan-accent); font-size: 0.75rem; font-weight: 700;">Gana +1 punto por cada $1 gastado en Donde David</small>
+      </div>
+
+      <!-- ALGORITMO: ⚡ REPETIR PEDIDO ANTERIOR CON 1-CLIC EN PERFIL -->
+      <div id="profile-reorder-container" style="display: none; background: linear-gradient(135deg, rgba(0,245,212,0.12), rgba(255,183,3,0.15)); border: 1.5px solid var(--cyan-accent); border-radius: 16px; padding: 1.1rem; margin-bottom: 1.25rem; box-shadow: 0 8px 25px rgba(0,245,212,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.78rem; color: var(--cyan-accent); font-weight: 900; letter-spacing: 0.5px;">⚡ REPETIR TU PEDIDO FAVORITO ANTERIOR</span>
+          <span style="font-size: 0.75rem; background: var(--cyan-accent); color: #000; padding: 0.15rem 0.55rem; border-radius: 20px; font-weight: 900;">1-CLIC</span>
+        </div>
+        <div style="font-size: 0.95rem; font-weight: 900; color: #fff; margin-bottom: 0.2rem;" id="profile-reorder-summary">Hamburguesa Doble Toon + Papas con Queso</div>
+        <small style="color: var(--text-muted); display: block; margin-bottom: 0.75rem;">Repite tu pedido favorito sin volver a buscar los platillos.</small>
+        <button class="btn-gold" style="width: 100%; padding: 0.75rem; font-weight: 900; font-size: 0.95rem; background: linear-gradient(135deg, #00f5d4, #00b4d8); color: #000;" onclick="repeatLastOrderOneClick()">
+          ⚡ REPETIR ESTE PEDIDO AHORA ($<span id="profile-reorder-price-val">0.00</span>)
+        </button>
+      </div>
+
+      <!-- ALGORITMO: 💡 SUGERENCIAS PERSONALIZADAS SEGÚN HISTORIAL EN PERFIL -->
+      <div id="profile-smart-recommendations-container" style="display: none; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 900; color: var(--gold-accent); margin: 0 0 0.75rem 0;">💡 SUGERIDOS PARA TI SEGÚN TUS GUSTOS</h3>
+        <div style="display: flex; gap: 0.85rem; overflow-x: auto; padding-bottom: 0.5rem;" id="profile-smart-recommendations-grid">
+          <!-- Creados dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Botones de Acción de Autenticación & Registro -->
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;" id="profile-actions-container">
+        <button class="btn-gold" style="width: 100%; font-size: 1rem;" onclick="openModal('client-login-modal')">
+          🔑 INICIAR SESIÓN EN MI CUENTA
+        </button>
+        <button class="btn-gold" style="width: 100%; background: linear-gradient(135deg, #00f5d4, #00b4d8); color: #000;" onclick="openModal('client-register-modal')">
+          📝 REGISTRARME COMO NUEVO CLIENTE (+50 PTS)
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL DE REGISTRO DE CLIENTE USUARIO DENTRO DE LA PLATAFORMA -->
+    <div class="product-modal-backdrop" id="client-register-modal">
+      <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+        <button class="modal-close-btn" onclick="closeModal('client-register-modal')">&times;</button>
+        <div style="text-align: center; margin-bottom: 1rem;">
+          <span style="font-size: 2.5rem;">🎁</span>
+          <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.2rem;">REGISTRO DE CLIENTE USUARIO</h3>
+          <p style="color: var(--text-muted); font-size: 0.82rem;">Regístrate para acumular puntos y disfrutar de ofertas exclusivas.</p>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Nombre</label>
+          <input type="text" id="reg-nombre" class="form-control" placeholder="Ej. Carlos">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Apellido</label>
+          <input type="text" id="reg-apellido" class="form-control" placeholder="Ej. Rodríguez">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Correo Electrónico</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="carlos@mail.com">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Teléfono de Contacto</label>
+          <input type="text" id="reg-tel" class="form-control" placeholder="+502 5123 4567">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Nombre de Usuario</label>
+          <input type="text" id="reg-username" class="form-control" placeholder="carlos_david">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Contraseña</label>
+          <input type="password" id="reg-pass" class="form-control" placeholder="••••••••">
+        </div>
+
+        <button class="btn-gold" style="width: 100%; font-size: 1.1rem; padding: 0.85rem;" onclick="submitClientUserRegistration()">
+          🚀 REGISTRARME Y GANAR +50 PUNTOS
+        </button>
+
+        <div style="text-align: center; margin-top: 1rem; font-size: 0.85rem;">
+          <span style="color: var(--text-muted);">¿Ya tienes cuenta?</span>
+          <a style="color: var(--cyan-accent); font-weight: 800; cursor: pointer; margin-left: 0.3rem;" onclick="closeModal('client-register-modal'); openModal('client-login-modal')">Iniciar Sesión</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE INICIO DE SESIÓN CLIENTE -->
+    <div class="product-modal-backdrop" id="client-login-modal">
+      <div class="product-modal-card" style="max-width: 440px; padding: 1.5rem;">
+        <button class="modal-close-btn" onclick="closeModal('client-login-modal')">&times;</button>
+        <div style="text-align: center; margin-bottom: 1rem;">
+          <span style="font-size: 2.5rem;">🔑</span>
+          <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.2rem;">INICIAR SESIÓN</h3>
+          <p style="color: var(--text-muted); font-size: 0.82rem;">Ingresa a tu cuenta para acumular puntos y repetir tus pedidos en 1-clic.</p>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Usuario o Correo Electrónico</label>
+          <input type="text" id="login-username-input" class="form-control" placeholder="Ej. carlos_david">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Contraseña</label>
+          <input type="password" id="login-pass-input" class="form-control" placeholder="••••••••">
+        </div>
+
+        <button class="btn-gold" style="width: 100%; font-size: 1.1rem; padding: 0.85rem;" onclick="submitClientLogin()">
+          🔑 INICIAR SESIÓN
+        </button>
+
+        <div style="text-align: center; margin-top: 1rem; font-size: 0.85rem;">
+          <span style="color: var(--text-muted);">¿No tienes cuenta?</span>
+          <a style="color: var(--cyan-accent); font-weight: 800; cursor: pointer; margin-left: 0.3rem;" onclick="closeModal('client-login-modal'); openModal('client-register-modal')">Regístrate (+50 Pts)</a>
+        </div>
+      </div>
     </div>
 
     <!-- WIDGET CARRITO FLOTANTE (REQUERIMIENTO #1) -->
@@ -321,19 +488,13 @@
       <span id="floating-cart-price" style="border-left: 1px solid rgba(0,0,0,0.3); padding-left: 0.5rem;">$0.00</span>
     </div>
 
-    <!-- Navegación Inferior Cliente en Footer (Bottom Navigation Bar) -->
+    <!-- Navegación Inferior Cliente en Footer (Bottom Navigation Bar - Estilo Cashea) -->
     <nav class="bottom-bar" id="app-bottom-nav">
       <ul>
         <li>
           <a class="nav-item active" onclick="showScreen('screen-home')" title="Inicio">
             <span>🏠</span>
             <small>Inicio</small>
-          </a>
-        </li>
-        <li>
-          <a class="nav-item" onclick="showScreen('screen-categorias')" title="Menú">
-            <span>🍔</span>
-            <small>Menú</small>
           </a>
         </li>
         <li>
@@ -396,8 +557,190 @@
           <option value="20">Mesa #20</option>
         </select>
       </div>
-
       <button class="btn-gold" style="width: 100%; font-size: 1.05rem;" onclick="confirmQrScannerSelection()">✅ VALIDAR SELECCIÓN DE MESA</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE SELECCIÓN DE MODALIDAD (MESA / LLEVAR / DELIVERY) - ESTILO CASHEA -->
+  <div class="product-modal-backdrop" id="order-modality-modal">
+    <div class="product-modal-card" style="max-width: 460px; padding: 1.75rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('order-modality-modal')">&times;</button>
+      <span style="font-size: 2.8rem;">⚡</span>
+      <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.3rem;">¿CÓMO DESEAS RECIBIR TU PEDIDO?</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">Selecciona tu preferencia para procesar tu orden al instante.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.25rem;">
+        <button class="btn-gold" style="padding: 1rem; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #00f5d4, #00b4d8); color: #000;" onclick="selectOrderModality('mesa')">
+          <span>🍽️ COMER EN MESA (CÁMARA QR)</span>
+          <span>→</span>
+        </button>
+        <button class="btn-gold" style="padding: 1rem; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #ffb703, #ff7a00); color: #000;" onclick="selectOrderModality('llevar')">
+          <span>🛍️ PARA LLEVAR (MOSTRADOR)</span>
+          <span>→</span>
+        </button>
+        <button class="btn-gold" style="padding: 1rem; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff;" onclick="selectOrderModality('delivery')">
+          <span>🛵 DELIVERY (CON MAPA GPS)</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SELECCIÓN MODO PAGO EN MESA (PAGAR ANTES VS PAGAR DESPUÉS) -->
+  <div class="product-modal-backdrop" id="mesa-payment-option-modal">
+    <div class="product-modal-card" style="max-width: 440px; padding: 1.75rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('mesa-payment-option-modal')">&times;</button>
+      <span style="font-size: 2.8rem;">💳</span>
+      <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent); margin-top: 0.3rem;">OPCIÓN DE PAGO EN MESA</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">¿Deseas pagar ahora o mantener tu cuenta abierta para pagar al salir?</p>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+        <button class="btn-gold" style="padding: 1rem; font-size: 1rem;" onclick="chooseMesaPaymentMode('PAGAR_ANTES')">
+          ⚡ PAGAR AHORA (PASARELA DIGITAL)
+        </button>
+        <button class="btn-gold" style="padding: 1rem; font-size: 1rem; background: rgba(255,255,255,0.08); border: 1px solid var(--gold-accent); color: #fff;" onclick="chooseMesaPaymentMode('PAGAR_DESPUES')">
+          🧾 CUENTA ABIERTA (PAGAR AL SALIR)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PASARELA DE PAGO DIGITAL CLIENTE (ESTILO CASHEA / STRIPE / PAGOS MÓVILES) -->
+  <div class="product-modal-backdrop" id="client-payment-gateway-modal">
+    <div class="product-modal-card" style="max-width: 490px; padding: 1.5rem; overflow-y: auto; max-height: 90vh;">
+      <button class="modal-close-btn" onclick="closeModal('client-payment-gateway-modal')">&times;</button>
+      
+      <!-- Security & Trust Badge Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--toon-border); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.4rem;">🔒</span>
+          <div>
+            <strong style="font-size: 0.95rem; color: var(--text-primary); display: block; line-height: 1;">PASARELA DIGITAL SEGURO</strong>
+            <small style="color: var(--cyan-accent); font-size: 0.7rem; font-weight: 800;">ENCRIPTACIÓN SSL 256-BIT • DONDE DAVID</small>
+          </div>
+        </div>
+        <div style="font-size: 0.7rem; background: rgba(0,245,212,0.1); border: 1px solid var(--cyan-accent); color: var(--cyan-accent); padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: 800;">PRODUCCIÓN</div>
+      </div>
+
+      <!-- Resumen Dual USD / Bs. -->
+      <div style="background: linear-gradient(135deg, rgba(255,183,3,0.15), rgba(0,245,212,0.1)); border: 1.5px solid var(--gold-accent); border-radius: 14px; padding: 1rem; text-align: center; margin-bottom: 1.25rem;">
+        <small style="color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">TOTAL A COBRAR EN TRANSACCIÓN:</small>
+        <div style="font-size: 2rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.2rem;" id="gateway-total-display">$0.00</div>
+      </div>
+
+      <!-- Selector de Método de Pago por Pestañas Estilo Cashea -->
+      <div style="display: flex; gap: 0.4rem; margin-bottom: 1.25rem;">
+        <button class="payment-method-tab active" id="tab-pay-card" onclick="switchGatewayTab('card')">💳 Tarjeta</button>
+        <button class="payment-method-tab" id="tab-pay-pm" onclick="switchGatewayTab('pm')">📱 Pago Móvil</button>
+        <button class="payment-method-tab" id="tab-pay-zelle" onclick="switchGatewayTab('zelle')">🇺🇸 Zelle</button>
+        <button class="payment-method-tab" id="tab-pay-cash" onclick="switchGatewayTab('cash')">💵 Efectivo</button>
+      </div>
+
+      <!-- OP 1: TARJETA DE CRÉDITO / DÉBITO (PUNTO DE VENTA EN CAJA) -->
+      <div id="gateway-sec-card">
+        <div style="background: rgba(8,121,232,0.1); border: 1.5px solid var(--cyan-accent); border-radius: 14px; padding: 1.1rem; text-align: center; margin-bottom: 1.25rem;">
+          <span style="font-size: 2.2rem; display: block; margin-bottom: 0.4rem;">💳</span>
+          <strong style="color: #fff; font-size: 0.98rem; display: block;">COBRO POR PUNTO DE VENTA EN CAJA</strong>
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 0.3rem;">El cobro por tarjeta de débito o crédito se procesa directamente en la Caja POS por la cajera del restaurante.</p>
+        </div>
+      </div>
+
+      <!-- OP 2: PAGO MÓVIL (ÚLTIMOS 4 DÍGITOS DE OPERACIÓN PARA VALIDACIÓN CAJERA) -->
+      <div id="gateway-sec-pm" style="display: none;">
+        <div style="background: rgba(0,245,212,0.06); border: 1px solid var(--cyan-accent); border-radius: 12px; padding: 0.85rem; margin-bottom: 1rem; font-size: 0.82rem;">
+          <div style="color: var(--cyan-accent); font-weight: 900; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+            <span>DATOS PAGO MÓVIL BANESCO</span>
+            <button style="background: none; border: none; color: var(--cyan-accent); cursor: pointer; text-decoration: underline;" onclick="copyBankData()">📋 Copiar Datos</button>
+          </div>
+          <p style="margin: 0.2rem 0; color: var(--text-primary);">• <strong>Banco:</strong> Banesco (0134)</p>
+          <p style="margin: 0.2rem 0; color: var(--text-primary);">• <strong>RIF:</strong> J-50123984-0 (Donde David C.A.)</p>
+          <p style="margin: 0.2rem 0; color: var(--text-primary);">• <strong>Teléfono:</strong> 0414-555-4321</p>
+          <p style="margin: 0.2rem 0; color: var(--gold-accent);">• <strong>Tasa BCV del Día:</strong> <span id="pm-bcv-rate">36.50</span> Bs/$</p>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label style="color: var(--gold-accent); font-size: 0.85rem; font-weight: 800;">ÚLTIMOS 4 DÍGITOS DEL NÚMERO DE OPERACIÓN DE PAGO MÓVIL:</label>
+          <input type="text" id="pm-ref-input" class="form-control" placeholder="Ej. 4567" maxlength="4" style="font-size: 1.4rem; font-weight: 900; letter-spacing: 4px; text-align: center; color: var(--gold-accent);">
+          <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.3rem;">La cajera verificará estos 4 dígitos en la cuenta bancaria para aprobar tu comanda.</small>
+        </div>
+      </div>
+
+      <!-- OP 3: ZELLE -->
+      <div id="gateway-sec-zelle" style="display: none;">
+        <div style="background: rgba(168,85,247,0.1); border: 1px solid #a855f7; border-radius: 12px; padding: 0.85rem; margin-bottom: 1rem; font-size: 0.82rem;">
+          <div style="color: #a855f7; font-weight: 900; margin-bottom: 0.5rem;">🇺🇸 DATOS OFICIALES DE ZELLE</div>
+          <p style="margin: 0.2rem 0; color: var(--text-primary);">• <strong>Correo Zelle:</strong> pagos@dondedavid.com</p>
+          <p style="margin: 0.2rem 0; color: var(--text-primary);">• <strong>Titular:</strong> Donde David Gourmet LLC</p>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Código / Referencia de Confirmación Zelle</label>
+          <input type="text" id="zelle-ref-input" class="form-control" placeholder="Ej. ZEL-889102">
+        </div>
+      </div>
+
+      <!-- OP 4: EFECTIVO EN CAJA -->
+      <div id="gateway-sec-cash" style="display: none;">
+        <div style="background: rgba(255,183,3,0.08); border: 1px solid var(--gold-accent); border-radius: 12px; padding: 0.85rem; margin-bottom: 1rem; font-size: 0.82rem;">
+          <strong style="color: var(--gold-accent); display: block; margin-bottom: 0.3rem;">💵 PAGO EN EFECTIVO ($ / Bs.)</strong>
+          <p style="color: var(--text-primary); margin: 0;">El pago en efectivo lo recibe directamente la cajera en el mostrador o el repartidor.</p>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label style="color: var(--text-primary); font-size: 0.8rem;">Denominación de Billete con el que cancelará ($10, $20, $50, $100)</label>
+          <input type="text" id="cash-bill-input" class="form-control" placeholder="Ej. Billete de $20 (para preparar vuelto)">
+        </div>
+      </div>
+
+      <!-- Botón de Procesamiento con Animación -->
+      <button class="btn-gold" id="btn-submit-payment-gateway" style="width: 100%; font-size: 1.1rem; padding: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="submitClientGatewayPayment()">
+        <span>🔒 CONFIRMAR Y ENVIAR A CAJA</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL SELECCIÓN DE UBICACIÓN MAPA DELIVERY (LEAFLET GPS PICKER) -->
+  <div class="product-modal-backdrop" id="delivery-map-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('delivery-map-modal')">&times;</button>
+      <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--cyan-accent); margin-top: 0;">📍 SELECCIONA TU UBICACIÓN DE ENTREGA</h3>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 0.75rem;">Arrastra el marcador en el mapa para fijar tu dirección exacta de entrega.</p>
+
+      <div id="leaflet-map-container" style="width: 100%; height: 240px; border-radius: 12px; border: 2px solid var(--cyan-accent); margin-bottom: 0.85rem;"></div>
+
+      <div class="form-group" style="margin-bottom: 0.75rem;">
+        <label style="font-size: 0.82rem; color: var(--text-primary);">Dirección Detallada / Punto de Referencia</label>
+        <input type="text" id="map-address-input" class="form-control" placeholder="Ej. Res. Las Flores, Apto 4B, frente a la farmacia">
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1rem;" onclick="confirmDeliveryMapLocation()">
+        ✅ CONFIRMAR UBICACIÓN Y CONTINUAR
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL CALIFICACIÓN DEL SERVICIO / RATING CON ESTRELLAS -->
+  <div class="product-modal-backdrop" id="service-rating-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.75rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('service-rating-modal')">&times;</button>
+      <span style="font-size: 2.8rem;">⭐</span>
+      <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.2rem;">¡CALIFICA TU EXPERIENCIA!</h3>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1rem;">¿Qué tal estuvo tu atención y la comida hoy en Donde David?</p>
+
+      <div style="font-size: 2rem; display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer;" id="star-rating-picker">
+        <span onclick="setRatingStars(1)">⭐</span>
+        <span onclick="setRatingStars(2)">⭐</span>
+        <span onclick="setRatingStars(3)">⭐</span>
+        <span onclick="setRatingStars(4)">⭐</span>
+        <span onclick="setRatingStars(5)">⭐</span>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <textarea id="rating-comment-input" class="form-control" rows="2" placeholder="Déjanos un comentario o sugerencia..."></textarea>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1rem;" onclick="submitServiceRating()">
+        🌟 ENVIAR CALIFICACIÓN Y FINALIZAR
+      </button>
     </div>
   </div>
 
@@ -408,7 +751,7 @@
       <img id="modal-product-img" src="" class="product-hero-img" alt="Producto">
       <div class="modal-content-body">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.3rem;">
-          <h2 id="modal-product-title" style="font-size: 1.4rem; font-weight: 900; margin: 0; color: #fff;">Nombre del Producto</h2>
+          <h2 id="modal-product-title" style="font-size: 1.4rem; font-weight: 900; margin: 0; color: var(--text-primary);">Nombre del Producto</h2>
           <span id="modal-product-price" style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent);">$0.00</span>
         </div>
         <p id="modal-product-desc" style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.4; margin-bottom: 1.25rem;">Descripción detallada.</p>
@@ -427,7 +770,7 @@
 
         <!-- Observaciones especiales -->
         <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label style="font-size: 0.82rem; color: #fff;">📝 Observación Especial para Cocina</label>
+          <label style="font-size: 0.82rem; color: var(--text-primary);">📝 Observación Especial para Cocina</label>
           <input type="text" id="modal-product-notes" class="form-control" placeholder="Ej. Bien cocido, sin sal adicional...">
         </div>
 
@@ -443,6 +786,33 @@
 
         <button class="btn-gold" style="width: 100%; font-size: 1.1rem;" onclick="addModalProductToCart()">🛒 AGREGAR AL CARRITO</button>
       </div>
+  <!-- BOTÓN FLOTANTE CHATBOT IA DAVIDBOT (ESTILO GUSTICOS VALENCIA) -->
+  <div class="fab-chatbot" onclick="openModal('chatbot-modal')" title="Asistente Virtual DavidBot 💬">
+    💬
+  </div>
+
+  <!-- MODAL ASISTENTE VIRTUAL CHATBOT -->
+  <div class="product-modal-backdrop" id="chatbot-modal">
+    <div class="product-modal-card" style="max-width: 440px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('chatbot-modal')">&times;</button>
+      <div style="display: flex; align-items: center; gap: 0.65rem; border-bottom: 1px solid var(--toon-border); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 2rem;">🤖</span>
+        <div>
+          <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent); margin: 0;">DAVIDBOT • ASISTENTE VIRTUAL</h3>
+          <small style="color: var(--cyan-accent); font-weight: 800; font-size: 0.72rem;">Respuestas instantáneas en vivo</small>
+        </div>
+      </div>
+
+      <div id="chat-messages-container" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1rem; padding-right: 0.3rem;">
+        <div style="background: rgba(255,255,255,0.06); padding: 0.75rem; border-radius: 12px; font-size: 0.85rem; color: #fff; align-self: flex-start; border: 1px solid var(--toon-border);">
+          ¡Hola! Soy <strong>DavidBot</strong> 🍔. ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre promociones, recomendaciones de la casa o el estado de tu pedido.
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <input type="text" id="chat-input-msg" class="form-control" placeholder="Escribe tu consulta aquí..." onkeypress="if(event.key==='Enter') sendChatbotMessage()">
+        <button class="btn-gold" style="padding: 0.6rem 1rem; min-width: fit-content;" onclick="sendChatbotMessage()">Enviar</button>
+      </div>
     </div>
   </div>
 
@@ -453,6 +823,7 @@
   <script src="/static/js/auth.js?v=2.0"></script>
   <script src="/static/js/websocket.js?v=2.0"></script>
   <script src="/static/js/cliente-toon.js?v=2.0"></script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
 
   <!-- Script para Cámara QR Scanner & Modal (Requerimientos #1, #2, #3) -->
   <script>

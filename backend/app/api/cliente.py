@@ -58,7 +58,7 @@ def get_promociones(db: Session = Depends(get_db)):
 def get_resenas_publicas(db: Session = Depends(get_db)):
     return db.query(Resena).filter(Resena.activo == True).order_by(Resena.fecha_creacion.desc()).all()
 
-@router.post("/resenas", response_model=ResenaOut)
+@router.post("/resenas", response_model=ResenaOut, status_code=status.HTTP_201_CREATED)
 def crear_resena_publica(resena_in: ResenaCreate, db: Session = Depends(get_db)):
     nueva = Resena(
         nombre_cliente=resena_in.nombre_cliente,

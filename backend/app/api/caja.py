@@ -11,6 +11,7 @@ from backend.app.models.producto import Producto
 from backend.app.models.turno import Turno
 from backend.app.models.configuracion import Configuracion
 from backend.app.models.mesa import Mesa
+from backend.app.models.usuario import Usuario
 from backend.app.schemas.schemas import PedidoOut, TurnoApertura, TurnoCierre, TurnoOut, CobrarPedidoRequest, DetallePedidoItem
 from backend.app.websockets.manager import ws_manager
 
@@ -321,3 +322,47 @@ def get_factura_pedido(pedido_id: int, db: Session = Depends(get_db)):
         "monto_recibido": float(pedido.monto_recibido or pedido.total or 0.0),
         "cambio": float(pedido.cambio or 0.0)
     }
+
+@router.get("/clientes/buscar")
+def buscar_cliente_por_id_o_nombre(q: str, db: Session = Depends(get_db)):
+    """
+    Permite a la cajera buscar clientes registrados por su ID (ej: CLI-0004 o 4) o Nombre/Teléfono/Email
+    """
+    if not q or len(q.strip()) == 0:
+        return []
+    
+    query_str = q.strip()
+    clean_id = query_str.upper().replace("CLI-", "").replace("#", "").strip()
+    
+    query = db.query(Usuario).filter(Usuario.rol == "cliente", Usuario.activo == True)
+    
+    if clean_id.isdigit():
+        target_id = int(clean_id)
+        results = query.filter(
+            (Usuario.id == target_id) | 
+            (Usuario.nombre.ilike(f"%{query_str}%")) |
+            (Usuario.apellido.ilike(f"%{query_str}%")) |
+            (Usuario.nombre_usuario.ilike(f"%{query_str}%")) |
+            (Usuario.telefono.ilike(f"%{query_str}%"))
+        ).limit(10).all()
+    else:
+        results = query.filter(
+            (Usuario.nombre.ilike(f"%{query_str}%")) |
+            (Usuario.apellido.ilike(f"%{query_str}%")) |
+            (Usuario.nombre_usuario.ilike(f"%{query_str}%")) |
+            (Usuario.email.ilike(f"%{query_str}%")) |
+            (Usuario.telefono.ilike(f"%{query_str}%"))
+        ).limit(10).all()
+
+    return [
+        {
+            "id": u.id,
+            "codigo_cliente": f"CLI-{u.id:04d}",
+            "nombre_completo": f"{u.nombre} {u.apellido}",
+            "nombre_usuario": u.nombre_usuario,
+            "email": u.email,
+            "telefono": u.telefono or "Sin teléfono",
+            "puntos_fidelidad": u.puntos_fidelidad or 0
+        }
+        for u in results
+    ]

@@ -230,3 +230,11 @@ function playChimeSound() {
     console.log("Audio notice blocked or unsupported.");
   }
 }
+
+function setKDSGridScale(scaleClass) {
+  const grid = document.getElementById("kds-grid");
+  if (!grid) return;
+  grid.classList.remove("scale-sm", "scale-md", "scale-lg");
+  grid.classList.add(scaleClass);
+  showToast(`📐 Escala de pantalla KDS fijada`, "info");
+}

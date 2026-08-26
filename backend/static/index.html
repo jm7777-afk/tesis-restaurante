@@ -6,496 +6,274 @@
   <title>DONDE DAVID - Hamburguesas Gourmet & Fast Food Tech</title>
   
   <!-- SEO & Open Graph Meta Tags -->
-  <meta name="description" content="Donde David: Las mejores hamburguesas artesanales de res 100% gourmet, perros calientes crocantes y malteadas. Pide por QR en mesa o solicita delivery a tu puerta.">
+  <meta name="description" content="Donde David: Las mejores hamburguesas artesanales de res 100% gourmet, perros calientes crocantes, combos y malteadas. Pide por QR en mesa o solicita delivery directo a tu puerta.">
   <meta property="og:title" content="DONDE DAVID - Hamburguesas Gourmet & Fast Food Tech">
   <meta property="og:description" content="¡Sabor que se siente! Pide online o escanea tu QR en mesa.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="/static/images/logo-donde-david.jpg">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800">
   <link rel="manifest" href="/static/manifest.json">
   <meta name="theme-color" content="#071A3D">
 
   <link rel="stylesheet" href="/static/css/global.css?v=2.0">
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
-  <link rel="stylesheet" href="/static/css/index.css">
 
   <style>
-    /* Container System & Fluid Typography */
+    /* Estilos Específicos para la Landing Page Donde David */
+    .landing-hero {
+      position: relative;
+      padding: clamp(2rem, 5vw, 4rem) 1.25rem;
+      background: radial-gradient(circle at 70% 20%, rgba(255, 183, 3, 0.12) 0%, transparent 60%),
+                  radial-gradient(circle at 20% 80%, rgba(0, 245, 212, 0.08) 0%, transparent 60%),
+                  var(--toon-bg);
+      border-bottom: 2px solid var(--gold-accent);
+    }
     .landing-container {
-      width: 100%;
       max-width: 1280px;
       margin: 0 auto;
-      padding-left: clamp(16px, 4vw, 32px);
-      padding-right: clamp(16px, 4vw, 32px);
     }
-
-    /* Sticky Header */
-    .landing-header {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: rgba(7, 26, 61, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--color-border);
-      transition: padding var(--transition-fast);
-    }
-    .landing-nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 72px;
-    }
-    .landing-nav-links {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      list-style: none;
-    }
-    .landing-nav-links a {
-      color: #FFFFFF;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.92rem;
-      transition: color var(--transition-fast);
-    }
-    .landing-nav-links a:hover {
-      color: var(--color-orange);
-    }
-
-    /* Mobile Drawer */
-    .mobile-drawer {
-      position: fixed;
-      top: 0;
-      right: -100%;
-      width: 280px;
-      height: 100vh;
-      background: var(--color-dark);
-      z-index: 2000;
-      padding: 2rem 1.5rem;
-      transition: right var(--transition-smooth);
-      box-shadow: var(--shadow-lg);
-      border-left: 1px solid var(--color-border);
-    }
-    .mobile-drawer.open {
-      right: 0;
-    }
-
-    /* Hero Section */
-    .hero-section {
-      background: radial-gradient(circle at 70% 30%, rgba(8, 121, 232, 0.25), transparent 70%), var(--color-navy);
-      border-bottom: 1px solid var(--color-border);
-      padding: clamp(2rem, 6vw, 4.5rem) 0;
-    }
-    .hero-grid {
+    .landing-hero-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(2rem, 4vw, 4rem);
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: clamp(1.5rem, 4vw, 3rem);
       align-items: center;
     }
-    @media (max-width: 900px) {
-      .hero-grid {
+    @media (max-width: 992px) {
+      .landing-hero-grid {
         grid-template-columns: 1fr;
         text-align: center;
       }
     }
-    .hero-title {
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
+    .landing-badge-trust {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 188, 13, 0.12);
+      border: 1px solid var(--gold-accent);
+      border-radius: 30px;
+      padding: 0.4rem 1.1rem;
+      margin-bottom: 1.25rem;
+    }
+    .landing-hero-title {
       font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
       font-weight: 900;
       line-height: 1.08;
-      color: #FFFFFF;
+      color: #ffffff;
       margin-bottom: 1rem;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.8);
     }
-    .hero-title span {
-      color: var(--color-yellow);
+    .landing-hero-title span {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    /* Category Cards (Horizontal Scroll on Mobile) */
-    .cat-scroll-wrapper {
+    /* Standard Web Footer Links Styling */
+    .standard-footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
       display: flex;
-      gap: 1rem;
-      overflow-x: auto;
-      padding-bottom: 1rem;
-      scroll-snap-type: x mandatory;
+      flex-direction: column;
+      gap: 0.6rem;
     }
-    .cat-landing-card {
-      min-width: 160px;
-      background: var(--color-dark);
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 1.25rem 1rem;
-      text-align: center;
+    .standard-footer-links a {
+      color: var(--text-dim);
       text-decoration: none;
-      color: #FFFFFF;
-      transition: all var(--transition-base);
-      scroll-snap-align: start;
-      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: color 0.2s ease;
     }
-    .cat-landing-card:hover {
-      border-color: var(--color-orange);
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-orange);
-    }
-
-    /* Products Responsive Grid */
-    .products-responsive-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
-    }
-    @media (max-width: 1024px) {
-      .products-responsive-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 640px) {
-      .products-responsive-grid { grid-template-columns: 1fr; }
-    }
-
-    /* Steps Section */
-    .step-card {
-      background: var(--color-navy);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 1.75rem 1.25rem;
-      text-align: center;
-      position: relative;
-    }
-    .step-num {
-      position: absolute;
-      top: -16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--color-orange);
-      color: #FFFFFF;
-      font-weight: 900;
-      font-size: 0.9rem;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow-orange);
+    .standard-footer-links a:hover {
+      color: var(--gold-accent);
     }
   </style>
 </head>
-<body class="toon-theme" style="background: var(--color-background); color: var(--color-text);">
+<body class="toon-theme">
 
-  <!-- 1. STICKY HEADER -->
+  <!-- 1. HEADER UNIVERSAL REUTILIZABLE (DONDE DAVID BRAND) -->
   <header id="app-header"></header>
 
-  <!-- MOBILE NAVIGATION DRAWER -->
-  <div class="mobile-drawer" id="mobile-drawer">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-      <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--color-yellow);">DONDE DAVID</h3>
-      <button class="modal-close" onclick="document.getElementById('mobile-drawer').classList.remove('open')">&times;</button>
-    </div>
-    <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.25rem;">
-      <li><a href="#inicio" onclick="document.getElementById('mobile-drawer').classList.remove('open')" style="color: #fff; text-decoration: none; font-weight: 700;">🏠 Inicio</a></li>
-      <li><a href="#menu" onclick="document.getElementById('mobile-drawer').classList.remove('open')" style="color: #fff; text-decoration: none; font-weight: 700;">🍔 Ver Menú</a></li>
-      <li><a href="#promos" onclick="document.getElementById('mobile-drawer').classList.remove('open')" style="color: #fff; text-decoration: none; font-weight: 700;">🔥 Promociones</a></li>
-      <li><a href="#qr-mesa" onclick="document.getElementById('mobile-drawer').classList.remove('open')" style="color: #fff; text-decoration: none; font-weight: 700;">📱 Pedir por QR</a></li>
-      <li><a href="/login" style="color: var(--color-yellow); text-decoration: none; font-weight: 800;">🔐 Acceso Personal</a></li>
-    </ul>
-    <div style="margin-top: 3rem;">
-      <a href="/static/cliente/app.html?mesa=5" class="btn btn-cta" style="width: 100%;">🚀 ORDENAR AHORA</a>
-    </div>
-  </div>
-
   <main>
-    <!-- 2. HERO SECTION (RESPONSIVE STACKED ON MOBILE) -->
-    <section class="hero-section" id="inicio">
+    <!-- 2. HERO SECTION CON CARRUSEL DE FOTOS HD Y TASA BCV -->
+    <section class="landing-hero" id="inicio">
       <div class="landing-container">
-        <div class="hero-grid">
-          <!-- Text Content -->
+        
+        <!-- Tarjeta de Puntos de Regalo por Registro -->
+        <div class="points-welcome-card" style="margin-bottom: 1.5rem;">
           <div>
-            <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255, 196, 0, 0.15); border: 1px solid var(--color-yellow); border-radius: var(--radius-full); padding: 0.4rem 1.1rem; margin-bottom: 1.25rem;">
-              <span style="color: var(--color-yellow);">⭐⭐⭐⭐⭐</span>
-              <strong style="font-size: 0.85rem; color: #FFFFFF;">4.9/5 (+1,420 Reseñas Reales)</strong>
+            <div style="font-size: 0.78rem; color: var(--gold-accent); font-weight: 800; text-transform: uppercase;">¡BIENVENIDO A DONDE DAVID!</div>
+            <div style="font-size: 0.95rem; font-weight: 900; color: #fff; margin-top: 0.15rem;">🎁 Regístrate gratis y gana +50 Puntos de Regalo para tu próximo pedido</div>
+          </div>
+          <a href="/static/cliente/app.html#screen-perfil" class="btn-gold" style="font-size: 0.8rem; padding: 0.45rem 0.9rem; text-decoration: none;">
+            +50 PTS 🎁
+          </a>
+        </div>
+
+        <div class="landing-hero-grid">
+          <!-- Columna Izquierda: Mensaje Principal & CTAs -->
+          <div>
+            <div class="landing-badge-trust">
+              <span>⭐⭐⭐⭐⭐</span>
+              <strong style="font-size: 0.85rem; color: #ffffff;">4.9/5 (+1,420 Reseñas Reales)</strong>
             </div>
 
-            <h1 class="hero-title">
-              ¡SABOR QUE SE <span>SIENTE!</span>
+            <h1 class="landing-hero-title">
+              ¡SABOR GOURMET QUE SE <span>SIENTE!</span>
             </h1>
 
-            <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 2rem;">
-              Hamburguesas artesanales de res 100% gourmet, perros calientes con toppings crocantes y malteadas heladas. Pide escaneando el QR en tu mesa o solicita delivery directo a tu casa.
+            <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-dim); line-height: 1.6; margin-bottom: 1.75rem; font-weight: 500;">
+              Hamburguesas artesanales de carne 100% res, perros calientes con toppings crocantes y malteadas heladas. Pide escaneando el código QR en tu mesa o solicita delivery a tu casa.
             </p>
 
-            <!-- Responsive CTAs -->
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: inherit;">
-              <a href="/static/cliente/app.html?mesa=5" class="btn btn-cta" style="font-size: 1.1rem; padding: 0.9rem 2rem;">
-                🔥 ORDENAR AHORA
+            <div style="display: flex; gap: 0.85rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+              <a href="/static/cliente/app.html?mesa=5" class="btn-gold" style="font-size: 1.05rem; padding: 0.85rem 1.8rem;">
+                🚀 ORDENAR AHORA (APP QR)
               </a>
-              <a href="#menu" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.9rem 2rem;">
-                📋 VER MENÚ
+              <a href="#menu" class="btn btn-outline" style="font-size: 1.05rem; padding: 0.85rem 1.8rem; border-color: var(--gold-accent); color: var(--gold-accent);">
+                📋 EXPLORAR MENÚ
               </a>
+            </div>
+
+            <!-- Badges de Garantía -->
+            <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.2rem;">
+              <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; color: #fff;">🥩 Carne 100% Res</span>
+              <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; color: #fff;">⚡ Preparación &lt;12 min</span>
+              <span style="background: rgba(255,255,255,0.05); border: 1px solid var(--toon-border); padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; color: #fff;">💵 Tasa BCV Oficial</span>
             </div>
           </div>
 
-          <!-- Hero Image Carousel -->
-          <div style="position: relative; width: 100%; height: clamp(260px, 35vw, 400px); border-radius: var(--radius-lg); overflow: hidden; border: 3px solid var(--color-yellow); box-shadow: var(--shadow-orange);">
-            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800" alt="Hamburguesa Gourmet Donde David" style="width: 100%; height: 100%; object-fit: cover;">
-            <div style="position: absolute; inset: 0; background: linear-gradient(0deg, rgba(7,26,61,0.9) 0%, transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 1.5rem;">
-              <span class="badge badge-PENDIENTE" style="width: fit-content; margin-bottom: 0.4rem;">🍔 HAMBURGUESA DAVID GOURMET</span>
-              <h3 style="color: #FFFFFF; font-size: 1.3rem; font-weight: 800; margin: 0;">Carne 100% Res Jugosa & Pan Brioche Tostado</h3>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. CATEGORÍAS ("¿QUÉ SE TE ANTOJA?") -->
-    <section style="padding: 4rem 0;" id="menu">
-      <div class="landing-container">
-        <div style="text-align: center; margin-bottom: 2.5rem;">
-          <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-family: var(--font-display); font-weight: 900;">¿QUÉ SE TE ANTOJA HOY?</h2>
-          <p style="color: var(--color-text-secondary);">Selecciona tu categoría favorita para explorar el menú</p>
-        </div>
-
-        <div class="cat-scroll-wrapper">
-          <a href="/static/cliente/app.html?cat=hamburguesas" class="cat-landing-card">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🍔</span>
-            <strong style="display: block;">Hamburguesas</strong>
-            <small style="color: var(--color-text-secondary);">Artesanales</small>
-          </a>
-          <a href="/static/cliente/app.html?cat=perros" class="cat-landing-card">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🌭</span>
-            <strong style="display: block;">Hot Dogs</strong>
-            <small style="color: var(--color-text-secondary);">Con Toppings</small>
-          </a>
-          <a href="/static/cliente/app.html?cat=combos" class="cat-landing-card">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🍟</span>
-            <strong style="display: block;">Combos & Papas</strong>
-            <small style="color: var(--color-text-secondary);">Crocantes</small>
-          </a>
-          <a href="/static/cliente/app.html?cat=bebidas" class="cat-landing-card">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🥤</span>
-            <strong style="display: block;">Bebidas</strong>
-            <small style="color: var(--color-text-secondary);">Heladas</small>
-          </a>
-          <a href="/static/cliente/app.html?cat=postres" class="cat-landing-card">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🍰</span>
-            <strong style="display: block;">Postres</strong>
-            <small style="color: var(--color-text-secondary);">Dulce Final</small>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. PRODUCTOS DESTACADOS ("LOS FAVORITOS DE DONDE DAVID") -->
-    <section style="background: var(--color-navy); padding: 4rem 0; border-y: 1px solid var(--color-border);">
-      <div class="landing-container">
-        <div style="text-align: center; margin-bottom: 3rem;">
-          <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-family: var(--font-display); font-weight: 900; color: #FFFFFF;">🔥 LOS FAVORITOS DE DONDE DAVID</h2>
-          <p style="color: var(--color-text-secondary);">Los platillos más pedidos por nuestros clientes estrella</p>
-        </div>
-
-        <div class="products-responsive-grid" id="landing-featured-grid">
-          <!-- Creados dinámicamente mediante JS -->
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. PROMOCIONES DINÁMICAS DESDE BACKEND -->
-    <section style="padding: 4rem 0;" id="promos">
-      <div class="landing-container">
-        <div style="background: linear-gradient(135deg, var(--color-navy), var(--color-dark)); border: 2px solid var(--color-yellow); border-radius: var(--radius-lg); padding: clamp(2rem, 5vw, 3.5rem); position: relative; overflow: hidden; box-shadow: var(--shadow-lg);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
-            <div>
-              <span class="badge badge-PENDIENTE" style="font-size: 0.9rem; margin-bottom: 0.75rem;">💥 PROMOCIÓN BOOM DE LA SEMANA</span>
-              <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-family: var(--font-display); font-weight: 900; color: #FFFFFF; margin: 0.3rem 0;">COMBO DAVID SUPERIOR</h2>
-              <p style="color: var(--color-text-secondary); max-width: 500px; font-size: 1.05rem;">Burger Doble Carne + Papas Rústicas + Malteada Especial + Salsa Secreta</p>
-              <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1.25rem;">
-                <span style="font-size: 2.2rem; font-weight: 900; color: var(--color-yellow); font-family: var(--font-display);">$14.99</span>
-                <span style="font-size: 1.2rem; color: var(--color-text-secondary); text-decoration: line-through;">$18.50</span>
+          <!-- Columna Derecha: Carrusel Interactivo de Fotos HD -->
+          <div id="landing-hero-carousel-container">
+            <div style="position: relative; border-radius: 20px; overflow: hidden; height: 280px; border: 2px solid var(--gold-accent); box-shadow: 0 12px 35px rgba(255,183,3,0.4); cursor: pointer;" onclick="window.location.href='/static/cliente/app.html'">
+              <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1000" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.88);" alt="Hamburguesa Gourmet">
+              <div style="position: absolute; inset: 0; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(8,12,20,0.92) 0%, rgba(8,12,20,0.2) 50%, rgba(0,0,0,0.4) 100%);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.78rem; font-weight: 900; background: var(--gold-gradient); color: #000; padding: 0.3rem 0.85rem; border-radius: 20px;">
+                    ⭐ PLATILLO ESTRELLA EN VIVO
+                  </span>
+                  <span style="font-size: 0.78rem; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid var(--cyan-accent); color: var(--cyan-accent); padding: 0.3rem 0.75rem; border-radius: 20px; font-weight: 900;">
+                    Toca para Pedir ⚡
+                  </span>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.55rem; font-weight: 900; color: #fff; margin: 0 0 0.3rem 0; text-shadow: 0 3px 10px rgba(0,0,0,0.9);">HAMBURGUESA DOBLE DAVID</h3>
+                  <p style="font-size: 0.88rem; color: #e2e8f0; margin: 0 0 0.75rem 0; font-weight: 600; text-shadow: 0 2px 6px rgba(0,0,0,0.9);">Carne 100% res jugosa, doble queso cheddar fundido, tocino crocante y salsa secreta.</p>
+                  <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.65); backdrop-filter: blur(10px); padding: 0.6rem 0.9rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15);">
+                    <div style="font-size: 1.25rem; font-weight: 900; color: var(--gold-accent);">$15.00 <span style="font-size: 0.8rem; color: var(--text-dim); font-weight: 700;">(Bs. 547.50)</span></div>
+                    <button class="btn-gold" style="padding: 0.45rem 1rem; font-size: 0.85rem;">🛒 PEDIR EN APP</button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <a href="/static/cliente/app.html?mesa=5" class="btn btn-cta" style="font-size: 1.1rem; padding: 1rem 2.2rem;">
-                ⚡ APROVECHAR PROMOCIÓN
-              </a>
-            </div>
           </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. CATEGORÍAS DESLIZABLES INTEGRADAS AL TEMA OSCURO -->
+    <section style="padding: 2.5rem 1.25rem; background: var(--toon-card); border-bottom: 1px solid var(--toon-border);" id="menu">
+      <div class="landing-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent); margin: 0; letter-spacing: 0.5px;">🍔 EXPLORAR CATEGORÍAS DEL MENÚ</h2>
+          <a href="/static/cliente/app.html" style="color: var(--cyan-accent); font-weight: 800; text-decoration: none; font-size: 0.85rem;">Ir a la App →</a>
+        </div>
+        
+        <div style="display: flex; gap: 0.65rem; overflow-x: auto; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+          <a href="/static/cliente/app.html" style="background: var(--gold-gradient); color: #000; padding: 0.55rem 1.15rem; border-radius: 25px; font-weight: 900; font-size: 0.85rem; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 15px rgba(255,188,13,0.4);">
+            <span>🔥</span> <span>TODOS LOS PLATILLOS</span>
+          </a>
+          <a href="/static/cliente/app.html?cat=1" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--toon-border); padding: 0.55rem 1.15rem; border-radius: 25px; font-weight: 800; font-size: 0.85rem; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🍔</span> <span>HAMBURGUESAS</span>
+          </a>
+          <a href="/static/cliente/app.html?cat=2" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--toon-border); padding: 0.55rem 1.15rem; border-radius: 25px; font-weight: 800; font-size: 0.85rem; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🌭</span> <span>HOT DOGS</span>
+          </a>
+          <a href="/static/cliente/app.html?cat=3" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--toon-border); padding: 0.55rem 1.15rem; border-radius: 25px; font-weight: 800; font-size: 0.85rem; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🍟</span> <span>PAPAS</span>
+          </a>
+          <a href="/static/cliente/app.html?cat=4" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--toon-border); padding: 0.55rem 1.15rem; border-radius: 25px; font-weight: 800; font-size: 0.85rem; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🥤</span> <span>BEBIDAS</span>
+          </a>
+          <a href="/static/cliente/app.html?cat=5" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--toon-border); padding: 0.55rem 1.15rem; border-radius: 25px; font-weight: 800; font-size: 0.85rem; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🍰</span> <span>POSTRES</span>
+          </a>
         </div>
       </div>
     </section>
 
-    <!-- 6. CÓMO FUNCIONA ("¿CÓMO QUIERES PEDIR?") -->
-    <section style="background: var(--color-dark); padding: 4rem 0; border-y: 1px solid var(--color-border);" id="como-funciona">
+    <!-- 4. FAVORITOS DESTACADOS DINÁMICOS DE BACKEND -->
+    <section style="padding: 3.5rem 1.25rem;">
       <div class="landing-container">
-        <div style="text-align: center; margin-bottom: 3.5rem;">
-          <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-family: var(--font-display); font-weight: 900; color: #FFFFFF;">¿CÓMO FUNCIONA?</h2>
-          <p style="color: var(--color-text-secondary);">Pide en 4 sencillos pasos sin filas ni esperas</p>
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+          <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-family: var(--font-display); font-weight: 900; color: #ffffff;">🔥 LOS FAVORITOS DE DONDE DAVID</h2>
+          <p style="color: var(--text-dim); font-size: 0.95rem;">Los platillos más pedidos y recomendados por nuestros clientes</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem;">
-          <div class="step-card">
-            <span class="step-num">01</span>
-            <span style="font-size: 2.5rem; display: block; margin-top: 0.5rem; margin-bottom: 0.75rem;">🍔</span>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">ELIGE</h3>
-            <p style="font-size: 0.88rem; color: var(--color-text-secondary);">Explora el menú y selecciona tus hamburguesas y combos.</p>
-          </div>
-          <div class="step-card">
-            <span class="step-num">02</span>
-            <span style="font-size: 2.5rem; display: block; margin-top: 0.5rem; margin-bottom: 0.75rem;">🛠️</span>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">PERSONALIZA</h3>
-            <p style="font-size: 0.88rem; color: var(--color-text-secondary);">Quita o agrega ingredientes extras según tu antojo.</p>
-          </div>
-          <div class="step-card">
-            <span class="step-num">03</span>
-            <span style="font-size: 2.5rem; display: block; margin-top: 0.5rem; margin-bottom: 0.75rem;">💳</span>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">PAGA</h3>
-            <p style="font-size: 0.88rem; color: var(--color-text-secondary);">Selecciona Efectivo, Tarjeta o Pago Móvil seguro.</p>
-          </div>
-          <div class="step-card">
-            <span class="step-num">04</span>
-            <span style="font-size: 2.5rem; display: block; margin-top: 0.5rem; margin-bottom: 0.75rem;">😋</span>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">DISFRUTA</h3>
-            <p style="font-size: 0.88rem; color: var(--color-text-secondary);">Recibe tu pedido caliente servido en tu mesa o delivery.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. PEDIDO POR QR ("¿YA ESTÁS EN EL RESTAURANTE?") -->
-    <section style="padding: 4rem 0;" id="qr-mesa">
-      <div class="landing-container">
-        <div style="background: var(--color-navy); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: clamp(2rem, 4vw, 3.5rem); display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
-          <div>
-            <span class="badge badge-EN_PREPARACION" style="margin-bottom: 0.8rem;">📱 PEDIDO DESDE TU MESA</span>
-            <h2 style="font-size: clamp(1.8rem, 3vw, 2.5rem); font-family: var(--font-display); font-weight: 900; color: #FFFFFF;">¿YA ESTÁS EN EL RESTAURANTE?</h2>
-            <p style="color: var(--color-text-secondary); margin-bottom: 1.75rem;">Escanea el código QR ubicado en tu mesa, visualiza la comanda interactiva y realiza tu pedido sin esperar al garzón.</p>
-            <a href="/static/cliente/app.html?mesa=1" class="btn btn-cta" style="font-size: 1.05rem;">
-              📱 ESCANEAR QR / ELEGIR MESA
-            </a>
-          </div>
-          <div style="text-align: center;">
-            <span style="font-size: 7rem; display: block; filter: drop-shadow(0 10px 20px rgba(8,121,232,0.4));">📲</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 8. BENEFICIOS -->
-    <section style="background: var(--color-dark); padding: 4rem 0; border-y: 1px solid var(--color-border);">
-      <div class="landing-container">
-        <div style="text-align: center; margin-bottom: 3rem;">
-          <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-family: var(--font-display); font-weight: 900; color: #FFFFFF;">¿POR QUÉ ELEGIR DONDE DAVID?</h2>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
-          <div style="background: var(--color-navy); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-            <span style="font-size: 2rem;">⚡</span>
-            <h4 style="color: #FFFFFF; margin: 0.5rem 0;">Preparación Rápida</h4>
-            <p style="font-size: 0.85rem; color: var(--color-text-secondary);">Tiempos de cocción optimizados en menos de 15 minutos.</p>
-          </div>
-          <div style="background: var(--color-navy); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-            <span style="font-size: 2rem;">🥩</span>
-            <h4 style="color: #FFFFFF; margin: 0.5rem 0;">Carne 100% Res</h4>
-            <p style="font-size: 0.85rem; color: var(--color-text-secondary);">Ingredientes frescos y cortes gourmet sin congelar.</p>
-          </div>
-          <div style="background: var(--color-navy); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-            <span style="font-size: 2rem;">📦</span>
-            <h4 style="color: #FFFFFF; margin: 0.5rem 0;">Empaque Térmico</h4>
-            <p style="font-size: 0.85rem; color: var(--color-text-secondary);">Tu comida llega crujiente y caliente a tu domicilio.</p>
-          </div>
-          <div style="background: var(--color-navy); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-            <span style="font-size: 2rem;">⭐</span>
-            <h4 style="color: #FFFFFF; margin: 0.5rem 0;">Puntos de Lealtad</h4>
-            <p style="font-size: 0.85rem; color: var(--color-text-secondary);">Acumula puntos en cada compra y canjea por hamburguesas gratis.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 9. TESTIMONIOS / RESEÑAS REALES -->
-    <section style="padding: 4rem 0;" id="opiniones">
-      <div class="landing-container">
-        <div style="text-align: center; margin-bottom: 3rem;">
-          <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-family: var(--font-display); font-weight: 900;">LO QUE DICEN NUESTROS CLIENTES</h2>
-          <p style="color: var(--color-text-secondary);">Reseñas reales verificadas de comensales satisfechos</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;" id="landing-reviews-grid">
+        <div class="product-toon-grid" id="landing-featured-grid">
           <!-- Creados dinámicamente -->
         </div>
       </div>
     </section>
 
-    <!-- 10. UBICACIÓN / HORARIOS / CONTACTO -->
-    <section style="background: var(--color-navy); padding: 4rem 0; border-y: 1px solid var(--color-border);" id="contacto">
+    <!-- 5. RESEÑAS REALES DE CLIENTES -->
+    <section style="padding: 3.5rem 1.25rem; background: rgba(16, 23, 38, 0.6); border-t: 1px solid var(--toon-border);">
       <div class="landing-container">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
-          <div>
-            <h3 style="color: var(--color-yellow); font-family: var(--font-display); font-size: 1.4rem; margin-top: 0;">📍 UBICACIÓN</h3>
-            <p style="color: #FFFFFF;">Av. Principal de Gourmet #104, Zona Gastronómica.</p>
-            <a href="https://maps.google.com" target="_blank" class="btn btn-outline" style="margin-top: 0.75rem;">🗺️ CÓMO LLEGAR</a>
-          </div>
-          <div>
-            <h3 style="color: var(--color-yellow); font-family: var(--font-display); font-size: 1.4rem; margin-top: 0;">🕒 HORARIOS DE ATENCIÓN</h3>
-            <p style="color: #FFFFFF; margin-bottom: 0.4rem;"><strong>Lunes a Jueves:</strong> 12:00 PM - 10:00 PM</p>
-            <p style="color: #FFFFFF;"><strong>Viernes a Domingo:</strong> 12:00 PM - 11:30 PM</p>
-          </div>
-          <div>
-            <h3 style="color: var(--color-yellow); font-family: var(--font-display); font-size: 1.4rem; margin-top: 0;">📞 CONTACTO & PEDIDOS</h3>
-            <p style="color: #FFFFFF; margin-bottom: 0.4rem;">Teléfono: +502 5555-4321</p>
-            <p style="color: #FFFFFF;">WhatsApp Directo: +502 9876-5432</p>
-          </div>
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+          <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-family: var(--font-display); font-weight: 900; color: #ffffff;">🌟 RESEÑAS DE NUESTROS CLIENTES</h2>
+          <p style="color: var(--text-dim);">Opiniones verificadas registradas en nuestra plataforma</p>
         </div>
-      </div>
-    </section>
 
-    <!-- 11. CTA FINAL -->
-    <section style="background: var(--color-dark); padding: 5rem 0; text-align: center;">
-      <div class="landing-container">
-        <h2 style="font-size: clamp(2rem, 4vw, 3.2rem); font-family: var(--font-display); font-weight: 900; color: #FFFFFF; margin-bottom: 1rem;">¿LISTO PARA COMER?</h2>
-        <p style="color: var(--color-text-secondary); font-size: 1.1rem; max-width: 500px; margin: 0 auto 2rem;">Tu próximo favorito gourmet está a un solo clic de distancia.</p>
-        <a href="/static/cliente/app.html?mesa=5" class="btn btn-cta" style="font-size: 1.2rem; padding: 1rem 2.5rem;">
-          🚀 ORDENAR AHORA
-        </a>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;" id="landing-reviews-grid">
+          <!-- Creados dinámicamente -->
+        </div>
       </div>
     </section>
   </main>
 
-  <nav id="app-bottom-bar" class="bottom-bar">
-    <ul class="bottom-nav-links" style="list-style:none;display:flex;justify-content:space-around;margin:0;padding:0;">
-      <li><a href="#inicio"><span>🏠</span><br/>Inicio</a></li>
-      <li><a href="#menu"><span>🍔</span><br/>Menú</a></li>
-      <li><a href="#promos"><span>🔥</span><br/>Promos</a></li>
-      <li><a href="#qr-mesa"><span>📱</span><br/>QR</a></li>
-      <li><a href="#contacto"><span>📍</span><br/>Contacto</a></li>
-    </ul>
-  </nav>
-
-  <!-- 12. FOOTER CON ACORDEONES RESPONSIVE -->
-  <footer style="background: var(--color-navy); border-top: 1px solid var(--color-border); padding: 3rem 0 2rem; color: var(--color-text-secondary); font-size: 0.88rem;">
+  <!-- FOOTER WEB ESTÁNDAR Y SENCILLO -->
+  <footer style="background: #060910; border-top: 2px solid var(--gold-accent); padding: 3.5rem 1.25rem 2rem 1.25rem; color: var(--text-dim); font-size: 0.88rem;">
     <div class="landing-container">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2.5rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 2.5rem; text-align: left;">
+        
+        <!-- Columna 1: Marca & Descripción -->
         <div>
-          <strong style="color: #FFFFFF; font-size: 1.1rem; font-family: var(--font-display); display: block; margin-bottom: 0.75rem;">DONDE DAVID</strong>
-          <p>Restaurante Gourmet & Fast Food Tech. La mejor calidad artesanal servida en mesa o delivery.</p>
+          <div style="font-family: var(--font-display); font-size: 1.45rem; font-weight: 900; color: var(--gold-accent); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🍔</span> DONDE DAVID
+          </div>
+          <p style="color: var(--text-dim); line-height: 1.6; margin-bottom: 1rem;">
+            Restaurante Gourmet &amp; Fast Food Tech. Las mejores hamburguesas artesanales de res 100% preparadas al instante.
+          </p>
+          <div style="display: flex; gap: 0.5rem; font-size: 0.8rem; color: var(--cyan-accent); font-weight: 800;">
+            <span>📍 Valencia • Sede Principal</span>
+          </div>
         </div>
+
+        <!-- Columna 2: Navegación Web Sencilla -->
         <div>
-          <strong style="color: #FFFFFF; font-size: 1rem; display: block; margin-bottom: 0.75rem;">Menú Rápido</strong>
-          <ul style="list-style: none; padding: 0; line-height: 1.8;">
-            <li><a href="/static/cliente/app.html?cat=hamburguesas" style="color: inherit; text-decoration: none;">Hamburguesas</a></li>
-            <li><a href="/static/cliente/app.html?cat=perros" style="color: inherit; text-decoration: none;">Hot Dogs</a></li>
-            <li><a href="/static/cliente/app.html?cat=combos" style="color: inherit; text-decoration: none;">Combos</a></li>
+          <strong style="color: #ffffff; font-size: 1rem; display: block; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">ENLACES RÁPIDOS</strong>
+          <ul class="standard-footer-links">
+            <li><a href="#inicio">🏠 Inicio</a></li>
+            <li><a href="/static/cliente/app.html">🍔 Menú Interactivo</a></li>
+            <li><a href="/static/cliente/app.html#screen-perfil">🎁 Puntos de Fidelidad</a></li>
+            <li><a href="/login">🔐 Acceso Empleados</a></li>
           </ul>
         </div>
+
+        <!-- Columna 3: Horario y Medios de Pago -->
         <div>
-          <strong style="color: #FFFFFF; font-size: 1rem; display: block; margin-bottom: 0.75rem;">Información</strong>
-          <ul style="list-style: none; padding: 0; line-height: 1.8;">
-            <li><a href="#como-funciona" style="color: inherit; text-decoration: none;">Cómo Pedir</a></li>
-            <li><a href="#qr-mesa" style="color: inherit; text-decoration: none;">Pedido por QR</a></li>
-            <li><a href="#contacto" style="color: inherit; text-decoration: none;">Horarios</a></li>
-          </ul>
+          <strong style="color: #ffffff; font-size: 1rem; display: block; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">HORARIO & ATENCIÓN</strong>
+          <p style="margin: 0 0 0.4rem 0; color: #fff;">🕒 Todos los días: 11:00 AM - 11:00 PM</p>
+          <p style="margin: 0 0 0.8rem 0; color: var(--text-dim);">📱 Delivery directo & Pedidos QR en mesa</p>
+          <div style="font-size: 0.82rem; color: var(--gold-accent); font-weight: 800;">
+            💳 Pago Móvil • Zelle • Tarjetas • Efectivo
+          </div>
         </div>
-        <div>
-          <strong style="color: #FFFFFF; font-size: 1rem; display: block; margin-bottom: 0.75rem;">Métodos de Pago</strong>
-          <p>💵 Efectivo | 💳 Tarjeta | 📱 Pago Móvil</p>
-        </div>
+
       </div>
 
-      <div style="border-top: 1px solid rgba(226,232,240,0.1); padding-top: 1.5rem; text-align: center; font-size: 0.8rem;">
+      <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem; text-align: center; font-size: 0.8rem; color: var(--text-dim);">
         © 2026 DONDE DAVID. Todos los derechos reservados. Sistema desarrollado para Trabajo Especial de Grado.
       </div>
     </div>
@@ -504,13 +282,108 @@
   <script src="/static/js/theme-toggle.js?v=2.0"></script>
   <script src="/static/js/auth.js?v=2.0"></script>
   <script src="/static/js/websocket.js?v=2.0"></script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
 
-  <!-- Script de Carga Dinámica de Productos y Reseñas Real de Backend -->
   <script>
+    let landingPromoIndex = 0;
+    let landingPromoTimer = null;
+
     document.addEventListener("DOMContentLoaded", () => {
+      loadLandingPromoCarousel();
       loadLandingFeaturedProducts();
       loadLandingReviews();
     });
+
+    async function loadLandingPromoCarousel() {
+      const container = document.getElementById("landing-hero-carousel-container");
+      if (!container) return;
+
+      let list = [
+        {
+          id: 1,
+          titulo: "COMBO EXPLOSIVO DAVID 🍔",
+          descripcion: "2 Hamburguesas Artesanales + Papas Rústicas + 2 Bebidas Heladas",
+          banner_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1000",
+          descuento_pct: 20,
+          codigo_cupon: "TOON20"
+        },
+        {
+          id: 2,
+          titulo: "SUPER HOT DOGS CROCANTES 🌭",
+          descripcion: "Doble salchicha premium, lluvia de papas, queso fundido y tocineta",
+          banner_url: "https://images.unsplash.com/photo-1619740455993-9e612b1af08a?w=1000",
+          descuento_pct: 15,
+          codigo_cupon: "HOT15"
+        },
+        {
+          id: 3,
+          titulo: "SHAKES & POSTRES GOURMET 🍰",
+          descripcion: "Malteada Oreo gigante con crema batida y brownie artesanal de chocolate",
+          banner_url: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=1000",
+          descuento_pct: 10,
+          codigo_cupon: "DULCE10"
+        }
+      ];
+
+      try {
+        const res = await fetch("/api/v1/cliente/promociones");
+        if (res.ok) {
+          const fetched = await res.json();
+          if (fetched && fetched.length > 0) list = fetched;
+        }
+      } catch(e) {}
+
+      function renderLandingSlide() {
+        if (landingPromoIndex >= list.length) landingPromoIndex = 0;
+        const p = list[landingPromoIndex];
+        const isVideo = p.banner_url && (p.banner_url.endsWith(".mp4") || p.banner_url.endsWith(".webm"));
+
+        let dotsHtml = list.map((_, idx) => `
+          <span onclick="event.stopPropagation(); setLandingSlide(${idx})" style="width: ${idx === landingPromoIndex ? '22px' : '8px'}; height: 8px; border-radius: 10px; background: ${idx === landingPromoIndex ? 'var(--gold-accent)' : 'rgba(255,255,255,0.4)'}; cursor: pointer; transition: all 0.3s ease; display: inline-block;"></span>
+        `).join('');
+
+        container.innerHTML = `
+          <div style="position: relative; border-radius: 20px; overflow: hidden; height: 280px; border: 2px solid var(--gold-accent); box-shadow: 0 12px 35px rgba(255,183,3,0.4); cursor: pointer;" onclick="window.location.href='/static/cliente/app.html'">
+            ${isVideo ? `
+              <video src="${p.banner_url}" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.85);"></video>
+            ` : `
+              <img src="${p.banner_url}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.85); transition: transform 0.6s ease;" alt="${p.titulo}">
+            `}
+            <div style="position: absolute; inset: 0; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(8,12,20,0.92) 0%, rgba(8,12,20,0.2) 50%, rgba(0,0,0,0.4) 100%);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; font-weight: 900; background: var(--neon-red); color: #fff; padding: 0.3rem 0.85rem; border-radius: 20px;">
+                  🔥 PROMO BOOM ${p.descuento_pct ? `(-${p.descuento_pct}% OFF)` : ''}
+                </span>
+                <span style="font-size: 0.78rem; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid var(--cyan-accent); color: var(--cyan-accent); padding: 0.3rem 0.75rem; border-radius: 20px; font-weight: 900;">
+                  CÓDIGO: ${p.codigo_cupon || 'DAVID'}
+                </span>
+              </div>
+              <div>
+                <h3 style="font-size: 1.5rem; font-weight: 900; color: #fff; margin: 0 0 0.3rem 0; text-shadow: 0 3px 10px rgba(0,0,0,0.9);">${p.titulo}</h3>
+                <p style="font-size: 0.88rem; color: #e2e8f0; margin: 0 0 0.75rem 0; font-weight: 600; text-shadow: 0 2px 6px rgba(0,0,0,0.9);">${p.descripcion || ''}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.65); backdrop-filter: blur(10px); padding: 0.6rem 0.9rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15);">
+                  <div style="display: flex; gap: 0.4rem; align-items: center;">${dotsHtml}</div>
+                  <button class="btn-gold" style="padding: 0.45rem 1rem; font-size: 0.85rem;">🛒 PEDIR EN APP</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      renderLandingSlide();
+      if (!landingPromoTimer) {
+        landingPromoTimer = setInterval(() => {
+          landingPromoIndex = (landingPromoIndex + 1) % list.length;
+          renderLandingSlide();
+        }, 4000);
+      }
+    }
+
+    function setLandingSlide(idx) {
+      landingPromoIndex = idx;
+      loadLandingPromoCarousel();
+    }
 
     async function loadLandingFeaturedProducts() {
       const grid = document.getElementById("landing-featured-grid");
@@ -519,27 +392,29 @@
         const res = await fetch("/api/v1/cliente/productos");
         if (!res.ok) return;
         const products = await res.json();
-        const featured = products.slice(0, 4);
+        const featured = products.filter(p => p.stock > 0).slice(0, 4);
 
         if (featured.length === 0) {
-          grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-secondary);">No hay productos destacados cargados.</p>`;
+          grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim);">No hay productos destacados disponibles.</p>`;
           return;
         }
 
         grid.innerHTML = featured.map(p => `
-            <div class="card product-card fade-in">
-              <div class="product-img-wrapper">
-                <img src="${p.imagen_url || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500'}" alt="${p.nombre}" class="product-img" loading="lazy">
-                <span class="product-price-tag">$${parseFloat(p.precio).toFixed(2)}</span>
-              </div>
-              <div class="product-info">
-                <h3 class="product-title" style="color: #FFFFFF;">${p.nombre}</h3>
-                <p class="product-desc">${p.descripcion || 'Sin descripción'}</p>
-                <a href="/static/cliente/app.html?mesa=5" class="btn btn-cta" style="width: 100%; margin-top: auto; font-size: 0.9rem;">
-                  🛒 AGREGAR Y PEDIR
-                </a>
-              </div>
+          <div class="product-toon-card">
+            <div style="position: relative; overflow: hidden; height: 160px;">
+              <img src="${p.imagen_url || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500'}" style="width: 100%; height: 100%; object-fit: cover;" alt="${p.nombre}">
+              <span style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.75); border: 1px solid var(--gold-accent); color: var(--gold-accent); padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: 900; font-size: 0.85rem;">
+                $${parseFloat(p.precio).toFixed(2)}
+              </span>
             </div>
+            <div style="padding: 1rem; display: flex; flex-direction: column; flex: 1;">
+              <h3 style="font-size: 1.1rem; font-weight: 900; color: #fff; margin: 0 0 0.3rem 0;">${p.nombre}</h3>
+              <p style="font-size: 0.82rem; color: var(--text-dim); margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.descripcion || ''}</p>
+              <a href="/static/cliente/app.html" class="btn-gold" style="width: 100%; margin-top: auto; font-size: 0.85rem; text-decoration: none;">
+                🛒 PEDIR PLATILLO
+              </a>
+            </div>
+          </div>
         `).join('');
       } catch (e) {
         console.error("Error al cargar favoritos en landing:", e);
@@ -554,27 +429,27 @@
         if (!res.ok) return;
         const reviews = await res.json();
         
-        if (reviews.length === 0) {
-          grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-secondary);">Sé el primero en dejar una reseña en Donde David.</p>`;
+        if (!reviews || reviews.length === 0) {
+          grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim);">Sé el primero en calificar a Donde David.</p>`;
           return;
         }
 
         grid.innerHTML = reviews.slice(0, 3).map(r => `
-          <div class="card review-card fade-in" style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                <span style="color: var(--color-yellow);">{"⭐".repeat(r.estrellas || 5)}</span>
-                <span class="badge badge-LISTO" style="font-size: 0.7rem;">✓ Compra verificada</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+                <span style="color: var(--gold-accent); font-size: 1.1rem;">${'⭐'.repeat(Math.min(5, Math.max(1, parseInt(r.estrellas) || 5)))}</span>
+                <span style="font-size: 0.72rem; color: var(--cyan-accent); font-weight: 800; background: rgba(0,245,212,0.1); padding: 0.2rem 0.5rem; border-radius: 12px;">✓ Cliente Verificado</span>
               </div>
-              <p style="font-size: 0.92rem; color: #FFFFFF; font-style: italic; margin-bottom: 1rem;">"${r.comentario}"</p>
+              <p style="font-size: 0.88rem; color: #fff; font-style: italic; margin-bottom: 1rem;">"${r.comentario}"</p>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.75rem; border-top: 1px dashed var(--color-border); padding-top: 0.75rem;">
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--color-primary); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; border-top: 1px solid var(--toon-border); padding-top: 0.75rem;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--gold-gradient); color: #000; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
                 ${r.nombre_cliente ? r.nombre_cliente.charAt(0).toUpperCase() : 'C'}
               </div>
               <div>
-                <strong style="color: #FFFFFF; display: block; font-size: 0.9rem;">${r.nombre_cliente}</strong>
-                <small style="color: var(--color-text-secondary); font-size: 0.75rem;">Cliente Verificado</small>
+                <strong style="color: #fff; display: block; font-size: 0.88rem;">${r.nombre_cliente}</strong>
+                <small style="color: var(--text-dim); font-size: 0.72rem;">Comensal Satisfecho</small>
               </div>
             </div>
           </div>

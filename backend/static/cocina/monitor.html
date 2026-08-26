@@ -15,13 +15,22 @@
   <header id="app-header"></header>
 
   <div class="kds-container" style="padding: 1.5rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; background: rgba(18, 24, 41, 0.75); border: 1px solid var(--border); padding: 0.85rem 1.25rem; border-radius: var(--radius-md);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; background: rgba(18, 24, 41, 0.75); border: 1px solid var(--border); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); flex-wrap: wrap; gap: 0.85rem;">
       <h1 style="font-size: 1.3rem; font-weight: 900; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
         <span>👨‍🍳</span> MONITOR KDS DE COCINA
       </h1>
-      <span class="badge badge-PENDIENTE" id="kds-order-count" style="font-size: 0.88rem; padding: 0.4rem 0.9rem;">Comandas activas: 0</span>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <!-- Selector de Tamaño Ajustable de Tarjetas KDS (Estilo Cashea) -->
+        <span style="font-size: 0.8rem; font-weight: 800; color: var(--gold-accent);">ESCALA KDS:</span>
+        <div style="display: flex; gap: 0.35rem;">
+          <button class="btn btn-outline" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;" onclick="setKDSGridScale('scale-sm')">🔍 80%</button>
+          <button class="btn btn-outline" style="padding: 0.25rem 0.55rem; font-size: 0.75rem; border-color: var(--gold-accent); color: var(--gold-accent);" onclick="setKDSGridScale('scale-md')">📐 100%</button>
+          <button class="btn btn-outline" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;" onclick="setKDSGridScale('scale-lg')">🐘 120%</button>
+        </div>
+        <span class="badge badge-PENDIENTE" id="kds-order-count" style="font-size: 0.88rem; padding: 0.4rem 0.9rem;">Comandas activas: 0</span>
+      </div>
     </div>
-    <div class="kds-grid" id="kds-grid">
+    <div class="kds-grid scale-md" id="kds-grid">
       <!-- Dynamic Order Cards populated via JS -->
     </div>
   </div>
@@ -45,6 +54,7 @@
 
   <script src="/static/js/theme-toggle.js?v=2.0"></script>
   <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
   <script src="/static/js/websocket.js?v=2.0"></script>
   <script src="/static/js/cocina.js?v=2.0"></script>
 </body>

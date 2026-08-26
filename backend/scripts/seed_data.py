@@ -166,7 +166,8 @@ def seed():
         ]
 
         for nom, desc, precio, pr_promo, cat_id, img, ings in productos_data:
-            if not db.query(Producto).filter(Producto.nombre == nom).first():
+            p = db.query(Producto).filter(Producto.nombre == nom).first()
+            if not p:
                 db.add(Producto(
                     nombre=nom,
                     descripcion=desc,
@@ -174,10 +175,12 @@ def seed():
                     precio_promocion=pr_promo,
                     categoria_id=cat_id,
                     imagen_url=img,
-                    stock=40,
+                    stock=100,
                     tiempo_preparacion=12,
                     ingredientes_json=json.dumps(ings)
                 ))
+            else:
+                p.stock = 100
         db.commit()
 
         # 7. Promociones Editables (BOOM! PROMO DEL DÍA)

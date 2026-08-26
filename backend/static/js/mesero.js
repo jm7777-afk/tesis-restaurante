@@ -36,13 +36,13 @@ async function loadMeseroData() {
 
 async function loadMesas() {
   try {
-    const res = await fetch("/api/v1/mesero/mesas");
+    const res = await fetch("/api/v1/mesero/mesas", { headers: Auth.getHeaders() });
     if (res.ok) {
       meseroMesas = await res.json();
       renderMesas();
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error al cargar mesas:", err);
   }
 }
 
@@ -65,13 +65,13 @@ function renderMesas() {
 
 async function loadPedidosActivos() {
   try {
-    const res = await fetch("/api/v1/mesero/pedidos-activos");
+    const res = await fetch("/api/v1/mesero/pedidos-activos", { headers: Auth.getHeaders() });
     if (res.ok) {
       meseroPedidos = await res.json();
       renderPedidosActivos();
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error al cargar pedidos mesero:", err);
   }
 }
 
@@ -84,7 +84,21 @@ function renderPedidosActivos() {
 
   let html = "";
   meseroPedidos.forEach(p => {
-    const itemsStr = p.detalles.map(d => `${d.cantidad}x ${d.producto ? d.producto.nombre : 'Producto'}`).join(', ');
+    // Separa bebidas de comida
+    const bebidas = [];
+    const comidas = [];
+
+    p.detalles.forEach(d => {
+      const prodName = d.producto ? d.producto.nombre : '';
+      const catName = (d.producto && d.producto.categoria) ? d.producto.categoria.nombre.toLowerCase() : '';
+      
+      if (catName.includes("bebida") || prodName.toLowerCase().includes("refresco") || prodName.toLowerCase().includes("jugo") || prodName.toLowerCase().includes("agua") || prodName.toLowerCase().includes("cerveza")) {
+        bebidas.push(`${d.cantidad}x ${prodName}`);
+      } else {
+        comidas.push(`${d.cantidad}x ${prodName}`);
+      }
+    });
+
     const isListo = p.estado === "LISTO";
 
     html += `
@@ -98,7 +112,16 @@ function renderPedidosActivos() {
           </div>
           <div style="font-size: 0.85rem; color: #fff; margin-top: 0.3rem;">Cliente: <strong>${p.nombre_factura || p.nombre_cliente_delivery || 'Comensal'}</strong></div>
           <div style="font-size: 0.85rem; color: var(--gold-accent); font-weight: 800;">Total: ${formatPriceDual(p.total)}</div>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.4rem 0;">${itemsStr}</p>
+          
+          <!-- Bloque de Destacado de BEBIDAS para Entregas Rápidas en Mesa -->
+          ${bebidas.length > 0 ? `
+            <div style="background: rgba(0,245,212,0.1); border: 1px solid var(--cyan-accent); border-radius: 8px; padding: 0.5rem 0.75rem; margin: 0.6rem 0;">
+              <strong style="color: var(--cyan-accent); font-size: 0.78rem; display: block;">🥤 BEBIDAS (ENTREGA INMEDIATA):</strong>
+              <div style="color: #fff; font-size: 0.82rem; font-weight: 700;">${bebidas.join(', ')}</div>
+            </div>
+          ` : ''}
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.4rem 0;"><strong>🍽️ Platos:</strong> ${comidas.join(', ') || 'Sin comida'}</p>
         </div>
 
         <div style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px dashed var(--toon-border); padding-top: 0.75rem;">
@@ -135,7 +158,7 @@ async function submitCambiarMesa() {
   try {
     const res = await fetch(`/api/v1/mesero/pedidos/${selectedPedidoForSwap.id}/cambiar-mesa`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: Auth.getHeaders(),
       body: JSON.stringify({ nueva_mesa: nuevaMesa })
     });
 
@@ -151,7 +174,10 @@ async function submitCambiarMesa() {
 
 async function marcarPedidoEntregado(pedidoId) {
   try {
-    const res = await fetch(`/api/v1/mesero/pedidos/${pedidoId}/marcar-entregado`, { method: "POST" });
+    const res = await fetch(`/api/v1/mesero/pedidos/${pedidoId}/marcar-entregado`, {
+      method: "POST",
+      headers: Auth.getHeaders()
+    });
     if (!res.ok) throw new Error("Error al actualizar estado");
     showToast(`Pedido #${pedidoId} entregado a la mesa`, "success");
     loadMeseroData();

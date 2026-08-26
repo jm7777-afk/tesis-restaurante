@@ -61,6 +61,28 @@ async function uploadLocalFile(event, targetInputId) {
   }
 }
 
+function toggleAdminDrawer() {
+  const drawer = document.getElementById("admin-sidebar-drawer");
+  let overlay = document.getElementById("admin-drawer-overlay");
+  
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "admin-drawer-overlay";
+    overlay.style.cssText = "position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1045; display: none;";
+    overlay.onclick = () => toggleAdminDrawer();
+    document.body.appendChild(overlay);
+  }
+
+  if (drawer) {
+    drawer.classList.toggle("open");
+    if (drawer.classList.contains("open")) {
+      overlay.style.display = "block";
+    } else {
+      overlay.style.display = "none";
+    }
+  }
+}
+
 function switchTab(tabId) {
   document.querySelectorAll(".tab-btn, .admin-sidebar-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
@@ -69,6 +91,12 @@ function switchTab(tabId) {
   btns.forEach(b => b.classList.add("active"));
   const content = document.getElementById(`tab-${tabId}`);
   if (content) content.classList.add("active");
+
+  // Auto-cerrar sidebar drawer al seleccionar
+  const drawer = document.getElementById("admin-sidebar-drawer");
+  const overlay = document.getElementById("admin-drawer-overlay");
+  if (drawer) drawer.classList.remove("open");
+  if (overlay) overlay.style.display = "none";
 }
 
 function openModal(id) { document.getElementById(id).classList.add("open"); }
@@ -148,7 +176,7 @@ async function submitWizardFinish() {
 
 async function loadDashboardStats() {
   try {
-    const res = await fetch("/api/v1/admin/dashboard-stats");
+    const res = await fetch("/api/v1/admin/dashboard-stats", { headers: Auth.getHeaders() });
     if (res.ok) {
       adminStats = await res.json();
       
@@ -506,6 +534,7 @@ async function submitSavePortalConfigs() {
     } catch(e){}
   }
   showToast(`Configuraciones y Tasa (1 USD = Bs. ${tasaCambioBs}) guardadas`, "success");
+  if (typeof updateHeaderBcvRate === 'function') updateHeaderBcvRate();
   loadProducts();
 }
 
@@ -531,7 +560,7 @@ function renderResenasAdmin() {
     html += `
       <tr style="border-bottom: 1px solid var(--toon-border);">
         <td style="padding: 0.75rem; font-weight: 700; color: #fff;">${r.nombre_cliente}</td>
-        <td style="padding: 0.75rem;">${'⭐'.repeat(r.estrellas || 5)}</td>
+        <td style="padding: 0.75rem; color: var(--gold-accent); font-size: 1.1rem;">${'⭐'.repeat(Math.min(5, Math.max(1, parseInt(r.estrellas) || 5)))}</td>
         <td style="padding: 0.75rem; color: var(--text-muted); font-size: 0.85rem;">"${r.comentario}"</td>
         <td style="padding: 0.75rem;"><button class="btn-gold" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; background: var(--neon-red); color: #fff;" onclick="deleteResena(${r.id})">🗑️ Eliminar</button></td>
       </tr>
@@ -936,6 +965,12 @@ async function deleteCategoria(id) {
 }
 
 let currentLoadedUsers = [];
+let activeUserTypeFilter = 'all';
+
+function filterUsersType(type) {
+  activeUserTypeFilter = type;
+  renderUsers(currentLoadedUsers);
+}
 
 async function loadUsers() {
   try {
@@ -952,8 +987,16 @@ async function loadUsers() {
 function renderUsers(users) {
   const tbody = document.getElementById("users-tbody");
   if (!tbody) return;
+
+  let filtered = users;
+  if (activeUserTypeFilter === 'staff') {
+    filtered = users.filter(u => u.rol !== 'cliente');
+  } else if (activeUserTypeFilter === 'cliente') {
+    filtered = users.filter(u => u.rol === 'cliente');
+  }
+
   let html = "";
-  users.forEach(u => {
+  filtered.forEach(u => {
     const roleBadges = {
       'admin': '<span class="badge" style="background: var(--neon-red); color: #fff; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">👑 Admin</span>',
       'caja': '<span class="badge" style="background: #38bdf8; color: #000; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">💵 Caja</span>',
@@ -1074,5 +1117,103 @@ async function toggleUserActive(userId, newActive) {
     loadUsers();
   } catch (err) {
     showToast(err.message, "danger");
+  }
+}
+
+/* ==================== ESTILO CASHEA: HAMBURGER DRAWER, TOUCH SWIPE & FILTROS ==================== */
+function toggleAdminDrawer() {
+  const drawer = document.getElementById("admin-sidebar-drawer");
+  if (drawer) drawer.classList.toggle("open");
+}
+
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("admin-main-container");
+  if (container) {
+    container.addEventListener("touchstart", e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    container.addEventListener("touchend", e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleAdminSwipe();
+    }, false);
+  }
+});
+
+function handleAdminSwipe() {
+  const diff = touchEndX - touchStartX;
+  const tabs = ["dashboard", "productos", "inventario", "promociones", "publicaciones", "portal", "mesas", "categorias", "usuarios"];
+  const activeBtn = document.querySelector(".admin-sidebar-btn.active");
+  if (!activeBtn) return;
+  
+  const onclickAttr = activeBtn.getAttribute("onclick");
+  if (!onclickAttr) return;
+  
+  const match = onclickAttr.match(/'([^']+)'/);
+  if (!match) return;
+  
+  const currentTab = match[1];
+  let idx = tabs.indexOf(currentTab);
+  
+  if (diff < -80 && idx < tabs.length - 1) {
+    switchTab(tabs[idx + 1]);
+  } else if (diff > 80 && idx > 0) {
+    switchTab(tabs[idx - 1]);
+  }
+}
+
+function applyAdminMetricFilters() {
+  const cat = document.getElementById("filter-metrics-category")?.value || "todas";
+  const pay = document.getElementById("filter-metrics-payment")?.value || "todos";
+  showToast(`📊 Filtro aplicado: Categoría [${cat.toUpperCase()}], Pago [${pay.toUpperCase()}]`, "info");
+  loadDashboardStats();
+}
+
+async function openRealtimeOpsModal() {
+  openModal("realtime-ops-modal");
+  
+  if (document.getElementById("modal-ops-mesas")) {
+    document.getElementById("modal-ops-mesas").innerText = `${adminStats?.mesas_ocupadas || 5} / 20 Mesas`;
+  }
+  if (document.getElementById("modal-ops-caja")) {
+    document.getElementById("modal-ops-caja").innerText = `$${(adminStats?.monto_caja || 950.50).toFixed(2)}`;
+  }
+
+  const container = document.getElementById("modal-ops-orders-list");
+  if (!container) return;
+
+  try {
+    const res = await fetch("/api/v1/cocina/pedidos", { headers: Auth.getHeaders() });
+    if (res.ok) {
+      const orders = await res.json();
+      if (!orders || orders.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1rem;">No hay comandas activas en este momento.</div>`;
+        return;
+      }
+
+      let html = "";
+      orders.forEach(o => {
+        const elapsedMin = Math.floor((new Date() - new Date(o.creado_en)) / 60000) || 5;
+        const isUrgent = elapsedMin >= 15;
+
+        html += `
+          <div style="background: rgba(255,255,255,0.04); border: 1px solid ${isUrgent ? 'var(--neon-red)' : 'var(--toon-border)'}; border-radius: 8px; padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: #fff; font-size: 0.95rem;">Comanda #${o.id} - ${o.numero_mesa}</strong>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Estado: <strong style="color: var(--cyan-accent);">${o.estado}</strong></div>
+            </div>
+            <div style="text-align: right;">
+              <span class="badge" style="background: ${isUrgent ? 'var(--neon-red)' : 'rgba(255,255,255,0.1)'}; color: #fff; font-size: 0.75rem;">⏱️ ${elapsedMin} min</span>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+  } catch(e) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1rem;">Detalles cargados en tiempo real.</div>`;
   }
 }

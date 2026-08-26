@@ -8,6 +8,12 @@
   <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
   <link rel="stylesheet" href="/static/css/index.css?v=2.0">
   <style>
+    .product-modal-backdrop.open {
+      display: flex !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      z-index: 99999 !important;
+    }
     body.pos-body {
       background: var(--color-dark);
       color: #FFFFFF;
@@ -212,30 +218,22 @@
 <nav id="app-sidebar"></nav>
   <!-- Header POS Registradora con Logo Oficial -->
   <header id="app-header"></header>
-    <div style="display: flex; align-items: center; gap: 0.8rem;">
-      <img src="/static/images/logo-donde-david.jpg" style="height: 48px; border-radius: 50%; border: 2px solid var(--color-yellow);" alt="Donde David Logo">
-      <div>
-        <h1 style="font-size: 1.2rem; font-weight: 900; font-family: var(--font-display); margin: 0; color: var(--color-yellow); line-height: 1;">DONDE DAVID TOUCH POS</h1>
-        <small style="color: #FFFFFF; opacity: 0.8; font-size: 0.7rem; font-weight: 700;">GESTIÓN INTEGRAL DE CAJA Y FACTURACIÓN</small>
-      </div>
-    </div>
 
-    <!-- Switcher de Vistas -->
-    <div style="display: flex; gap: 0.5rem;">
+    <!-- Switcher de Vistas Completo (Estilo Cashea) -->
+    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.75rem 1rem;">
       <button class="mc-mode-btn active" id="view-btn-pos" onclick="switchPosMainView('pos')">🖥️ POS TOUCH</button>
-      <button class="mc-mode-btn" id="view-btn-queue" onclick="switchPosMainView('queue')">⏳ MESAS & CUENTAS (<span id="pending-count">0</span>)</button>
-      <button class="mc-mode-btn" id="view-btn-history" onclick="switchPosMainView('history')">📄 FACTURAS TURNO</button>
+      <button class="mc-mode-btn" id="view-btn-queue" onclick="switchPosMainView('queue')">🧾 CUENTAS Y PAGOS POR COBRAR (<span id="pending-count">0</span>)</button>
+      <button class="mc-mode-btn" id="view-btn-postres" onclick="switchPosMainView('postres')">🍰 POSTRES (CAJERA)</button>
+      <button class="mc-mode-btn" id="view-btn-deliverys" onclick="switchPosMainView('deliverys')">🛵 DELIVERYS</button>
+      <button class="mc-mode-btn" id="view-btn-history" onclick="switchPosMainView('history')">📄 FACTURAS</button>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 0.75rem;">
-      <button class="theme-toggle-btn" onclick="toggleThemeMode()">🌓 TEMA</button>
-      <button class="btn btn-outline" style="min-height: 38px; padding: 0.4rem 0.8rem; font-size: 0.78rem; border-color: var(--color-yellow); color: var(--color-yellow);" onclick="openModal('caja-guide-modal')">❓ GUÍA CAJA</button>
-      <div style="text-align: right; font-size: 0.8rem;">
-        <div style="color: var(--color-yellow); font-weight: 800;" id="shift-number-label">Caja: #1 Activa</div>
-        <div style="color: var(--color-success); font-weight: 900;" id="shift-sales-label">$0.00</div>
+    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0 1rem; margin-bottom: 0.5rem;">
+      <div style="font-size: 0.8rem;">
+        <span style="color: var(--color-yellow); font-weight: 800;" id="shift-number-label">Caja: #1 Activa</span> | 
+        <span style="color: var(--color-success); font-weight: 900;" id="shift-sales-label">$0.00</span>
       </div>
       <div id="shift-actions"></div>
-      <button class="btn btn-cta" style="min-height: 38px; padding: 0.4rem 0.8rem; font-size: 0.78rem;" onclick="Auth.logout()">🚪 Salir</button>
     </div>
   </header>
   <script src="/static/js/theme-toggle.js"></script>
@@ -270,14 +268,20 @@
         <h3 style="font-size: 1.1rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0; margin-bottom: 0.75rem;">🛒 PEDIDO PRESENCIAL CAJA</h3>
         
         <!-- Modalidad Order Tabs -->
-        <div class="mc-mode-tabs">
+        <div class="mc-mode-tabs" style="margin-bottom: 0.75rem;">
           <button class="mc-mode-btn active" id="type-btn-llevar" onclick="setPosOrderType('llevar')">🛍️ Para Llevar</button>
           <button class="mc-mode-btn" id="type-btn-mesa" onclick="setPosOrderType('mesa')">🍽️ Comer Aquí</button>
           <button class="mc-mode-btn" id="type-btn-delivery" onclick="setPosOrderType('delivery')">🛵 Delivery</button>
         </div>
 
+        <!-- BÚSQUEDA DE CLIENTE REGISTRADO POR ID O NOMBRE (REQUERIMIENTO OFICIAL) -->
+        <div style="position: relative; margin-bottom: 0.6rem;">
+          <input type="text" id="pos-customer-search-input" class="form-control" style="font-size: 0.85rem; padding: 0.45rem; border-color: var(--cyan-accent); color: var(--cyan-accent); font-weight: 800;" placeholder="🔍 Buscar Cliente por ID (ej. CLI-0042) o Nombre..." oninput="searchCustomerPosLive()">
+          <div id="pos-customer-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--toon-card); border: 1px solid var(--cyan-accent); border-radius: 10px; z-index: 100; max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.85);"></div>
+        </div>
+
         <div class="form-group" style="margin-bottom: 0.6rem;">
-          <input type="text" id="pos-mesa-input" class="form-control" style="font-size: 0.85rem; padding: 0.4rem;" value="Mostrador" placeholder="Mesa # o Nombre Cliente">
+          <input type="text" id="pos-mesa-input" class="form-control" style="font-size: 0.85rem; padding: 0.4rem;" value="Mostrador" placeholder="Mesa # o Nombre / ID Cliente">
         </div>
 
         <!-- Lista de Items en Ticket -->
@@ -324,10 +328,23 @@
 
   </div>
 
-  <!-- CONTENIDO 2: PEDIDOS PENDIENTES DE MESAS / CUENTAS -->
+  <!-- CONTENIDO 2: MAESTRO UNIFICADO DE CUENTAS, MESAS Y PAGOS DIGITALES POR COBRAR -->
   <div id="view-queue-container" style="display: none; max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
-    <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0; margin-bottom: 1.25rem;">⏳ CUENTAS Y PEDIDOS EN ESPERA DE COBRO</h2>
-    <div id="pending-orders-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.85rem;">
+      <div>
+        <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin: 0;">🧾 CUENTAS, PAGOS Y PEDIDOS EN ESPERA DE COBRO</h2>
+        <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin: 0.2rem 0 0 0;">Visualización unificada de comandas de salón, pagos digitales y búsqueda por ID.</p>
+      </div>
+      <span class="badge" style="background: var(--color-yellow); color: #000; font-size: 0.9rem; padding: 0.4rem 0.85rem; border-radius: 20px; font-weight: 900;" id="pending-count">0 En Espera</span>
+    </div>
+
+    <!-- BUSCADOR INTERACTIVO EN TIEMPO REAL POR ID DE PEDIDO (#104), CÓDIGO O CLIENTE -->
+    <div class="form-group" style="margin-bottom: 1.25rem; position: relative;">
+      <input type="text" id="pos-queue-search-input" class="form-control" placeholder="🔍 BUSCAR CUENTA O PAGO POR ID (#104 / 104), CÓDIGO CLIENTE (CLI-0042) O NOMBRE..." style="font-size: 0.95rem; font-weight: 800; border: 2px solid var(--color-yellow); padding: 0.75rem 1rem 0.75rem 2.8rem; background: rgba(0,0,0,0.5); color: #fff;" oninput="searchPosQueueLive()">
+      <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem;">🔎</span>
+    </div>
+
+    <div id="pending-orders-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.25rem;"></div>
   </div>
 
   <!-- CONTENIDO 3: HISTORIAL DE FACTURAS -->
@@ -347,7 +364,39 @@
         <tbody id="paid-orders-tbody"></tbody>
       </table>
     </div>
+  <!-- CONTENIDO 4: PREPARACIÓN DE POSTRES (PREPARADOS POR LA CAJERA) -->
+  <div id="view-postres-container" style="display: none; max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin: 0;">🍰 MONITOR DE PREPARACIÓN DE POSTRES (CAJA)</h2>
+      <span class="badge" style="background: var(--color-yellow); color: #000; font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 900;" id="postres-queue-count">0 Postres Pendientes</span>
+    </div>
+    <p style="color: var(--color-text-secondary); font-size: 0.88rem; margin-top: -0.5rem; margin-bottom: 1.25rem;">La cajera prepara los postres solicitados por clientes en mesa y delivery.</p>
+
+    <div id="postres-grid-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
+      <!-- Tarjetas de Postres Generadas Dinámicamente -->
+    </div>
   </div>
+
+  <!-- CONTENIDO 5: CONFIRMACIÓN DE PAGOS DIGITALES APP CLIENTE -->
+  <div id="view-app-payments-container" style="display: none; max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: var(--cyan-accent); margin: 0;">📱 PAGOS DIGITALES APP CLIENTE POR CONFIRMAR</h2>
+      <span class="badge" style="background: var(--cyan-accent); color: #000; font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 900;" id="app-payments-count">0 Pagos por Confirmar</span>
+    </div>
+    <p style="color: var(--color-text-secondary); font-size: 0.88rem; margin-top: -0.5rem; margin-bottom: 1.25rem;">Verifica las referencias de Pago Móvil / Transferencia enviadas por los clientes desde la app antes de liberar a cocina.</p>
+    <div id="app-payments-grid-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;"></div>
+  </div>
+
+  <!-- CONTENIDO 6: GESTIÓN DE DELIVERYS Y MOTORIZADOS -->
+  <div id="view-deliverys-container" style="display: none; max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: var(--gold-accent); margin: 0;">🛵 GESTIÓN DE ENVÍOS DELIVERY</h2>
+      <span class="badge" style="background: var(--gold-accent); color: #000; font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 900;" id="deliverys-count">0 Envíos Activos</span>
+    </div>
+    <p style="color: var(--color-text-secondary); font-size: 0.88rem; margin-top: -0.5rem; margin-bottom: 1.25rem;">Asignación de motorizados, verificación de pago previo y envío con mapa de ubicación GPS.</p>
+    <div id="deliverys-grid-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;"></div>
+  </div>
+
 
   <!-- MODAL GUÍA DE USO DE CAJA POS -->
   <div class="product-modal-backdrop" id="caja-guide-modal">
@@ -404,35 +453,61 @@
     </div>
   </div>
 
-  <!-- Modal Cobro POS regular -->
+  <!-- PASARELA DIGITAL DE PAGO EN CAJA (ESTILO CASHEA / STRIPE) -->
   <div class="product-modal-backdrop" id="payment-modal">
-    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+    <div class="product-modal-card" style="max-width: 470px; padding: 1.5rem;">
       <button class="modal-close-btn" onclick="closeModal('payment-modal')">&times;</button>
-      <h3 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0;">💳 FACTURAR Y COBRAR PEDIDO <span id="pay-order-id">#0</span></h3>
       
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.3rem;"><span>Ubicación:</span><strong id="pay-order-mesa" style="color: #FFFFFF;">Mesa 5</strong></div>
-        <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 900; color: var(--color-yellow); border-top: 1px dashed var(--color-border); padding-top: 0.5rem; margin-top: 0.5rem;"><span>TOTAL A PAGAR:</span><span id="pay-order-total">$0.00</span></div>
+      <!-- Security Badge Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--toon-border); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.4rem;">🔒</span>
+          <div>
+            <strong style="font-size: 0.95rem; color: #fff; display: block; line-height: 1;">PASARELA DIGITAL EN CAJA</strong>
+            <small style="color: var(--cyan-accent); font-size: 0.7rem; font-weight: 800;">DONDE DAVID POS • FACTURACIÓN EN VIVO</small>
+          </div>
+        </div>
+        <span class="badge" style="background: var(--gold-accent); color: #000; font-weight: 900; font-size: 0.75rem;" id="pay-order-id">#0</span>
       </div>
 
-      <div class="form-group"><label>NIT Cliente (Factura)</label><input type="text" id="pay-nit-input" class="form-control" value="CF"></div>
-      <div class="form-group"><label>Nombre Factura / Cliente</label><input type="text" id="pay-nombre-input" class="form-control" value="Consumidor Final"></div>
-      <div class="form-group">
-        <label>Método de Pago</label>
-        <select id="pay-method-select" class="form-control" onchange="calculateChange()">
-          <option value="Efectivo">💵 Efectivo</option>
-          <option value="Tarjeta">💳 Tarjeta de Crédito / Débito</option>
-          <option value="Pago Móvil">📱 Pago Móvil / Transferencia</option>
+      <!-- Resumen Total $ / Bs. -->
+      <div style="background: linear-gradient(135deg, rgba(255,183,3,0.15), rgba(0,245,212,0.1)); border: 1.5px solid var(--gold-accent); border-radius: 12px; padding: 1rem; text-align: center; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">
+          <span>UBICACIÓN / MESA:</span>
+          <strong id="pay-order-mesa" style="color: #fff;">Mesa 1</strong>
+        </div>
+        <small style="color: var(--text-muted); font-weight: 800; text-transform: uppercase;">TOTAL NETO A COBRAR EN PASARELA:</small>
+        <div style="font-size: 2rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.2rem;" id="pay-order-total">$0.00</div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0.75rem;">
+        <label style="font-size: 0.82rem; color: #fff;">MÉTODO DE PAGO EN PASARELA</label>
+        <select id="pay-method-select" class="form-control" style="font-size: 0.95rem; font-weight: 800;" onchange="calculateChange()">
+          <option value="Efectivo">💵 Efectivo ($ USD / Bs.)</option>
+          <option value="Pago Móvil">📱 Pago Móvil (Verificación 4 Dígitos)</option>
+          <option value="Tarjeta">💳 Tarjeta de Crédito / Débito (Punto POS)</option>
+          <option value="Zelle">🇺🇸 Zelle / Transferencia</option>
         </select>
       </div>
-      <div class="form-group"><label>Monto Recibido ($)</label><input type="number" step="0.01" id="pay-received-input" class="form-control" placeholder="0.00" oninput="calculateChange()"></div>
 
-      <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid var(--color-success); padding: 0.75rem; border-radius: var(--radius-sm); text-align: center; margin-bottom: 1rem;">
-        <div style="font-size: 0.75rem; color: var(--color-text-secondary);">CAMBIO A ENTREGAR AL CLIENTE</div>
-        <div style="font-size: 1.6rem; font-weight: 900; color: var(--color-success);" id="pay-change-display">$0.00</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <div class="form-group" style="margin: 0;"><label style="font-size: 0.8rem; color: #fff;">NIT Cliente</label><input type="text" id="pay-nit-input" class="form-control" value="CF"></div>
+        <div class="form-group" style="margin: 0;"><label style="font-size: 0.8rem; color: #fff;">Nombre Factura</label><input type="text" id="pay-nombre-input" class="form-control" value="Consumidor Final"></div>
       </div>
 
-      <button class="btn btn-cta" style="width: 100%; font-size: 1.1rem;" onclick="submitPayment()">✅ PROCESAR COBRO Y EMITIR FACTURA</button>
+      <div class="form-group" style="margin-bottom: 0.75rem;">
+        <label style="font-size: 0.82rem; color: #fff;">Monto Recibido ($ USD)</label>
+        <input type="number" step="0.01" id="pay-received-input" class="form-control" placeholder="0.00" style="font-size: 1.1rem; font-weight: 900; color: var(--gold-accent);" oninput="calculateChange()">
+      </div>
+
+      <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid var(--color-success); padding: 0.75rem; border-radius: 10px; text-align: center; margin-bottom: 1.25rem;">
+        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">CAMBIO / VUELTO A ENTREGAR AL CLIENTE:</div>
+        <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-success);" id="pay-change-display">$0.00 (Bs. 0.00)</div>
+      </div>
+
+      <button class="btn btn-cta" style="width: 100%; font-size: 1.05rem; font-weight: 900; padding: 0.85rem;" onclick="submitPayment()">
+        🔒 PROCESAR COBRO Y EMITIR FACTURA
+      </button>
     </div>
   </div>
 
@@ -449,7 +524,8 @@
 
   <!-- Modal Apertura Shift -->
   <div class="product-modal-backdrop" id="open-shift-modal">
-    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem; position: relative;">
+      <button class="modal-close-btn" onclick="closeModal('open-shift-modal')">&times;</button>
       <h3 style="font-size: 1.3rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0;">🟢 APERTURA DE TURNO DE CAJA</h3>
       <div class="form-group"><label>Monto Inicial de Apertura en Caja ($)</label><input type="number" step="0.01" id="monto-apertura-input" class="form-control" value="200.00"></div>
       <button class="btn btn-success" style="width: 100%; margin-top: 1rem;" onclick="submitAbrirTurno()">🟢 ABRIR TURNO DE CAJA</button>
@@ -457,6 +533,7 @@
   </div>
 
   <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
   <script src="/static/js/websocket.js?v=2.0"></script>
   <script src="/static/js/caja.js?v=2.0"></script>
 </body>

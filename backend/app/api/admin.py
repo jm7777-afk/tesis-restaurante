@@ -515,7 +515,7 @@ async def delete_producto_admin(producto_id: int, db: Session = Depends(get_db))
 
 # ==================== CONFIGURACIONES GLOBALES (HISTORIA & REDES) ====================
 @router.post("/configuraciones")
-def update_configuracion_admin(data: ConfiguracionUpdate, db: Session = Depends(get_db)):
+async def update_configuracion_admin(data: ConfiguracionUpdate, db: Session = Depends(get_db)):
     c = db.query(Configuracion).filter(Configuracion.clave == data.clave).first()
     if not c:
         c = Configuracion(clave=data.clave, valor=data.valor)
@@ -523,6 +523,10 @@ def update_configuracion_admin(data: ConfiguracionUpdate, db: Session = Depends(
     else:
         c.valor = data.valor
     db.commit()
+    try:
+        from backend.app.websockets.connection_manager import ws_manager
+        await ws_manager.broadcast_event("CONFIGURACION_ACTUALIZADA", {"clave": data.clave, "valor": data.valor})
+    except Exception: pass
     return {"clave": data.clave, "valor": data.valor}
 
 # ==================== AUDITORIA & LOGS ====================
