@@ -561,6 +561,39 @@
     </div>
   </div>
 
+  <!-- MODAL DE INFORMACIÓN DETALLADA Y CÓDIGO QR DE MESA (REQUERIMIENTO #5) -->
+  <div class="product-modal-backdrop" id="header-table-info-modal">
+    <div class="product-modal-card" style="max-width: 420px; padding: 1.5rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('header-table-info-modal')">&times;</button>
+      <span style="font-size: 2.8rem;">🍽️</span>
+      <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.3rem;" id="table-info-modal-title">MESA #1 DETALLES</h3>
+      <div style="background: rgba(0,245,212,0.06); border: 1px solid var(--cyan-accent); border-radius: 12px; padding: 0.85rem; margin: 1rem 0; text-align: left;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+          <span style="color: var(--text-muted);">Mesa Asignada:</span>
+          <strong style="color: #fff;" id="table-info-modal-num">Mesa #1</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+          <span style="color: var(--text-muted);">Estado del Salón:</span>
+          <span class="badge badge-success" id="table-info-modal-status" style="font-size: 0.75rem; padding: 0.2rem 0.55rem;">🟢 LIBRE / ACTIVA</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem;">
+          <span style="color: var(--text-muted);">Capacidad:</span>
+          <strong style="color: var(--gold-accent);">4 Personas</strong>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CÓDIGO QR OFICIAL DE LA MESA:</p>
+        <img id="table-info-modal-qr-img" src="/api/v1/cliente/qr/1" style="width: 180px; height: 180px; border-radius: 14px; border: 2px solid var(--gold-accent); box-shadow: 0 4px 20px rgba(255,188,13,0.3);" alt="QR Mesa">
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn-gold" style="flex: 1; font-size: 0.88rem;" onclick="closeModal('header-table-info-modal'); openQrScannerModal();">📷 ESCANEAR OTRO QR</button>
+        <button class="btn-gold" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--toon-border); font-size: 0.88rem;" onclick="closeModal('header-table-info-modal')">CERRAR</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DE SELECCIÓN DE MODALIDAD (MESA / LLEVAR / DELIVERY) - ESTILO CASHEA -->
   <div class="product-modal-backdrop" id="order-modality-modal">
     <div class="product-modal-card" style="max-width: 460px; padding: 1.75rem; text-align: center;">
@@ -698,22 +731,51 @@
     </div>
   </div>
 
-  <!-- MODAL SELECCIÓN DE UBICACIÓN MAPA DELIVERY (LEAFLET GPS PICKER) -->
+  <!-- MODAL DETECCIÓN Y UBICACIÓN GPS DELIVERY 1-CLIC (DONDE DAVID) -->
   <div class="product-modal-backdrop" id="delivery-map-modal">
-    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+    <div class="product-modal-card" style="max-width: 490px; padding: 1.75rem; text-align: center; max-height: 90vh; overflow-y: auto;">
       <button class="modal-close-btn" onclick="closeModal('delivery-map-modal')">&times;</button>
-      <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--cyan-accent); margin-top: 0;">📍 SELECCIONA TU UBICACIÓN DE ENTREGA</h3>
-      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 0.75rem;">Arrastra el marcador en el mapa para fijar tu dirección exacta de entrega.</p>
+      
+      <span style="font-size: 3rem;">📡</span>
+      <h3 style="font-size: 1.45rem; font-weight: 900; color: var(--gold-accent); margin-top: 0.2rem; font-family: var(--font-display);">UBICACIÓN DE ENTREGA DELIVERY</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">Comparte tu ubicación exacta en 1-clic sin necesidad de buscar direcciones.</p>
 
-      <div id="leaflet-map-container" style="width: 100%; height: 240px; border-radius: 12px; border: 2px solid var(--cyan-accent); margin-bottom: 0.85rem;"></div>
+      <!-- ⚡ BOTÓN PRINCIPAL: DETECCIÓN GPS EN 1-CLIC -->
+      <button class="btn-gold" id="btn-detect-1click-gps" style="width: 100%; padding: 1.1rem; font-size: 1.05rem; font-weight: 900; background: linear-gradient(135deg, #00f5d4 0%, #00b4d8 100%); color: #000; border: 2px solid #ffffff; box-shadow: 0 8px 30px rgba(0,245,212,0.45); margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer;" onclick="getDeviceGPSLocationOneClick()">
+        <span style="font-size: 1.4rem;">📍</span>
+        <span>COMPARTIR MI UBICACIÓN GPS ACTUAL (1-CLIC)</span>
+      </button>
 
-      <div class="form-group" style="margin-bottom: 0.75rem;">
-        <label style="font-size: 0.82rem; color: var(--text-primary);">Dirección Detallada / Punto de Referencia</label>
-        <input type="text" id="map-address-input" class="form-control" placeholder="Ej. Res. Las Flores, Apto 4B, frente a la farmacia">
+      <!-- BANNER DE ESTADO Y RESULTADO DE UBICACIÓN GPS -->
+      <div id="gps-status-badge" style="display: none; background: rgba(0,245,212,0.12); border: 1.5px solid var(--cyan-accent); border-radius: 14px; padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #fff; text-align: left;">
       </div>
 
-      <button class="btn-gold" style="width: 100%; font-size: 1rem;" onclick="confirmDeliveryMapLocation()">
-        ✅ CONFIRMAR UBICACIÓN Y CONTINUAR
+      <!-- Formulario de Datos de Entrega -->
+      <div style="text-align: left; background: rgba(255,255,255,0.03); border: 1px solid var(--toon-border); border-radius: 14px; padding: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="font-size: 0.82rem; font-weight: 800; color: var(--gold-accent);">👤 Nombre Completo</label>
+          <input type="text" id="deliv-nombre" class="form-control" placeholder="Ej. Carlos Rodríguez">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="font-size: 0.82rem; font-weight: 800; color: var(--gold-accent);">📞 Teléfono de Contacto</label>
+          <input type="text" id="deliv-telefono" class="form-control" placeholder="Ej. +58 414 123 4567">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.25rem;">
+          <label style="font-size: 0.82rem; font-weight: 800; color: var(--gold-accent);">📍 Dirección / Coordenadas GPS Capturadas</label>
+          <input type="text" id="deliv-direccion" class="form-control" placeholder="Presiona el botón superior para capturar automáticamente o escribe un punto de referencia...">
+        </div>
+      </div>
+
+      <!-- Visualizador Secundario de Mapa Interactivo Leaflet -->
+      <div style="margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <small style="color: var(--text-muted); font-weight: 700; font-size: 0.78rem;">🗺️ VISTA PREVIA MAPA INTERACTIVO (OPCIONAL):</small>
+        </div>
+        <div id="leaflet-map-container" style="width: 100%; height: 180px; border-radius: 12px; border: 1px solid var(--toon-border);"></div>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; font-size: 1.05rem; padding: 0.85rem;" onclick="confirmDeliveryMapLocation()">
+        🚀 CONFIRMAR Y IR A LA PASARELA DE PAGO
       </button>
     </div>
   </div>

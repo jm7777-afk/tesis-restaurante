@@ -1,0 +1,141 @@
+/* ============================================================ */
+/* COMPONENTES REUTILIZABLES - DONDE DAVID RESTAURANT SYSTEM      */
+/* ============================================================ */
+
+/* Tarjetas Reutilizables */
+.card {
+  background: var(--toon-card, #141c2e);
+  border: 1px solid var(--toon-border, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-md, 16px);
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  border-color: var(--gold-accent, #ffb703);
+  transform: translateY(-2px);
+}
+
+.card-primary { border-left: 4px solid var(--gold-accent, #ffb703); }
+.card-cyan { border-left: 4px solid var(--cyan-accent, #00f5d4); }
+.card-success { border-left: 4px solid #22c55e; }
+.card-danger { border-left: 4px solid #ff4757; }
+
+/* Botones Reutilizables */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.btn-primary, .btn-gold {
+  background: linear-gradient(135deg, #ffb703, #fb8500);
+  color: #000000;
+  box-shadow: 0 4px 15px rgba(255, 183, 3, 0.3);
+}
+
+.btn-primary:hover, .btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 183, 3, 0.5);
+}
+
+.btn-cyan {
+  background: linear-gradient(135deg, #00f5d4, #00b4d8);
+  color: #000000;
+  box-shadow: 0 4px 15px rgba(0, 245, 212, 0.3);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: #FFFFFF;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff4757, #dc2626);
+  color: #FFFFFF;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--toon-border, rgba(255, 255, 255, 0.2));
+  color: #FFFFFF;
+}
+
+/* Inputs Reutilizables */
+.input, .form-control {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: rgba(16, 23, 38, 0.8);
+  border: 1.5px solid var(--toon-border, rgba(255, 255, 255, 0.15));
+  border-radius: 10px;
+  color: #FFFFFF;
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus, .form-control:focus {
+  outline: none;
+  border-color: var(--gold-accent, #ffb703);
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.3);
+}
+
+/* Badges Reutilizables */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.badge-pendiente { background: var(--gold-accent, #ffb703); color: #000000; }
+.badge-en_preparacion { background: var(--cyan-accent, #00f5d4); color: #000000; }
+.badge-listo { background: #22c55e; color: #FFFFFF; }
+.badge-cancelado { background: #ff4757; color: #FFFFFF; }
+
+/* Modales Reutilizables */
+.product-modal-backdrop, .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-modal-backdrop.open, .modal-overlay.open {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.product-modal-card, .modal-content {
+  background: var(--toon-card, #141c2e);
+  border: 1.5px solid var(--gold-accent, #ffb703);
+  border-radius: 20px;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}

@@ -22,7 +22,6 @@ def test_readiness_check():
     assert data["status"] in ["ready", "degraded"]
 
 def test_unauthorized_admin_access_fails():
-    # Cliente no autenticado intentando acceder a usuarios del admin
     response = client.get("/api/v1/admin/usuarios")
     assert response.status_code in [401, 403]
 
@@ -47,13 +46,28 @@ def test_login_demo_admin():
     assert data["usuario"]["rol"] == "admin"
 
 def test_rbac_client_forbidden_on_caja():
-    # Login como cliente normal
     login_res = client.post("/api/v1/auth/login", json={
         "nombre_usuario": "cliente1",
         "password": "cliente123"
     })
     if login_res.status_code == 200:
         token = login_res.json()["access_token"]
-        # Intentar acceder a caja con token de cliente
         caja_res = client.get("/api/v1/caja/turno-activo", headers={"Authorization": f"Bearer {token}"})
         assert caja_res.status_code == 403
+
+def test_financial_insufficient_payment_rejected():
+    login_res = client.post("/api/v1/auth/login", json={
+        "nombre_usuario": "cajero1",
+        "password": "caja123"
+    })
+    if login_res.status_code == 200:
+        token = login_res.json()["access_token"]
+        # Intentar cobrar pedido rapido con monto insuficiente
+        res = client.post("/api/v1/caja/crear-y-cobrar-rapido", headers={"Authorization": f"Bearer {token}"}, json={
+            "numero_mesa": "Mostrador",
+            "tipo": "llevar",
+            "metodo_pago": "Efectivo",
+            "monto_recibido": 0.50, # Insuficiente para producto de $8+
+            "detalles": [{"producto_id": 1, "cantidad": 1, "personalizaciones": None}]
+        })
+        assert res.status_code == 400

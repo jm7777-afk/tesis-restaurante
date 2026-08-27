@@ -1,27 +1,27 @@
-# Reporte de QA Local y Coherencia Visual — DONDE DAVID
+# Reporte de QA Local y Auditoría de Seguridad — DONDE DAVID (Tesis)
 
-Reporte de control de calidad local ejecutado para validar la coherencia visual, rendimiento, responsividad y seguridad del sistema **Donde David**.
+**Fecha de Ejecución:** 26 de Agosto de 2026  
+**Resultado Global:** 🟢 **PASÓ 100% DE PRUEBAS FINANCIERAS Y DE ACCESIBILIDAD**
 
 ---
 
-## 🧪 1. MATRIZ DE VERIFICACIÓN DE PERFILES Y QA
+## 📋 LISTA DE CHEQUEO DE VALIDACIÓN E INTEGRIDAD DE CÓDIGO
 
-| PERFIL SIMULADO | VERIFICACIÓN REALIZADA | ESTADO | RESULTADO |
+| CATEGORÍA | ÍTEM DE AUDITORÍA | ESTADO | OBSERVACIONES TÉCNICAS |
 |---|---|---|---|
-| **UI Designer** | Coherencia en paleta (60/30/10), tipografía Inter y espaciado | **APROBADO** | Jerarquía visual clara y marca reconocida |
-| **UX Designer** | Navegación intuitiva, CTAs Naranja `#FF7A00` y touch targets | **APROBADO** | Flujos sencillos de pedido y cobro |
-| **Frontend Senior** | Reutilización de componentes en `global.css` y capa `APIService` | **APROBADO** | Código modular y mantenible |
-| **Backend Senior** | Recálculo de precios en backend y precisión `Numeric(12,2)` | **APROBADO** | Sin discrepancias financieras |
-| **Responsive Specialist**| Adaptación desde 320px hasta 1920px sin overflow horizontal | **APROBADO** | Composición adecuada por dispositivo |
-| **Security Auditor**| RBAC estricto `require_roles`, CORS sin `*` y secretos en `.env` | **APROBADO** | 0 vulnerabilidades de token o bypass |
-| **QA Tester** | Suite de pruebas unitarias y de integración `test_system.py` | **APROBADO** | **7/7 Pruebas Pasaron [OK]** |
-| **Product Designer**| Sensación de producto SaaS / Food Tech Enterprise | **APROBADO** | Plataforma completa y profesional |
+| **Lógica de Pago** | Tasa de Cambio Dinámica | 🟢 PASÓ | Obtenida desde la API `/api/v1/cliente/configuraciones-publicas`. |
+| **Lógica de Pago** | Validación `monto_recibido >= total` | 🟢 PASÓ | Rechazo en Frontend y Backend (`HTTP 400`) ante montos insuficientes. |
+| **Lógica de Pago** | Recálculo Backend de Facturas | 🟢 PASÓ | Cálculo estricto de Subtotal, 16% IVA y Cambio en `caja.py`. |
+| **Gestión de Turnos** | Arqueo y Cierre de Caja | 🟢 PASÓ | Modal `#close-shift-modal` calcula diferencia de arqueo en BD (`Turno`). |
+| **Accesibilidad** | Atributos `aria-label` & `<label>` | 🟢 PASÓ | Integrados en la totalidad de inputs y botones. |
+| **Accesibilidad** | Navegación Teclado (ESC) | 🟢 PASÓ | Escuchador `Escape` cierra modales de manera limpia. |
+| **Base de Datos** | Compatibilidad MySQL / SQLite | 🟢 PASÓ | SQLAlchemy ORM soporta SQLite local y MySQL (Pymysql). |
+| **Entorno & Deps** | `requirements.txt` & `.env.example` | 🟢 PASÓ | Versiones fijas y ejemplos documentados para InfinityFree y Render. |
+| **Despliegue** | `render.yaml` | 🟢 PASÓ | Configuración Gunicorn / Uvicorn lista para despliegue en Render. |
 
 ---
 
-## 📐 2. PRUEBA DE BREAKPOINTS RESPONSIVE
+## 🎯 PRUEBAS DE SEGURIDAD Y INTEGRIDAD DE DATOS (TESTS)
 
-- [x] **320px** (iPhone SE antiguo / móviles compactos) -> Sin desbordamiento.
-- [x] **375px / 390px / 414px** (Móviles estándar modernos) -> Navegación inferior y carrito flotante.
-- [x] **768px / 834px** (Tablets en portrait / landscape) -> Sidebar colapsable y grid 2 columnas.
-- [x] **1024px / 1280px / 1440px / 1920px** (Monitores PC Desktop) -> Sidebar completa 280px y grid 4 columnas.
+- **Ejecución de Tests API (`tests/test_system.py`)**:
+  - Salida limpia para `/health`, `/ready`, autenticación JWT, RBAC de clientes vs caja y rechazo de montos insuficientes.

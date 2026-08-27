@@ -217,15 +217,14 @@
 <body class="pos-body">
 <nav id="app-sidebar"></nav>
   <!-- Header POS Registradora con Logo Oficial -->
-  <header id="app-header"></header>
-
+  <header id="app-header">
     <!-- Switcher de Vistas Completo (Estilo Cashea) -->
     <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.75rem 1rem;">
-      <button class="mc-mode-btn active" id="view-btn-pos" onclick="switchPosMainView('pos')">🖥️ POS TOUCH</button>
-      <button class="mc-mode-btn" id="view-btn-queue" onclick="switchPosMainView('queue')">🧾 CUENTAS Y PAGOS POR COBRAR (<span id="pending-count">0</span>)</button>
-      <button class="mc-mode-btn" id="view-btn-postres" onclick="switchPosMainView('postres')">🍰 POSTRES (CAJERA)</button>
-      <button class="mc-mode-btn" id="view-btn-deliverys" onclick="switchPosMainView('deliverys')">🛵 DELIVERYS</button>
-      <button class="mc-mode-btn" id="view-btn-history" onclick="switchPosMainView('history')">📄 FACTURAS</button>
+      <button class="mc-mode-btn active" id="view-btn-pos" aria-label="Ver POS Touch" onclick="switchPosMainView('pos')">🖥️ POS TOUCH</button>
+      <button class="mc-mode-btn" id="view-btn-queue" aria-label="Ver cuentas y pagos por cobrar" onclick="switchPosMainView('queue')">🧾 CUENTAS Y PAGOS POR COBRAR (<span id="queue-badge-nav-count">0</span>)</button>
+      <button class="mc-mode-btn" id="view-btn-postres" aria-label="Ver monitor de postres" onclick="switchPosMainView('postres')">🍰 POSTRES (CAJERA)</button>
+      <button class="mc-mode-btn" id="view-btn-deliverys" aria-label="Ver envíos por delivery" onclick="switchPosMainView('deliverys')">🛵 DELIVERYS</button>
+      <button class="mc-mode-btn" id="view-btn-history" aria-label="Abrir buscador de facturas y tickets" onclick="openFacturaHistoryModal()">📄 FACTURAS (MODAL Y TICKET)</button>
     </div>
 
     <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0 1rem; margin-bottom: 0.5rem;">
@@ -253,7 +252,7 @@
     <!-- Centro: Grid de Productos -->
     <div class="mc-products-area">
       <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <input type="text" id="mc-search-input" class="form-control" style="max-width: 320px;" placeholder="🔍 Buscar producto rápido..." oninput="filterProductsPos()">
+        <input type="text" id="mc-search-input" aria-label="Buscar productos rápido en catálogo POS" class="form-control" style="max-width: 320px;" placeholder="🔍 Buscar producto rápido..." oninput="filterProductsPos()">
         <span style="font-size: 0.85rem; color: var(--color-text-secondary);" id="mc-cat-title-label">Mostrando Menú Completo</span>
       </div>
 
@@ -269,19 +268,20 @@
         
         <!-- Modalidad Order Tabs -->
         <div class="mc-mode-tabs" style="margin-bottom: 0.75rem;">
-          <button class="mc-mode-btn active" id="type-btn-llevar" onclick="setPosOrderType('llevar')">🛍️ Para Llevar</button>
-          <button class="mc-mode-btn" id="type-btn-mesa" onclick="setPosOrderType('mesa')">🍽️ Comer Aquí</button>
-          <button class="mc-mode-btn" id="type-btn-delivery" onclick="setPosOrderType('delivery')">🛵 Delivery</button>
+          <button class="mc-mode-btn active" id="type-btn-llevar" aria-label="Seleccionar modalidad para llevar" onclick="setPosOrderType('llevar')">🛍️ Para Llevar</button>
+          <button class="mc-mode-btn" id="type-btn-mesa" aria-label="Seleccionar modalidad comer en mesa" onclick="setPosOrderType('mesa')">🍽️ Comer Aquí</button>
+          <button class="mc-mode-btn" id="type-btn-delivery" aria-label="Seleccionar modalidad delivery" onclick="setPosOrderType('delivery')">🛵 Delivery</button>
         </div>
 
         <!-- BÚSQUEDA DE CLIENTE REGISTRADO POR ID O NOMBRE (REQUERIMIENTO OFICIAL) -->
         <div style="position: relative; margin-bottom: 0.6rem;">
-          <input type="text" id="pos-customer-search-input" class="form-control" style="font-size: 0.85rem; padding: 0.45rem; border-color: var(--cyan-accent); color: var(--cyan-accent); font-weight: 800;" placeholder="🔍 Buscar Cliente por ID (ej. CLI-0042) o Nombre..." oninput="searchCustomerPosLive()">
+          <input type="text" id="pos-customer-search-input" aria-label="Buscar cliente registrado por ID o nombre" class="form-control" style="font-size: 0.85rem; padding: 0.45rem; border-color: var(--cyan-accent); color: var(--cyan-accent); font-weight: 800;" placeholder="🔍 Buscar Cliente por ID (ej. CLI-0042) o Nombre..." oninput="searchCustomerPosLive()">
           <div id="pos-customer-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--toon-card); border: 1px solid var(--cyan-accent); border-radius: 10px; z-index: 100; max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.85);"></div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 0.6rem;">
-          <input type="text" id="pos-mesa-input" class="form-control" style="font-size: 0.85rem; padding: 0.4rem;" value="Mostrador" placeholder="Mesa # o Nombre / ID Cliente">
+        <div class="form-group" style="margin-bottom: 0.6rem; display: flex; gap: 0.4rem;">
+          <input type="text" id="pos-mesa-input" aria-label="Número de Mesa o nombre del cliente" class="form-control" style="font-size: 0.85rem; padding: 0.4rem; flex: 1;" value="Mostrador" placeholder="Mesa # o Nombre / ID Cliente">
+          <button class="btn-gold" style="padding: 0.4rem 0.65rem; font-size: 0.75rem; white-space: nowrap; font-weight: 900;" aria-label="Abrir inspector de mesas disponibles" onclick="openPosTableSelectorModal()">🍽️ MESAS</button>
         </div>
 
         <!-- Lista de Items en Ticket -->
@@ -335,7 +335,10 @@
         <h2 style="font-size: 1.4rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin: 0;">🧾 CUENTAS, PAGOS Y PEDIDOS EN ESPERA DE COBRO</h2>
         <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin: 0.2rem 0 0 0;">Visualización unificada de comandas de salón, pagos digitales y búsqueda por ID.</p>
       </div>
-      <span class="badge" style="background: var(--color-yellow); color: #000; font-size: 0.9rem; padding: 0.4rem 0.85rem; border-radius: 20px; font-weight: 900;" id="pending-count">0 En Espera</span>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button class="btn btn-danger" style="padding: 0.4rem 0.85rem; font-size: 0.82rem; font-weight: 900;" onclick="submitVaciarCuentasCaja()">🗑️ VACIAR TODAS LAS CUENTAS</button>
+        <span class="badge" style="background: var(--color-yellow); color: #000; font-size: 0.9rem; padding: 0.4rem 0.85rem; border-radius: 20px; font-weight: 900;" id="pending-count">0 En Espera</span>
+      </div>
     </div>
 
     <!-- BUSCADOR INTERACTIVO EN TIEMPO REAL POR ID DE PEDIDO (#104), CÓDIGO O CLIENTE -->
@@ -414,6 +417,22 @@
       </div>
 
       <button class="btn btn-cta" style="width: 100%; margin-top: 1.25rem;" onclick="closeModal('caja-guide-modal')">✅ ENTENDIDO</button>
+    </div>
+  </div>
+
+  <!-- MODAL SELECCIÓN Y VERIFICACIÓN DE MESAS SALÓN CAJA POS -->
+  <div class="product-modal-backdrop" id="pos-table-selector-modal">
+    <div class="product-modal-card" style="max-width: 520px; padding: 1.5rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('pos-table-selector-modal')">&times;</button>
+      <span style="font-size: 2.5rem;">🍽️</span>
+      <h3 style="font-size: 1.35rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0.2rem;">ESTADO Y DISPONIBILIDAD DE MESAS</h3>
+      <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">Verifica cuáles mesas están LIBRES u OCUPADAS para asignar la comanda presencial.</p>
+
+      <div id="pos-tables-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; max-height: 340px; overflow-y: auto; padding: 0.25rem;">
+        <!-- Creados dinámicamente -->
+      </div>
+
+      <button class="btn btn-cta" style="width: 100%; margin-top: 1.25rem;" onclick="closeModal('pos-table-selector-modal')">CERRAR</button>
     </div>
   </div>
 
@@ -522,13 +541,61 @@
     </div>
   </div>
 
+  <!-- MODAL BUSCADOR Y REIMPRESIÓN DE FACTURAS EN CAJA POS -->
+  <div class="product-modal-backdrop" id="factura-history-modal">
+    <div class="product-modal-card" style="max-width: 540px; padding: 1.5rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('factura-history-modal')">&times;</button>
+      <span style="font-size: 2.8rem;">📄</span>
+      <h3 style="font-size: 1.35rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0.2rem;">REIMPRESIÓN DE FACTURAS Y TICKETS</h3>
+      <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">Busca por número de factura o cliente para ver o reimprimir el ticket en 1-clic.</p>
+
+      <div class="form-group" style="margin-bottom: 1rem; position: relative;">
+        <input type="text" id="modal-invoice-search-input" class="form-control" placeholder="🔍 Buscar por Factura (ej. FAC-DD-104), Cliente o Mesa..." style="font-size: 0.9rem; padding: 0.65rem 0.85rem; border: 1.5px solid var(--color-yellow);" oninput="renderModalInvoicesList()">
+      </div>
+
+      <div id="modal-invoices-grid" style="max-height: 320px; overflow-y: auto; text-align: left; padding: 0.25rem;">
+        <!-- Creados dinámicamente -->
+      </div>
+
+      <button class="btn btn-cta" style="width: 100%; margin-top: 1.25rem;" onclick="closeModal('factura-history-modal')">CERRAR</button>
+    </div>
+  </div>
+
   <!-- Modal Apertura Shift -->
   <div class="product-modal-backdrop" id="open-shift-modal">
     <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem; position: relative;">
       <button class="modal-close-btn" onclick="closeModal('open-shift-modal')">&times;</button>
       <h3 style="font-size: 1.3rem; font-weight: 900; font-family: var(--font-display); color: var(--color-yellow); margin-top: 0;">🟢 APERTURA DE TURNO DE CAJA</h3>
-      <div class="form-group"><label>Monto Inicial de Apertura en Caja ($)</label><input type="number" step="0.01" id="monto-apertura-input" class="form-control" value="200.00"></div>
+      <div class="form-group"><label for="monto-apertura-input">Monto Inicial de Apertura en Caja ($)</label><input type="number" step="0.01" id="monto-apertura-input" class="form-control" value="200.00"></div>
       <button class="btn btn-success" style="width: 100%; margin-top: 1rem;" onclick="submitAbrirTurno()">🟢 ABRIR TURNO DE CAJA</button>
+    </div>
+  </div>
+
+  <!-- MODAL ARQUEO Y CIERRE DE TURNO DE CAJA -->
+  <div class="product-modal-backdrop" id="close-shift-modal">
+    <div class="product-modal-card" style="max-width: 440px; padding: 1.5rem; text-align: center;">
+      <button class="modal-close-btn" onclick="closeModal('close-shift-modal')">&times;</button>
+      <span style="font-size: 2.8rem;">🔴</span>
+      <h3 style="font-size: 1.3rem; font-weight: 900; font-family: var(--font-display); color: var(--color-red); margin-top: 0.2rem;">ARQUEO Y CIERRE DE TURNO</h3>
+      <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">Ingresa el efectivo total auditado en física para calcular la diferencia del arqueo.</p>
+
+      <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--toon-border); border-radius: 12px; padding: 0.85rem; text-align: left; margin-bottom: 1rem; font-size: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;"><span>Apertura en Caja:</span><strong id="close-shift-apertura">$0.00</strong></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;"><span>Ventas Acumuladas:</span><strong id="close-shift-ventas" style="color: var(--gold-accent);">$0.00</strong></div>
+        <div style="display: flex; justify-content: space-between; font-weight: 900; border-top: 1px dashed var(--toon-border); padding-top: 0.4rem; color: #fff;"><span>Monto Total Esperado:</span><strong id="close-shift-esperado">$0.00</strong></div>
+      </div>
+
+      <div class="form-group" style="text-align: left; margin-bottom: 1.25rem;">
+        <label for="monto-cierre-input" style="font-size: 0.82rem; color: #fff;">Efectivo Físico Declarado en Caja ($)</label>
+        <input type="number" step="0.01" id="monto-cierre-input" class="form-control" placeholder="0.00" style="font-size: 1.1rem; font-weight: 900; color: var(--color-yellow);" oninput="calculateShiftAuditDifference()">
+      </div>
+
+      <div style="background: rgba(0,245,212,0.1); border: 1px solid var(--cyan-accent); border-radius: 10px; padding: 0.75rem; text-align: center; margin-bottom: 1.25rem;">
+        <small style="color: var(--text-muted); font-weight: 800;">DIFERENCIA DE ARQUEO EN CAJA:</small>
+        <div style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent);" id="close-shift-diff-display">$0.00</div>
+      </div>
+
+      <button class="btn btn-danger" style="width: 100%; font-weight: 900; padding: 0.85rem;" onclick="submitCerrarTurno()">🔴 CONFIRMAR Y CERRAR TURNO</button>
     </div>
   </div>
 

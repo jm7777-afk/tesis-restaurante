@@ -1517,3 +1517,19 @@ select.form-control option, select option {
   border-color: var(--gold-accent);
   transform: translateX(4px);
 }
+
+/* Screen Scrolling & Bottom Navigation Protection */
+.screen {
+  padding-bottom: 140px !important;
+  box-sizing: border-box;
+}
+
+.checkout-sticky-footer, .cart-sticky-bar {
+  position: fixed !important;
+  bottom: 78px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 32px) !important;
+  max-width: 500px !important;
+  z-index: 1040 !important;
+}

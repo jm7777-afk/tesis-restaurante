@@ -30,8 +30,36 @@ except Exception as e:
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="API para la automatización de pedidos en restaurante con QR, tiempo real y turnos de caja"
+    description="API para la automatización de pedidos en restaurante con QR, tiempo real y turnos de caja",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
 )
+
+from fastapi.openapi.utils import get_openapi
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="DONDE DAVID RESTAURANT API",
+        version=settings.VERSION,
+        description="Sistema de Automatización de Pedidos para Restaurantes con QR, KDS, Caja POS y Delivery",
+        routes=app.routes,
+        contact={"name": "Javier Mendoza", "email": "javier@donde-david.com"},
+        license_info={"name": "MIT", "url": "https://opensource.org/licenses/MIT"}
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 # GZip Middleware para compresión ultrarrápida de respuestas HTTP
 app.add_middleware(GZipMiddleware, minimum_size=500)

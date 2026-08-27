@@ -1,9 +1,14 @@
 class WSClient {
-  constructor(onEventCallback) {
+  constructor(onEventCallback, options = {}) {
     this.onEventCallback = onEventCallback;
+    this.options = options;
     this.socket = null;
-    this.reconnectTimer = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = options.maxReconnectAttempts || 5;
+    this.reconnectDelay = options.reconnectDelay || 1000;
+    this.shouldReconnect = true;
     this.connect();
+    this.setupHeartbeat();
   }
 
   connect() {
@@ -14,12 +19,19 @@ class WSClient {
     this.socket = new WebSocket(wsUrl);
 
     this.socket.onopen = () => {
-      console.log("🟢 Conexión WebSocket establecida con el servidor.");
+      console.log("🟢 Conexión WebSocket establecida exitosamente.");
+      this.reconnectAttempts = 0;
+      this.updateConnectionStatus("connected");
+      if (this.options.onOpen) this.options.onOpen();
     };
 
     this.socket.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data);
+        if (payload.type === "pong") {
+          this.lastPong = Date.now();
+          return;
+        }
         if (this.onEventCallback) {
           this.onEventCallback(payload.event, payload.data);
         }
@@ -29,14 +41,55 @@ class WSClient {
     };
 
     this.socket.onclose = () => {
-      console.warn("🔴 Conexión WebSocket cerrada. Reintentando en 3 segundos...");
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = setTimeout(() => this.connect(), 3000);
+      console.log("🔴 WebSocket desconectado.");
+      this.updateConnectionStatus("disconnected");
+      if (this.shouldReconnect) {
+        this.handleDisconnect();
+      }
+      if (this.options.onClose) this.options.onClose();
     };
 
-    this.socket.onerror = (err) => {
-      console.error("Error WebSocket:", err);
+    this.socket.onerror = (error) => {
+      console.error("❌ Error WebSocket:", error);
+      this.updateConnectionStatus("error");
+      if (this.options.onError) this.options.onError(error);
     };
+  }
+
+  handleDisconnect() {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
+      console.log(`🔄 Reconectando WebSocket en ${delay}ms (Intento ${this.reconnectAttempts + 1})`);
+      setTimeout(() => {
+        this.reconnectAttempts++;
+        this.connect();
+      }, delay);
+    } else {
+      console.error("❌ Se alcanzó el límite de reintentos WebSocket.");
+      this.updateConnectionStatus("failed");
+    }
+  }
+
+  setupHeartbeat() {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(JSON.stringify({ type: "ping" }));
+      }
+    }, 30000);
+  }
+
+  updateConnectionStatus(status) {
+    const statusEl = document.getElementById("connection-status");
+    if (statusEl) {
+      const statusMap = {
+        connected: { icon: "🟢", text: "En Vivo" },
+        disconnected: { icon: "🔴", text: "Desconectado" },
+        error: { icon: "🟡", text: "Error" },
+        failed: { icon: "⛔", text: "Conexión Perdida" }
+      };
+      const info = statusMap[status] || statusMap.disconnected;
+      statusEl.innerHTML = `${info.icon} ${info.text}`;
+    }
   }
 }
 

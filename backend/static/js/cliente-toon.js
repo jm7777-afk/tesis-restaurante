@@ -17,19 +17,86 @@ function closeModal(id) {
   if (el) el.classList.remove("open");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has("mesa")) {
-    currentDetectedMesa = urlParams.get("mesa");
-    if (document.getElementById("current-table-indicator")) {
-      document.getElementById("current-table-indicator").innerText = `📱 QR MESA #${currentDetectedMesa}`;
+// PERSISTENCIA DE ESTADO Y DATOS EN LOCALSTORAGE (F5 REFRESH PROTECTED)
+function saveCartToStorage() {
+  try {
+    localStorage.setItem("app_cart", JSON.stringify(toonCart));
+  } catch(e){}
+}
+
+function loadCartFromStorage() {
+  try {
+    const saved = localStorage.getItem("app_cart");
+    if (saved) {
+      toonCart = JSON.parse(saved) || [];
+      updateCartNavBadge();
     }
-    if (document.getElementById("checkout-mesa-name")) {
-      document.getElementById("checkout-mesa-name").innerText = `Mesa #${currentDetectedMesa}`;
+  } catch(e){}
+}
+
+function saveActiveOrderToStorage(orderId) {
+  try {
+    if (orderId) localStorage.setItem("app_active_order_id", String(orderId));
+    else localStorage.removeItem("app_active_order_id");
+  } catch(e){}
+}
+
+function restoreActiveOrderTracking() {
+  try {
+    const activeId = localStorage.getItem("app_active_order_id");
+    if (activeId) {
+      currentPendingOrderId = parseInt(activeId);
+      if (typeof trackClientOrderLive === 'function') trackClientOrderLive(activeId);
     }
-  } else {
-    currentDetectedMesa = "1";
+  } catch(e){}
+}
+
+function saveSelectedMesaToStorage(num) {
+  try {
+    if (num) localStorage.setItem("app_mesa_num", String(num));
+  } catch(e){}
+}
+
+function restoreSelectedMesa() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("mesa")) {
+      currentDetectedMesa = urlParams.get("mesa");
+      saveSelectedMesaToStorage(currentDetectedMesa);
+    } else {
+      const saved = localStorage.getItem("app_mesa_num");
+      if (saved) currentDetectedMesa = saved;
+      else currentDetectedMesa = "1";
+    }
+    updateHeaderTableBadgeUI();
+  } catch(e){}
+}
+
+function openHeaderTableInfoModal() {
+  const num = currentDetectedMesa || "1";
+  if (document.getElementById("table-info-modal-title")) document.getElementById("table-info-modal-title").innerText = `MESA #${num} DETALLES`;
+  if (document.getElementById("table-info-modal-num")) document.getElementById("table-info-modal-num").innerText = `Mesa #${num}`;
+  if (document.getElementById("table-info-modal-qr-img")) document.getElementById("table-info-modal-qr-img").src = `/api/v1/cliente/qr/${num}`;
+  openModal("header-table-info-modal");
+}
+
+function updateHeaderTableBadgeUI() {
+  const badge = document.getElementById("header-table-badge") || document.getElementById("current-table-indicator");
+  if (badge) {
+    badge.innerText = `📱 QR MESA #${currentDetectedMesa}`;
+    badge.style.cursor = "pointer";
+    badge.onclick = openHeaderTableInfoModal;
   }
+  const checkoutLabel = document.getElementById("checkout-mesa-name");
+  if (checkoutLabel) {
+    checkoutLabel.innerText = `Mesa #${currentDetectedMesa}`;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  restoreSelectedMesa();
+  loadCartFromStorage();
+  restoreActiveOrderTracking();
 
   // ⚡ PETICIONES PARALELAS Y OPTIMIZADAS (Promise.all)
   Promise.all([
@@ -40,13 +107,17 @@ document.addEventListener("DOMContentLoaded", () => {
     loadPromocionesToon()
   ]).then(() => {
     console.log("⚡ Carga paralela optimizada completada.");
+    updateProfileUI();
+    initSmartRecommendationsAlgorithm();
   }).catch(err => {
     console.error("Error en peticiones iniciales:", err);
   });
 
   new WSClient((event, data) => {
     if (event === "CAMBIO_ESTADO_PEDIDO") {
-      showToast(`Estado de pedido actualizado: ${data.nuevo_estado}`, "info");
+      showToast(`⚡ Estado de pedido actualizado: ${data.nuevo_estado || 'EN PROCESO'}`, "info");
+      if (currentPendingOrderId) trackClientOrderLive(currentPendingOrderId);
+      loadHistorialPedidos();
     } else if (event === "PRODUCTOS_ACTUALIZADOS" || event === "NUEVO_PRODUCTO") {
       loadToonProducts();
       loadToonCategories();
@@ -77,6 +148,7 @@ function showScreen(screenId) {
   }
 
   if (screenId === "screen-historial") loadHistorialPedidos();
+  if (screenId === "screen-tracking" && currentPendingOrderId) trackClientOrderLive(currentPendingOrderId);
 }
 
 async function loadConfigPublica() {
@@ -512,6 +584,7 @@ function addModalProductToCart() {
 }
 
 function updateCartNavBadge() {
+  saveCartToStorage();
   const totalCount = toonCart.reduce((sum, item) => sum + item.cantidad, 0);
   const totalSum = toonCart.reduce((sum, item) => sum + item.subtotal, 0);
 
@@ -1014,13 +1087,22 @@ function initDeliveryInteractiveMap(initialLat = 10.4806, initialLng = -66.9036)
   setTimeout(() => deliveryMap.invalidateSize(), 300);
 }
 
-function getDeviceGPSLocation() {
+function getDeviceGPSLocationOneClick() {
+  const btn = document.getElementById("btn-detect-1click-gps");
+  const badge = document.getElementById("gps-status-badge");
+  const dirInput = document.getElementById("deliv-direccion");
+
   if (!navigator.geolocation) {
-    showToast("Tu navegador o celular no soporta geolocalización GPS", "warning");
+    showToast("⚠️ Tu dispositivo o navegador no admite geolocalización GPS automática.", "warning");
     return;
   }
 
-  showToast("📡 Obteniendo tu ubicación actual...", "info");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span style="font-size: 1.4rem; animation: spin 1s infinite linear;">📡</span> <span>BUSCANDO TU POSICIÓN EXACTA GPS...</span>`;
+  }
+
+  showToast("📡 Obteniendo coordenadas exactas por GPS en 1-clic...", "info");
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -1030,33 +1112,77 @@ function getDeviceGPSLocation() {
 
       currentCustomerGPS = { lat, lng, googleMapsUrl };
 
-      const dirInput = document.getElementById("deliv-direccion");
       if (dirInput) {
-        dirInput.value = `📍 Ubicación GPS: Lat ${lat}, Lng ${lng} (${googleMapsUrl})`;
+        dirInput.value = `📍 Ubicación GPS Exacta: Lat ${lat}, Lng ${lng} (${googleMapsUrl})`;
       }
 
-      const badge = document.getElementById("gps-status-badge");
       if (badge) {
         badge.style.display = "block";
-        badge.innerHTML = `✅ <strong>Ubicación GPS Obtenida:</strong> Lat ${lat}, Lng ${lng} • <a href="${googleMapsUrl}" target="_blank" style="color: var(--gold-accent); text-decoration: underline; font-weight: 800;">Ver en Google Maps</a>`;
+        badge.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem;">
+            <strong style="color: var(--cyan-accent); font-size: 0.9rem;">📍 ¡UBICACIÓN GPS CAPTURADA CON ÉXITO EN 1-CLIC!</strong>
+            <span style="background: var(--accent-green); color: #000; font-weight: 900; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 10px;">EN VIVO</span>
+          </div>
+          <div style="font-size: 0.82rem; color: #fff; margin-bottom: 0.3rem;">
+            <strong>Coordenadas:</strong> Lat ${lat}, Lng ${lng}
+          </div>
+          <a href="${googleMapsUrl}" target="_blank" style="color: var(--gold-accent); text-decoration: underline; font-weight: 800; font-size: 0.78rem; display: inline-block;">
+            🗺️ Probar enlace oficial en Google Maps →
+          </a>
+        `;
       }
 
-      showToast("📍 ¡Ubicación obtenida exitosamente!", "success");
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span style="font-size: 1.4rem;">✅</span> <span>UBICACIÓN GPS CAPTURADA (TOCA PARA REFRESCAR)</span>`;
+        btn.style.background = "linear-gradient(135deg, #22c55e, #16a34a)";
+      }
+
+      if (typeof initDeliveryInteractiveMap === "function") {
+        initDeliveryInteractiveMap(parseFloat(lat), parseFloat(lng));
+      }
+
+      showToast("📍 ¡Ubicación GPS capturada en 1-clic exitosamente!", "success");
     },
     (error) => {
-      let errMsg = "No se pudo obtener la ubicación GPS.";
-      if (error.code === error.PERMISSION_DENIED) {
-        errMsg = "Permiso de ubicación denegado en tu celular.";
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span style="font-size: 1.4rem;">📍</span> <span>REINTENTAR DETECCIÓN GPS EN 1-CLIC</span>`;
       }
+
+      let errMsg = "No se pudo obtener la posición GPS.";
+      if (error.code === error.PERMISSION_DENIED) {
+        errMsg = "⚠️ Permiso de ubicación denegado. Por favor activa el GPS en tu celular.";
+      } else if (error.code === error.TIMEOUT) {
+        errMsg = "⏱️ Tiempo de espera agotado al obtener el GPS.";
+      }
+
       showToast(errMsg, "danger");
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
   );
 }
 
+function getDeviceGPSLocation() {
+  getDeviceGPSLocationOneClick();
+}
+
 async function submitFinalOrderWithMode(modoPago) {
-  const mesaName = selectedModality === "mesa" ? `Mesa ${currentDetectedMesa || 1}` : (selectedModality === "delivery" ? "Delivery" : "Mostrador (Para Llevar)");
   const u = Auth.getUser();
+
+  if (selectedModality === "delivery") {
+    const name = (u ? `${u.nombre} ${u.apellido}` : document.getElementById("deliv-nombre")?.value.trim()) || "";
+    const phone = (u ? u.telefono : document.getElementById("deliv-telefono")?.value.trim()) || "";
+    const address = (document.getElementById("deliv-direccion")?.value || document.getElementById("map-address-input")?.value || "").trim();
+
+    if (!name || name === "Cliente Delivery" || !phone || !address || address === "Ubicación cliente") {
+      showToast("⚠️ Para envíos por Delivery debes registrar tu Nombre, Teléfono y Dirección/GPS de entrega.", "warning");
+      openOrderModalityModal();
+      return;
+    }
+  }
+
+  const mesaName = selectedModality === "mesa" ? `Mesa ${currentDetectedMesa || 1}` : (selectedModality === "delivery" ? "Delivery" : "Mostrador (Para Llevar)");
 
   const payload = {
     numero_mesa: mesaName,
@@ -1083,13 +1209,16 @@ async function submitFinalOrderWithMode(modoPago) {
     if (!res.ok) throw new Error("Error al registrar pedido");
     const order = await res.json();
     currentPendingOrderId = order.id;
+    saveActiveOrderToStorage(order.id);
 
     toonCart = [];
+    saveCartToStorage();
     updateCartNavBadge();
 
     showToast(`⚡ ¡Pedido #${order.id} registrado con éxito!`, "success");
     
-    // Redirigir al seguimiento en vivo y desplegar modal de calificación de servicio
+    // Redirigir al seguimiento en vivo
+    trackClientOrderLive(order.id);
     showScreen("screen-tracking");
     setTimeout(() => {
       openServiceRatingModal();
@@ -1391,7 +1520,6 @@ function addQuickProductToCart(prodId) {
 
 function repeatLastOrderOneClick() {
   if (!lastUserOrderItems || lastUserOrderItems.length === 0) {
-    // Si no hay ítems cargados aún, agregar combo defecto
     if (toonProducts && toonProducts.length > 0) {
       addQuickProductToCart(toonProducts[0].id);
     }
@@ -1400,9 +1528,9 @@ function repeatLastOrderOneClick() {
       toonCart.push({
         producto_id: d.producto_id,
         nombre: d.producto_nombre || "Producto",
-        precio: d.precio_unitario,
-        cantidad: d.cantidad,
-        subtotal: d.subtotal,
+        precio_unitario: d.precio_unitario || d.precio || 5.0,
+        cantidad: d.cantidad || 1,
+        subtotal: d.subtotal || 5.0,
         opciones: []
       });
     });
@@ -1411,5 +1539,134 @@ function repeatLastOrderOneClick() {
 
   showToast("⚡ ¡Pedido anterior cargado en tu carrito en 1-clic!", "success");
   openOrderModalityModal();
+}
+
+async function trackClientOrderLive(orderId) {
+  if (!orderId) return;
+  try {
+    const res = await fetch(`/api/v1/cliente/pedidos/${orderId}`);
+    if (!res.ok) return;
+    const order = await res.json();
+
+    if (document.getElementById("track-order-num")) {
+      document.getElementById("track-order-num").innerText = `PEDIDO #${order.id} (${order.numero_mesa || 'Mostrador'})`;
+    }
+    if (document.getElementById("track-order-status")) {
+      const statusColors = {
+        'PENDIENTE': 'var(--gold-accent)',
+        'EN_PREPARACION': 'var(--cyan-accent)',
+        'LISTO': '#22c55e',
+        'ENTREGADO': '#22c55e',
+        'COBRADO': 'var(--cyan-accent)'
+      };
+      const statusText = {
+        'PENDIENTE': '⏳ RECIBIDO EN CAJA (PENDIENTE DE PREPARACIÓN)',
+        'EN_PREPARACION': '🍳 EN PREPARACIÓN POR EL CHEF',
+        'LISTO': '🔔 ¡LISTO PARA SERVIR / ENTREGAR!',
+        'ENTREGADO': '✅ ENTREGADO Y DISFRUTADO',
+        'COBRADO': '💳 COBRADO EN CAJA POS'
+      };
+      const st = order.estado || 'PENDIENTE';
+      document.getElementById("track-order-status").innerText = statusText[st] || st;
+      document.getElementById("track-order-status").style.color = statusColors[st] || '#fff';
+    }
+    if (document.getElementById("track-order-info")) {
+      const detailsTxt = order.detalles ? order.detalles.map(d => `${d.cantidad}x ${d.producto_nombre || (d.producto ? d.producto.nombre : 'Producto')}`).join(" + ") : '';
+      document.getElementById("track-order-info").innerHTML = `
+        <div style="font-weight: 800; color: #fff; margin-bottom: 0.4rem;">📦 ${detailsTxt}</div>
+        <small style="color: var(--text-muted);">Total: ${formatPriceDual(order.total || 0)} • ${order.tipo ? order.tipo.toUpperCase() : 'MESA'}</small>
+      `;
+    }
+  } catch(e) {
+    console.error("Error al rastrear pedido en vivo:", e);
+  }
+}
+
+async function loadHistorialPedidos() {
+  const container = document.getElementById("historial-orders-list") || document.getElementById("historial-pedidos-container") || document.getElementById("client-orders-history-list");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="text-align: center; padding: 2rem; color: var(--gold-accent);">
+      <div style="font-size: 2rem; animation: spin 1s infinite linear;">⚡</div>
+      <p style="margin-top: 0.5rem; font-weight: 800;">Cargando tu historial de pedidos...</p>
+    </div>
+  `;
+
+  try {
+    let pedidos = [];
+    const u = Auth.getUser();
+
+    if (u) {
+      const res = await fetch("/api/v1/cliente/pedidos/historial", {
+        headers: Auth.getHeaders()
+      });
+      if (res.ok) {
+        pedidos = await res.json();
+      }
+    }
+
+    if ((!pedidos || pedidos.length === 0) && currentPendingOrderId) {
+      try {
+        const resLocal = await fetch(`/api/v1/cliente/pedidos/${currentPendingOrderId}`);
+        if (resLocal.ok) {
+          const ord = await resLocal.json();
+          pedidos = [ord];
+        }
+      } catch(e){}
+    }
+
+    if (!pedidos || pedidos.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 3rem 1.5rem; background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: 20px; margin-top: 1rem;">
+          <span style="font-size: 3rem;">📦</span>
+          <h4 style="color: #fff; font-size: 1.15rem; font-weight: 900; margin-top: 0.5rem;">AÚN NO HAS REALIZADO PEDIDOS</h4>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;">¡Explora nuestro delicioso menú y haz tu primera comanda en 1-clic!</p>
+          <button class="btn-gold" style="margin-top: 1.25rem; font-size: 0.9rem;" onclick="showScreen('screen-menu')">🍔 VER MENÚ GOURMET</button>
+        </div>
+      `;
+      return;
+    }
+
+    let html = "";
+    pedidos.forEach(p => {
+      const statusBadgeClass = p.estado === 'ENTREGADO' ? 'success' : (p.estado === 'COBRADO' ? 'info' : 'warning');
+      const itemsText = p.detalles ? p.detalles.map(d => `${d.cantidad}x ${d.producto_nombre || 'Producto'}`).join(", ") : "Comanda Especial";
+      const totalDisplay = formatPriceDual(p.total || 0.0);
+      const dateTxt = p.creado_en ? new Date(p.creado_en).toLocaleString() : 'Reciente';
+
+      html += `
+        <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: 16px; padding: 1.1rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">
+            <div>
+              <strong style="color: var(--gold-accent); font-size: 1rem;">PEDIDO #${p.id}</strong>
+              <small style="color: var(--text-muted); display: block; font-size: 0.75rem;">${dateTxt} • ${p.numero_mesa || 'Mostrador'}</small>
+            </div>
+            <span class="badge badge-${statusBadgeClass}" style="font-size: 0.78rem; padding: 0.3rem 0.65rem; border-radius: 12px; font-weight: 800;">
+              ${p.estado || 'EN PROCESO'}
+            </span>
+          </div>
+
+          <div style="font-size: 0.88rem; color: #fff; font-weight: 700; margin-bottom: 0.6rem; line-height: 1.3;">
+            🍔 ${itemsText}
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 0.6rem 0.85rem; border-radius: 10px;">
+            <div>
+              <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">TOTAL PAGADO:</small>
+              <div style="font-size: 1.05rem; font-weight: 900; color: #fff;">${totalDisplay}</div>
+            </div>
+            <button class="btn-gold" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 900;" onclick="trackClientOrderLive(${p.id}); showScreen('screen-tracking');">
+              📡 SEGUIMIENTO
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = `<div style="color: var(--neon-red); text-align: center; padding: 1.5rem;">Error al obtener historial: ${err.message}</div>`;
+  }
 }
 

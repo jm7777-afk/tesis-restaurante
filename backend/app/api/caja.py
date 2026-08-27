@@ -79,8 +79,16 @@ async def cerrar_turno(
     if not turno:
         raise HTTPException(status_code=404, detail="No hay turno activo para cerrar.")
 
+    if data.monto_cierre < 0:
+        raise HTTPException(status_code=400, detail="El monto en caja no puede ser negativo.")
+
+    monto_esperado = float(turno.monto_apertura or 0.0) + float(turno.total_ventas or 0.0)
+    diferencia_calc = round(data.monto_cierre - monto_esperado, 2)
+
     turno.fecha_cierre = datetime.now(timezone.utc)
     turno.monto_cierre = data.monto_cierre
+    turno.efectivo_declarado = data.monto_cierre
+    turno.diferencia = diferencia_calc
     turno.activo = False
 
     db.commit()
@@ -91,12 +99,14 @@ async def cerrar_turno(
         "turno_id": turno.id,
         "numero_turno": turno.numero_turno,
         "total_ventas": float(turno.total_ventas or 0.0),
+        "diferencia": diferencia_calc,
         "usuario": current_user.nombre
     })
 
     return turno
 
 @router.get("/pedidos-pendientes", response_model=List[PedidoOut])
+@router.get("/pedidos-pendientes-cobro", response_model=List[PedidoOut])
 def get_pedidos_pendientes_cobro(
     db: Session = Depends(get_db)
 ):
@@ -109,10 +119,61 @@ def get_pedidos_cobrados(
     db: Session = Depends(get_db)
 ):
     turno = db.query(Turno).filter(Turno.activo == True).first()
-    query = db.query(Pedido).filter(Pedido.estado.in_(["COBRADO", "ENTREGADO"]))
+    query = db.query(Pedido).filter(Pedido.estado.in_(["COBRADO", "ENTREGADO", "EN_CAMINO"]))
     if turno:
         query = query.filter(Pedido.turno_id == turno.id)
     return query.order_by(Pedido.fecha_creacion.desc()).all()
+
+class CambiarEstadoRequest(BaseModel):
+    estado: str
+
+@router.post("/pedidos/{pedido_id}/cambiar-estado")
+async def cambiar_estado_pedido_caja(
+    pedido_id: int,
+    data: CambiarEstadoRequest,
+    db: Session = Depends(get_db)
+):
+    pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
+    if not pedido:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+
+    pedido.estado = data.estado
+    db.commit()
+    db.refresh(pedido)
+
+    await ws_manager.broadcast("CAMBIO_ESTADO_PEDIDO", {
+        "pedido_id": pedido.id,
+        "nuevo_estado": pedido.estado,
+        "numero_mesa": pedido.numero_mesa
+    })
+
+    return {"mensaje": f"Estado del pedido #{pedido.id} actualizado a {pedido.estado}", "estado": pedido.estado}
+
+@router.post("/vaciar-cuentas-caja")
+async def vaciar_todas_las_cuentas_caja(
+    db: Session = Depends(get_db)
+):
+    num_detalles = db.query(DetallePedido).delete()
+    num_pedidos = db.query(Pedido).delete()
+    num_puntos = db.query(PuntosLog).delete()
+
+    mesas = db.query(Mesa).all()
+    for m in mesas:
+        m.estado = "LIBRE"
+        m.cliente_actual = None
+
+    turnos = db.query(Turno).all()
+    for t in turnos:
+        t.total_ventas = 0.0
+        t.total_pedidos = 0
+
+    db.commit()
+
+    await ws_manager.broadcast("TURNO_ACTUALIZADO", {
+        "accion": "CUENTAS_LIMPIADAS"
+    })
+
+    return {"mensaje": f"Se eliminaron {num_pedidos} pedidos/cuentas de caja y {num_detalles} detalles de comanda.", "pedidos_eliminados": num_pedidos}
 
 # ==================== COBRO Y PEDIDO RÁPIDO EN CAJA POS ====================
 @router.post("/crear-y-cobrar-rapido")
@@ -234,11 +295,10 @@ async def cobrar_pedido(
     ped_total = float(pedido.total or 0.0)
     recibido = float(data.monto_recibido or 0.0)
 
-    # Allow payment even if monto_recibido is less than total; compute change as zero if insufficient
     if recibido < ped_total:
-        cambio_calculado = 0.0
-    else:
-        cambio_calculado = round(recibido - ped_total, 2)
+        raise HTTPException(status_code=400, detail=f"El monto recibido (${recibido:.2f}) es insuficiente para cobrar el pedido de ${ped_total:.2f}.")
+
+    cambio_calculado = round(recibido - ped_total, 2)
 
     factura_num = f"FAC-DD-{pedido.id:06d}"
 

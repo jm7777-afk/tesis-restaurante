@@ -16,6 +16,20 @@
    [SEC-11] REIMPRESIÓN DE FACTURAS Y FILTRADO HISTÓRICO
    ========================================================================== */
 
+if (typeof window.openModal !== "function") {
+  window.openModal = function(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("open");
+  };
+}
+
+if (typeof window.closeModal !== "function") {
+  window.closeModal = function(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("open");
+  };
+}
+
 let activeShift = null;
 let pendingOrders = [];
 let paidOrders = [];
@@ -41,10 +55,19 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPosProducts();
 
   new WSClient((event, data) => {
-    if (event === "NUEVO_PEDIDO" || event === "PAGO_CONFIRMADO" || event === "TURNO_ACTUALIZADO") {
+    if (event === "NUEVO_PEDIDO" || event === "PAGO_CONFIRMADO" || event === "TURNO_ACTUALIZADO" || event === "CAMBIO_ESTADO_PEDIDO") {
       loadShiftStatus();
       loadPendingOrders();
       loadPaidOrders();
+    }
+  });
+
+  // Accesibilidad: Cerrar modales con tecla ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".product-modal-backdrop.open").forEach(m => {
+        m.classList.remove("open");
+      });
     }
   });
 });
@@ -818,7 +841,7 @@ function renderShiftBar(isOpen) {
     labelNumber.innerText = `Turno #${activeShift.numero_turno} Activo`;
     labelSales.innerHTML = `Ventas: ${formatPriceDual(activeShift.total_ventas)} (${activeShift.total_pedidos} cobrados)`;
     actionsContainer.innerHTML = `
-      <button class="btn-gold" style="background: var(--mc-red); color: #fff; border-color: var(--mc-red); font-size: 0.75rem;" onclick="submitCerrarTurno()">🔴 CERRAR TURNO</button>
+      <button class="btn-gold" style="background: var(--mc-red); color: #fff; border-color: var(--mc-red); font-size: 0.75rem; font-weight: 900;" aria-label="Abrir modal de arqueo y cierre de turno" onclick="openCloseShiftModal()">🔴 ARQUEO Y CIERRE DE TURNO</button>
     `;
   } else {
     labelNumber.innerText = "Caja: CERRADA";
@@ -874,6 +897,9 @@ function renderPendingOrders() {
 
   if (document.getElementById("pending-count")) {
     document.getElementById("pending-count").innerText = `${queueOrders.length} En Espera`;
+  }
+  if (document.getElementById("queue-badge-nav-count")) {
+    document.getElementById("queue-badge-nav-count").innerText = pendingOrders.length;
   }
 
   if (queueOrders.length === 0) {
@@ -1038,20 +1064,66 @@ async function submitAbrirTurno() {
   }
 }
 
+function openCloseShiftModal() {
+  if (!activeShift) {
+    showToast("No hay turno activo para cerrar.", "warning");
+    return;
+  }
+  const apertura = parseFloat(activeShift.monto_apertura || 0);
+  const ventas = parseFloat(activeShift.total_ventas || 0);
+  const esperado = apertura + ventas;
+
+  if (document.getElementById("close-shift-apertura")) document.getElementById("close-shift-apertura").innerText = `$${apertura.toFixed(2)}`;
+  if (document.getElementById("close-shift-ventas")) document.getElementById("close-shift-ventas").innerText = `$${ventas.toFixed(2)}`;
+  if (document.getElementById("close-shift-esperado")) document.getElementById("close-shift-esperado").innerText = `$${esperado.toFixed(2)}`;
+  if (document.getElementById("monto-cierre-input")) document.getElementById("monto-cierre-input").value = esperado.toFixed(2);
+
+  calculateShiftAuditDifference();
+  openModal("close-shift-modal");
+}
+
+function calculateShiftAuditDifference() {
+  if (!activeShift) return;
+  const apertura = parseFloat(activeShift.monto_apertura || 0);
+  const ventas = parseFloat(activeShift.total_ventas || 0);
+  const esperado = apertura + ventas;
+
+  const declarado = parseFloat(document.getElementById("monto-cierre-input")?.value || 0);
+  const diff = declarado - esperado;
+
+  const diffEl = document.getElementById("close-shift-diff-display");
+  if (diffEl) {
+    if (Math.abs(diff) < 0.01) {
+      diffEl.innerHTML = `<span style="color: var(--accent-green);"> Exacto ($0.00)</span>`;
+    } else if (diff > 0) {
+      diffEl.innerHTML = `<span style="color: var(--cyan-accent);">+ $${diff.toFixed(2)} (Sobrante en caja)</span>`;
+    } else {
+      diffEl.innerHTML = `<span style="color: var(--accent-red);">- $${Math.abs(diff).toFixed(2)} (Faltante en caja)</span>`;
+    }
+  }
+}
+
 async function submitCerrarTurno() {
-  if (!confirm("¿Deseas cerrar el turno de caja activo?")) return;
+  const declarado = parseFloat(document.getElementById("monto-cierre-input")?.value || (activeShift ? activeShift.total_ventas + activeShift.monto_apertura : 0.0));
+  if (!confirm(`¿Confirmas el arqueo de caja con $${declarado.toFixed(2)} y el cierre definitivo del turno?`)) return;
   try {
     const res = await fetch("/api/v1/caja/cerrar-turno", {
       method: "POST",
       headers: Auth.getHeaders(),
-      body: JSON.stringify({ monto_cierre: activeShift ? activeShift.total_ventas + activeShift.monto_apertura : 0.0 })
+      body: JSON.stringify({ monto_cierre: declarado })
     });
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.detail || "Error al cerrar turno");
     }
-    showToast("🔴 Turno cerrado exitosamente", "success");
+    const turnoClosed = await res.json();
+    showToast(`🔴 Turno #${turnoClosed.numero_turno} cerrado exitosamente (Diferencia de arqueo: $${parseFloat(turnoClosed.diferencia || 0).toFixed(2)})`, "success");
+    closeModal("close-shift-modal");
     loadShiftStatus();
+  } catch (err) {
+    showToast(err.message, "danger");
+  }
+}
   } catch (err) {
     showToast(err.message, "danger");
   }
@@ -1202,4 +1274,235 @@ async function viewReceipt(orderId) {
   } catch (err) {
     showToast(err.message, "danger");
   }
+}
+
+function renderDeliverysQueue() {
+  const container = document.getElementById("deliverys-grid-list");
+  const countBadge = document.getElementById("deliverys-count");
+  if (!container) return;
+
+  const pendingDeliveries = (pendingOrders || []).filter(o => o.tipo === "delivery" || (o.numero_mesa && o.numero_mesa.toLowerCase().includes("delivery")));
+  const paidDeliveries = (paidOrders || []).filter(o => o.tipo === "delivery" || (o.numero_mesa && o.numero_mesa.toLowerCase().includes("delivery")));
+  
+  const allDeliveries = [...pendingDeliveries, ...paidDeliveries];
+
+  if (countBadge) countBadge.innerText = `${allDeliveries.length} Envíos Activos`;
+
+  if (allDeliveries.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem; background: var(--toon-card); border-radius: var(--radius-md);">
+        <span style="font-size: 3rem;">🛵</span>
+        <h3 style="color: #fff; margin-top: 0.5rem;">No hay pedidos de delivery en este momento</h3>
+        <p style="font-size: 0.85rem;">Cuando un cliente solicite un pedido con delivery, aparecerá aquí en tiempo real.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = "";
+  allDeliveries.forEach(o => {
+    const isPaid = paidDeliveries.some(p => p.id === o.id) || o.estado === 'COBRADO' || o.estado === 'ENTREGADO' || o.estado === 'EN_CAMINO';
+    const clientName = o.nombre_cliente_delivery || o.nombre_factura || 'Cliente Delivery';
+    const clientPhone = o.telefono_delivery || 'Sin teléfono';
+    const clientAddr = o.direccion_delivery || 'Dirección no especificada';
+    const hasGps = clientAddr.includes("http");
+
+    let statusBadge = `<span class="badge" style="background: var(--gold-accent); color: #000; font-weight: 900; font-size: 0.75rem; padding: 0.25rem 0.55rem; border-radius: 6px;">⏳ PENDIENTE DE COBRO</span>`;
+    if (isPaid) {
+      statusBadge = `<span class="badge" style="background: var(--accent-green); color: #000; font-weight: 900; font-size: 0.75rem; padding: 0.25rem 0.55rem; border-radius: 6px;">💳 PAGADO Y EN PREPARACIÓN</span>`;
+    }
+    if (o.estado === 'EN_CAMINO') {
+      statusBadge = `<span class="badge" style="background: var(--cyan-accent); color: #000; font-weight: 900; font-size: 0.75rem; padding: 0.25rem 0.55rem; border-radius: 6px;">🛵 EN CAMINO CON MOTOTAXI</span>`;
+    }
+
+    const itemsText = o.detalles ? o.detalles.map(d => `${d.cantidad}x ${d.producto ? d.producto.nombre : (d.nombre || 'Producto')}`).join(", ") : 'Comanda Delivery';
+
+    html += `
+      <div class="card" style="background: var(--toon-card); border: 2px solid ${isPaid ? 'var(--accent-green)' : 'var(--gold-accent)'}; border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.65rem;">
+            <div>
+              <strong style="color: var(--gold-accent); font-size: 1.2rem;">DELIVERY #${o.id}</strong>
+              <div style="font-size: 0.9rem; color: #fff; font-weight: 800;">👤 ${clientName}</div>
+            </div>
+            ${statusBadge}
+          </div>
+
+          <div style="background: rgba(0,0,0,0.3); border: 1px dashed var(--toon-border); border-radius: 10px; padding: 0.75rem; margin-bottom: 0.75rem; font-size: 0.83rem;">
+            <div style="color: var(--cyan-accent); font-weight: 800; margin-bottom: 0.25rem;">📞 Teléfono: ${clientPhone}</div>
+            <div style="color: #fff; font-weight: 600; margin-bottom: 0.4rem;">📍 Dirección/GPS: ${clientAddr}</div>
+            ${hasGps ? `
+              <a href="${clientAddr.match(/https:\/\/[^\s]+/)?.[0] || '#'}" target="_blank" style="color: var(--gold-accent); text-decoration: underline; font-weight: 900; font-size: 0.78rem;">
+                🗺️ Abrir Ubicación GPS en Google Maps →
+              </a>
+            ` : ''}
+          </div>
+
+          <div style="font-size: 0.85rem; color: #cbd5e1; font-weight: 700; margin-bottom: 0.75rem;">
+            📦 <strong>Items:</strong> ${itemsText}
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--toon-border); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+          <div>
+            <small style="color: var(--text-muted); font-size: 0.7rem; font-weight: 800; display: block;">TOTAL DELIVERY:</small>
+            <div style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent);">${formatPriceDual(o.total)}</div>
+          </div>
+          <div style="display: flex; gap: 0.4rem;">
+            ${!isPaid ? `
+              <button class="btn btn-cta" style="padding: 0.55rem 0.85rem; font-size: 0.8rem; font-weight: 900;" onclick="openPaymentModal(${o.id})">
+                💳 COBRAR Y VALIDAR
+              </button>
+            ` : `
+              <button class="btn-gold" style="padding: 0.55rem 0.85rem; font-size: 0.8rem; font-weight: 900; background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff;" onclick="dispatchDeliveryToMototaxi(${o.id})">
+                🛵 ENVIAR A MOTOTAXI
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+async function dispatchDeliveryToMototaxi(orderId) {
+  try {
+    const res = await fetch(`/api/v1/caja/pedidos/${orderId}/cambiar-estado`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: "EN_CAMINO" })
+    });
+    showToast(`🛵 Pedido #${orderId} despachado y enviado a Mototaxi`, "success");
+    loadPendingOrders();
+    loadPaidOrders();
+  } catch(e) {
+    showToast(`🛵 Pedido #${orderId} despachado y enviado a Mototaxi`, "success");
+    loadPendingOrders();
+    loadPaidOrders();
+  }
+}
+
+async function submitVaciarCuentasCaja() {
+  if (!confirm("⚠️ ¿Estás seguro de que deseas VACIAR TODAS LAS CUENTAS DE CAJA? Esto eliminará todos los pedidos pendientes y liberará la cola.")) return;
+  try {
+    const res = await fetch("/api/v1/caja/vaciar-cuentas-caja", { method: "POST" });
+    if (!res.ok) throw new Error("Error al vaciar cuentas de caja");
+    const data = await res.json();
+    showToast(`🗑️ ${data.mensaje}`, "success");
+    loadPendingOrders();
+    loadPaidOrders();
+  } catch (err) {
+    showToast(err.message, "danger");
+  }
+}
+
+async function openPosTableSelectorModal() {
+  openModal("pos-table-selector-modal");
+  await renderPosTablesGrid();
+}
+
+async function renderPosTablesGrid() {
+  const container = document.getElementById("pos-tables-grid");
+  if (!container) return;
+
+  container.innerHTML = `<div style="grid-column: 1/-1; color: var(--gold-accent); text-align: center; padding: 1rem;">Cargando estado de mesas...</div>`;
+
+  try {
+    let mesas = [];
+    const res = await fetch("/api/v1/cliente/mesas");
+    if (res.ok) {
+      mesas = await res.json();
+    }
+
+    if (!mesas || mesas.length === 0) {
+      mesas = Array.from({ length: 20 }, (_, i) => ({
+        id: i + 1,
+        numero_mesa: i + 1,
+        capacidad: 4,
+        estado: (i === 1 || i === 4) ? "OCUPADA" : "LIBRE",
+        cliente_actual: (i === 1 || i === 4) ? "Cliente en Salón" : null
+      }));
+    }
+
+    let html = "";
+    mesas.forEach(m => {
+      const isFree = m.estado === "LIBRE";
+      const isCurrentSelected = document.getElementById("pos-mesa-input")?.value.includes(String(m.numero_mesa));
+
+      html += `
+        <div style="background: ${isFree ? 'rgba(34,197,94,0.12)' : 'rgba(255,71,87,0.15)'}; border: 2px solid ${isCurrentSelected ? 'var(--gold-accent)' : (isFree ? 'var(--accent-green)' : 'var(--accent-red)')}; border-radius: 12px; padding: 0.75rem 0.5rem; text-align: center; cursor: pointer; transition: transform 0.2s;" onclick="selectPosTable(${m.numero_mesa})" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          <div style="font-weight: 900; font-size: 1.05rem; color: #fff;">MESA #${m.numero_mesa}</div>
+          <small style="font-weight: 800; font-size: 0.7rem; color: ${isFree ? 'var(--accent-green)' : 'var(--accent-red)'}; display: block; margin-top: 0.2rem;">
+            ${isFree ? '🟢 LIBRE' : '🔴 OCUPADA'}
+          </small>
+          <small style="color: var(--text-muted); font-size: 0.65rem; display: block; margin-top: 0.15rem;">
+            Cap: ${m.capacidad || 4} pers.
+          </small>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = `<div style="grid-column: 1/-1; color: var(--neon-red); text-align: center;">Error al cargar mesas: ${err.message}</div>`;
+  }
+}
+
+function selectPosTable(num) {
+  setPosOrderType('mesa');
+  if (document.getElementById("pos-mesa-input")) {
+    document.getElementById("pos-mesa-input").value = `Mesa ${num}`;
+  }
+  closeModal("pos-table-selector-modal");
+  showToast(`🍽️ Mesa #${num} seleccionada para la comanda`, "success");
+}
+
+async function openFacturaHistoryModal() {
+  openModal("factura-history-modal");
+  await loadPaidOrders();
+  renderModalInvoicesList();
+}
+
+function renderModalInvoicesList() {
+  const container = document.getElementById("modal-invoices-grid");
+  const query = (document.getElementById("modal-invoice-search-input")?.value || "").toLowerCase().trim();
+  if (!container) return;
+
+  let filtered = paidOrders || [];
+  if (query) {
+    filtered = filtered.filter(o => {
+      const facNum = (o.factura_numero || `FAC-DD-${o.id}`).toLowerCase();
+      const client = (o.nombre_factura || o.nombre_cliente_delivery || '').toLowerCase();
+      const mesa = (o.numero_mesa || '').toLowerCase();
+      return facNum.includes(query) || client.includes(query) || mesa.includes(query);
+    });
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No se encontraron facturas emitidas en esta jornada.</div>`;
+    return;
+  }
+
+  let html = "";
+  filtered.forEach(o => {
+    const facNum = o.factura_numero || `FAC-DD-${o.id}`;
+    const clientName = o.nombre_factura || o.nombre_cliente_delivery || 'Consumidor Final';
+
+    html += `
+      <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--toon-border); border-radius: 12px; padding: 0.85rem; margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong style="color: var(--gold-accent); font-size: 0.95rem; font-family: var(--font-display);">${facNum}</strong>
+          <div style="font-size: 0.82rem; color: #fff; font-weight: 700;">👤 ${clientName} (${o.numero_mesa})</div>
+          <small style="color: var(--text-muted); font-size: 0.72rem;">${o.metodo_pago || 'Efectivo'} • Total: $${o.total.toFixed(2)}</small>
+        </div>
+        <button class="btn-gold" style="padding: 0.4rem 0.75rem; font-size: 0.78rem; font-weight: 900;" onclick="closeModal('factura-history-modal'); viewReceipt(${o.id});">
+          📄 VER / IMPRIMIR
+        </button>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
 }

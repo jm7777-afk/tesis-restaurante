@@ -21,7 +21,55 @@ from backend.app.models.publicacion import Publicacion
 from backend.app.schemas.schemas import CategoriaOut, ProductoOut, PedidoCreate, PedidoOut, OTPVerifyRequest, ResenaCreate, ResenaOut, PublicacionOut, CambiarMesaRequest
 from backend.app.websockets.manager import ws_manager
 
+from backend.app.services.carrito_service import CarritoService
+
 router = APIRouter(prefix="/cliente", tags=["Cliente QR / App"])
+
+@router.get("/carrito")
+def get_carrito_cliente(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user_optional)
+):
+    if not current_user:
+        return {"items": [], "total_usd": 0.0, "total_bs": 0.0}
+    service = CarritoService(db)
+    c = service.obtener_o_crear_carrito(current_user.id)
+    return {"items": c.items, "total_usd": float(c.total_usd), "total_bs": float(c.total_bs)}
+
+@router.post("/carrito/items")
+def agregar_item_carrito_cliente(
+    item_data: dict,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user_optional)
+):
+    if not current_user:
+        return {"mensaje": "Cliente navegando en modo invitado"}
+    service = CarritoService(db)
+    c = service.agregar_item(current_user.id, item_data)
+    return {"mensaje": "Producto agregado al carrito persistente", "total_usd": float(c.total_usd), "items": c.items}
+
+@router.delete("/carrito/items/{item_index}")
+def eliminar_item_carrito_cliente(
+    item_index: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user_optional)
+):
+    if not current_user:
+        return {"mensaje": "Modo invitado"}
+    service = CarritoService(db)
+    c = service.eliminar_item(current_user.id, item_index)
+    return {"mensaje": "Producto eliminado del carrito", "items": c.items}
+
+@router.delete("/carrito/vaciar")
+def vaciar_carrito_cliente(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user_optional)
+):
+    if not current_user:
+        return {"mensaje": "Modo invitado"}
+    service = CarritoService(db)
+    c = service.vaciar_carrito(current_user.id)
+    return {"mensaje": "Carrito vaciado", "items": []}
 
 @router.get("/configuraciones-publicas")
 def get_configuraciones_publicas(db: Session = Depends(get_db)):
@@ -77,6 +125,16 @@ def get_guia_cliente(tipo: Optional[str] = None, db: Session = Depends(get_db)):
     if tipo:
         query = query.filter(GuiaItem.tipo_vista.in_([tipo, "ambos"]))
     return query.order_by(GuiaItem.orden.asc()).all()
+
+@router.get("/mesas")
+def get_mesas_publicas(db: Session = Depends(get_db)):
+    mesas = db.query(Mesa).order_by(Mesa.numero_mesa.asc()).all()
+    if not mesas or len(mesas) == 0:
+        for i in range(1, 21):
+            db.add(Mesa(numero_mesa=i, capacidad=4, estado="LIBRE"))
+        db.commit()
+        mesas = db.query(Mesa).order_by(Mesa.numero_mesa.asc()).all()
+    return mesas
 
 @router.get("/categorias", response_model=List[CategoriaOut])
 def get_categorias(db: Session = Depends(get_db)):
@@ -273,7 +331,9 @@ def verificar_otp_pedido(req: OTPVerifyRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Código OTP incorrecto. Por favor verifica e intenta de nuevo.")
 
 @router.get("/pedidos/historial")
-def get_historial_pedidos(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_historial_pedidos(db: Session = Depends(get_db), current_user = Depends(get_current_user_optional)):
+    if not current_user:
+        return []
     pedidos = db.query(Pedido).filter(Pedido.usuario_id == current_user.id).order_by(Pedido.fecha_creacion.desc()).all()
     return pedidos
 @router.post("/puntos/canjear")

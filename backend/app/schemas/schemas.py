@@ -225,6 +225,8 @@ class TurnoOut(BaseModel):
     monto_cierre: Optional[float] = None
     total_ventas: float
     total_pedidos: int
+    efectivo_declarado: Optional[float] = None
+    diferencia: Optional[float] = None
     activo: bool
     usuario_caja_id: int
 
