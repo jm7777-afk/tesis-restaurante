@@ -29,11 +29,11 @@ services:
       - key: DEBUG
         value: "false"
       - key: FRONTEND_URL
-        value: https://donde-david.onrender.com
+        value: https://donde-david.com
       - key: BACKEND_URL
-        value: https://donde-david-backend.onrender.com
+        value: https://api.donde-david.com
       - key: CORS_ORIGINS
-        value: https://donde-david.onrender.com,https://donde-david-backend.onrender.com
+        value: https://donde-david.com,https://www.donde-david.com,https://donde-david.onrender.com,https://donde-david-backend.onrender.com
     healthCheckPath: /health
     autoDeploy: true
 
