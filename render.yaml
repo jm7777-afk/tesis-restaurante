@@ -1,5 +1,5 @@
 # ============================================================ #
-# DONDE DAVID - RENDER DEPLOYMENT BLUEPRINT                     #
+# DONDE DAVID - RENDER DEPLOYMENT BLUEPRINT (PRODUCTION READY) #
 # ============================================================ #
 
 services:
@@ -13,7 +13,9 @@ services:
     branch: main
     buildCommand: |
       pip install --upgrade pip
-      pip install -r backend/requirements.txt
+      pip install -r requirements.txt
+    preDeployCommand: |
+      python -m alembic upgrade head
     startCommand: |
       cd backend
       gunicorn -c gunicorn.conf.py app.main:app
@@ -24,16 +26,16 @@ services:
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
-      - key: ENV
+      - key: ENVIRONMENT
         value: production
       - key: DEBUG
         value: "false"
       - key: FRONTEND_URL
-        value: https://donde-david.com
+        value: https://adondedavid-com.onrender.com
       - key: BACKEND_URL
-        value: https://api.donde-david.com
+        value: https://adondedavid-com.onrender.com
       - key: CORS_ORIGINS
-        value: https://donde-david.com,https://www.donde-david.com,https://donde-david.onrender.com,https://donde-david-backend.onrender.com
+        value: https://adondedavid-com.onrender.com,https://donde-david-backend.onrender.com,http://localhost:8000,http://127.0.0.1:8000
     healthCheckPath: /health
     autoDeploy: true
 

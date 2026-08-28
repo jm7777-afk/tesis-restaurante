@@ -18,12 +18,10 @@ from backend.app.api.setup import check_system_installed, LOCK_FILE_PATH
 from backend.app.websockets.manager import ws_manager
 from backend.scripts.seed_data import seed
 
-# Create DB tables & Seed safely
+# Safe DB initialization on startup without destructive drop_all or blocking seeding
 try:
-    if os.getenv("TESTING") == "true":
-        Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    seed()
+    if settings.DATABASE_URL.startswith("sqlite"):
+        Base.metadata.create_all(bind=engine)
 except Exception as e:
     print(f"Aviso en inicio de base de datos: {e}")
 
@@ -161,7 +159,7 @@ def health_check():
     return {"status": "ok", "app": settings.PROJECT_NAME, "version": settings.VERSION, "environment": settings.ENVIRONMENT}
 
 @app.get("/ready")
-def readiness_check():
+def readiness_check(response: Response):
     db = SessionLocal()
     try:
         db.execute(text("SELECT 1"))
@@ -171,13 +169,17 @@ def readiness_check():
     finally:
         db.close()
     
+    is_ready = db_status == "connected"
+    if not is_ready:
+        response.status_code = 503
+        
     return {
-        "status": "ready" if db_status == "connected" else "degraded",
+        "status": "ready" if is_ready else "degraded",
         "database": db_status,
         "app": settings.PROJECT_NAME
     }
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    is_dev = os.getenv("ENVIRONMENT", "development").lower() == "development"
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port= 5000, reload=is_dev)
+    is_dev = settings.ENVIRONMENT.lower() == "development"
+    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port, reload=is_dev)

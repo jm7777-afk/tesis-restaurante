@@ -28,7 +28,8 @@ class PedidoRapidoPOSCreate(BaseModel):
 
 @router.get("/turno-activo", response_model=TurnoOut)
 def get_turno_activo(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(require_roles(["admin", "supervisor", "caja"]))
 ):
     turno = db.query(Turno).filter(Turno.activo == True).order_by(Turno.id.desc()).first()
     if not turno:
