@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    container_name: donde-david-db
+    environment:
+      POSTGRES_DB: donde_david_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres_schema.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - donde-network
+    restart: always
+
+  backend:
+    build: .
+    container_name: donde-david-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@db:5432/donde_david_db
+      SECRET_KEY: ${SECRET_KEY:-donde_david_super_secret_jwt_key_2026_tesis_restaurante}
+      ENV: production
+      DEBUG: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./logs:/app/logs
+      - ./static/uploads:/app/static/uploads
+    networks:
+      - donde-network
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    container_name: donde-david-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./backend/static:/usr/share/nginx/html/static
+    depends_on:
+      - backend
+    networks:
+      - donde-network
+    restart: always
+
+volumes:
+  postgres_data:
+
+networks:
+  donde-network:
+    driver: bridge
