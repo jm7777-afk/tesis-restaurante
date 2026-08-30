@@ -15,7 +15,8 @@ class Config:
     API_VERSION = os.getenv('API_VERSION', 'v1')
     
     # BASE DE DATOS
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./restaurante.db')
+    DATABASE_URL = os.getenv('DATABASE_URL') 
+    #'sqlite:///./restaurante.db')
     
     # SEGURIDAD
     SECRET_KEY = os.getenv('SECRET_KEY', 'donde_david_super_secret_jwt_key_2026_tesis_restaurante')
