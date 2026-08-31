@@ -32,9 +32,9 @@ class Config:
     BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
     
     # NEGOCIO Y FISCAL
-    TASA_CAMBIO_DEFAULT = float(os.getenv('TASA_CAMBIO_DEFAULT', 42.50))
-    IVA_PORCENTAJE = float(os.getenv('IVA_PORCENTAJE', 16.00))
-    TIEMPO_PREPARACION_BASE = int(os.getenv('TIEMPO_PREPARACION_BASE', 15))
+    TASA_CAMBIO_DEFAULT = float(os.getenv('TASA_CAMBIO_DEFAULT'))
+    IVA_PORCENTAJE = float(os.getenv('IVA_PORCENTAJE'))
+    TIEMPO_PREPARACION_BASE = int(os.getenv('TIEMPO_PREPARACION_BASE'))
     
     # LOGGING
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
