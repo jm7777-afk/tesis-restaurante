@@ -142,9 +142,9 @@ static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../static"
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
 
-@app.get("/setup")
-def setup_redirect():
-    return RedirectResponse(url="/static/setup/index.html")
+#@app.get("/setup")
+#def setup_redirect():
+    #return RedirectResponse(url="/static/setup/index.html")
 
 @app.get("/login")
 def login_redirect():
