@@ -10,7 +10,7 @@ class Config:
     """Configuración centralizada de la aplicación Donde David"""
     
     # ENTORNO
-    ENV = os.getenv('ENV', 'development')
+    ENV = os.getenv("ENV=production")
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
     API_VERSION = os.getenv('API_VERSION', 'v1')
     
@@ -25,7 +25,7 @@ class Config:
     REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS', 7))
     
     # CORS
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000').split(',')
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS=https://adondedavid-com.onrender.com').split(',')
     
     # URLs
     FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8000')
