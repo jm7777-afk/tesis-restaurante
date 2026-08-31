@@ -3,9 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from backend.app.core.config import settings
 
-# Configure SQLite thread checking and timeout if using SQLite
+# Configure PostgreSQL connection parameters
 connect_args = {}
-if settings.DATABASE_URL.startswith("sqlite"):
+if settings.DATABASE_URL.startswith("postgresql"):
     connect_args = {"check_same_thread": False, "timeout": 30}
 
 engine = create_engine(
