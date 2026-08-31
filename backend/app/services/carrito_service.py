@@ -8,7 +8,7 @@ class CarritoService:
 
     def _get_tasa_cambio(self) -> float:
         tasa_config = self.db.query(Configuracion).filter(Configuracion.clave == "tasa_cambio_bs").first()
-        return float(tasa_config.valor) if tasa_config else 36.50
+        return float(tasa_config.valor) if tasa_config else 00.00
 
     def obtener_o_crear_carrito(self, usuario_id: int) -> Carrito:
         carrito = self.db.query(Carrito).filter(Carrito.usuario_id == usuario_id).first()
