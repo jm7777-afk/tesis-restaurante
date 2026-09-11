@@ -3,8 +3,38 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from fastapi.testclient import TestClient
-from backend.app.main import app
+import pytest
+from backend.app.core.database import SessionLocal, engine, Base
+from backend.app.core.security import get_password_hash
+from backend.app.models.usuario import Usuario
+
+@pytest.fixture(autouse=True)
+def setup_test_users():
+    db = SessionLocal()
+    try:
+        if not db.query(Usuario).filter(Usuario.nombre_usuario == "admin").first():
+            db.add(Usuario(
+                nombre="Admin", apellido="Sistema", email="admin@test.com",
+                nombre_usuario="admin", contraseña_hash=get_password_hash("admin123"),
+                rol="admin", activo=True
+            ))
+        if not db.query(Usuario).filter(Usuario.nombre_usuario == "cliente1").first():
+            db.add(Usuario(
+                nombre="Cliente", apellido="Test", email="cliente1@test.com",
+                nombre_usuario="cliente1", contraseña_hash=get_password_hash("cliente123"),
+                rol="cliente", activo=True
+            ))
+        if not db.query(Usuario).filter(Usuario.nombre_usuario == "cajero1").first():
+            db.add(Usuario(
+                nombre="Cajero", apellido="Test", email="cajero1@test.com",
+                nombre_usuario="cajero1", contraseña_hash=get_password_hash("caja123"),
+                rol="caja", activo=True
+            ))
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
 
 client = TestClient(app)
 
