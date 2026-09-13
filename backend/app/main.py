@@ -13,7 +13,8 @@ import uvicorn
 from sqlalchemy import text
 from backend.app.core.config import settings
 from backend.app.core.database import Base, engine, SessionLocal
-from backend.app.api import auth, cliente, cocina, caja, admin, mesero
+from backend.app.core.exceptions import register_exception_handlers
+from backend.app.api.router import api_router
 from backend.app.websockets.manager import ws_manager
 
 # Safe DB initialization on startup without destructive drop_all or blocking seeding
@@ -31,6 +32,9 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json"
 )
+
+# Registrar handlers de excepciones por dominio (evita 500 no controlados)
+register_exception_handlers(app)
 
 from fastapi.openapi.utils import get_openapi
 
@@ -69,13 +73,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Routers
-app.include_router(auth.router, prefix=settings.API_V1_STR)
-app.include_router(cliente.router, prefix=settings.API_V1_STR)
-app.include_router(cocina.router, prefix=settings.API_V1_STR)
-app.include_router(caja.router, prefix=settings.API_V1_STR)
-app.include_router(admin.router, prefix=settings.API_V1_STR)
-app.include_router(mesero.router, prefix=settings.API_V1_STR)
+# Include API Routers Centralizados con Aislamiento
+app.include_router(api_router)
 
 # Global Exception Handler para capturar errores no controlados
 @app.exception_handler(Exception)
