@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DONDE DAVID - Portal de Personal & Empleados</title>
-  <link rel="stylesheet" href="/static/css/global.css?v=2.0">
-  <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
-  <link rel="stylesheet" href="/static/css/index.css?v=2.0">
+  <link rel="stylesheet" href="css/global.css?v=2.0">
+  <link rel="stylesheet" href="css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="css/utilities.css?v=2.0">
+  <link rel="stylesheet" href="css/index.css?v=2.0">
   <style>
     body.login-portal-body {
       background: var(--color-navy);
@@ -97,9 +98,11 @@
 
   </div>
 
-  <script src="/static/js/websocket.js?v=2.0"></script>
-  <script src="/static/js/auth.js?v=2.0"></script>
-  <script src="/static/js/appShell.js?v=2.0"></script>
+  <script src="js/config.js?v=2.0"></script>
+  <script src="js/services/apiService.js?v=2.0"></script>
+  <script src="js/websocket.js?v=2.0"></script>
+  <script src="js/auth.js?v=2.0"></script>
+  <script src="js/appShell.js?v=2.0"></script>
   <script>
     document.getElementById("staff-portal-form").addEventListener("submit", async (e) => {
       e.preventDefault();
