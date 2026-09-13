@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donde David - Monitor KDS de Cocina</title>
+  <link rel="stylesheet" href="/static/css/global.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/index.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/app-modules.css?v=2.0">
+</head>
+<body class="toon-theme"><nav id="app-sidebar"></nav>
+
+  <!-- KDS Header -->
+  <header id="app-header"></header>
+
+  <div class="kds-container" style="padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; background: rgba(18, 24, 41, 0.75); border: 1px solid var(--border); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); flex-wrap: wrap; gap: 0.85rem;">
+      <h1 style="font-size: 1.3rem; font-weight: 900; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <span>👨‍🍳</span> MONITOR KDS DE COCINA
+      </h1>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <!-- Selector de Tamaño Ajustable de Tarjetas KDS (Estilo Cashea) -->
+        <span style="font-size: 0.8rem; font-weight: 800; color: var(--gold-accent);">ESCALA KDS:</span>
+        <div style="display: flex; gap: 0.35rem;">
+          <button class="btn btn-outline" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;" onclick="setKDSGridScale('scale-sm')">🔍 80%</button>
+          <button class="btn btn-outline" style="padding: 0.25rem 0.55rem; font-size: 0.75rem; border-color: var(--gold-accent); color: var(--gold-accent);" onclick="setKDSGridScale('scale-md')">📐 100%</button>
+          <button class="btn btn-outline" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;" onclick="setKDSGridScale('scale-lg')">🐘 120%</button>
+        </div>
+        <span class="badge badge-PENDIENTE" id="kds-order-count" style="font-size: 0.88rem; padding: 0.4rem 0.9rem;">Comandas activas: 0</span>
+      </div>
+    </div>
+    <div class="kds-grid scale-md" id="kds-grid">
+      <!-- Dynamic Order Cards populated via JS -->
+    </div>
+  </div>
+
+  <!-- MODAL GUÍA DE USO DE COCINA KDS -->
+  <div class="product-modal-backdrop" id="cocina-guide-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.75rem;">
+      <button class="modal-close-btn" onclick="closeModal('cocina-guide-modal')">&times;</button>
+      <span style="font-size: 2.5rem; text-align: center; display: block;">👨‍🍳</span>
+      <h3 style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent); text-align: center; margin-top: 0.3rem;">GUÍA DE USO MONITOR KDS COCINA</h3>
+      
+      <div style="font-size: 0.85rem; line-height: 1.6; color: #fff; margin-top: 1rem;">
+        <p><strong>1. Notificaciones en Tiempo Real:</strong> Cada vez que un cliente en mesa o la caja registradora ingrese un pedido nuevo, sonará una alerta sonora automática y la tarjeta aparecerá en vivo en la pantalla.</p>
+        <p><strong>2. Detalle de Preparación:</strong> Cada tarjeta muestra la mesa, el tiempo transcurrido (cambia a rojo tras 15 min), los ítems solicitados y las personalizaciones requeridas (ej. <em>Sin cebolla, Extra Tocino</em>).</p>
+        <p><strong>3. Marcar Listo:</strong> Al finalizar la preparación del plato, presiona el botón 🟢 <em>MARCAR LISTO</em> para despachar el pedido a los garzones.</p>
+      </div>
+
+      <button class="btn-gold" style="width: 100%; margin-top: 1.25rem;" onclick="closeModal('cocina-guide-modal')">✅ ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="/static/js/theme-toggle.js?v=2.0"></script>
+  <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
+  <script src="/static/js/websocket.js?v=2.0"></script>
+  <script src="/static/js/cocina.js?v=2.0"></script>
+</body>
+</html>

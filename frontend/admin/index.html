@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donde David - Panel de Administración General</title>
+  <link rel="stylesheet" href="/static/css/global.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/toon-theme.css?v=2.0">
+  <link rel="stylesheet" href="/static/css/index.css">
+  
+  <!-- Driver.js CSS para Onboarding Tour Interactivo -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
+
+  <style>
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--toon-border);
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 0.8rem 1.25rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: var(--gold-accent);
+      border-bottom-color: var(--gold-accent);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+    @media (max-width: 900px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+    .kpi-card {
+      background: var(--toon-card);
+      border: 1px solid var(--toon-border);
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+    }
+    .wizard-step {
+      display: none;
+    }
+    .wizard-step.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="toon-theme"><nav id="app-sidebar"></nav>
+
+  <header id="app-header"></header>
+  
+
+
+  <!-- Layout con Nav Lateral para el Panel de Administración -->
+  <div class="admin-sidebar-layout">
+    
+    <!-- Sidebar Navegación Lateral Deslizable (Estilo Hamburger Cashea) -->
+    <aside class="admin-sidebar" id="admin-sidebar-drawer">
+      <div style="display: flex; justify-content: space-between; align-items: center;" class="admin-sidebar-title">
+        <span>⚙️ MENÚ PRINCIPAL ADMIN</span>
+        <button id="admin-hamburger-btn" style="background: none; border: none; color: var(--gold-accent); font-size: 1.4rem; cursor: pointer;" onclick="toggleAdminDrawer()">☰</button>
+      </div>
+      <button class="admin-sidebar-btn active" id="btn-orders-panel" onclick="switchTab('dashboard')">📊 Dashboard & Métricas</button>
+      <button class="admin-sidebar-btn" id="nav-menu-items" onclick="switchTab('productos')">🍔 Productos & Ingredientes</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('inventario')">📦 Insumos e Inventario</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('promociones')">🔥 Promociones & Banners</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('resenas')">⭐ Calificaciones de Clientes</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('publicaciones')">📰 Publicaciones Web</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('portal')">🌐 Portal, Tasa & Historia</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('mesas')">🍽️ Mesas & QR</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('categorias')">📂 Categorías de Menú</button>
+      <button class="admin-sidebar-btn" onclick="switchTab('usuarios')">👥 Usuarios del Sistema</button>
+    </aside>
+
+    <!-- Contenido Principal Administrador con Soporte Touch Swipe -->
+    <main class="admin-main-content" id="admin-main-container">
+
+    <!-- TAB 1: DASHBOARD & MÉTRICAS DE VENTAS CON FILTROS -->
+    <div id="tab-dashboard" class="tab-content active">
+      
+      <!-- Barra de Filtros de Ventas por Categoría y Método de Pago (Estilo Cashea) -->
+      <div style="background: var(--toon-card); border: 1px solid var(--gold-accent); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.2rem;">🔍</span>
+          <strong style="color: var(--gold-accent); font-size: 0.95rem;">FILTROS DE RECAUDACIÓN Y VENTAS:</strong>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <select id="filter-metrics-category" class="form-control" style="width: auto; min-width: 180px; font-weight: 700;" onchange="applyAdminMetricFilters()">
+            <option value="todas">🍔 Categoría: Todas (Comida, Postres, Bebidas)</option>
+            <option value="comidas">🍔 Solo Comidas Principal</option>
+            <option value="postres">🍰 Solo Postres & Dulces</option>
+            <option value="bebidas">🥤 Solo Bebidas & Refrescos</option>
+          </select>
+
+          <select id="filter-metrics-payment" class="form-control" style="width: auto; min-width: 180px; font-weight: 700;" onchange="applyAdminMetricFilters()">
+            <option value="todos">💵 Pago: Todos los Métodos</option>
+            <option value="Efectivo">💵 Efectivo ($ USD / Bs.)</option>
+            <option value="Pago Móvil">📱 Pago Móvil / Transferencia</option>
+            <option value="Tarjeta">💳 Tarjeta Débito / Crédito</option>
+            <option value="Divisas">💰 Divisas USD</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- KPI Grid: Ventas de Hoy, Semanales, Mensuales y Recaudación Total -->
+      <div class="kpi-grid" style="margin-bottom: 1.5rem;">
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">☀️ VENTAS DE HOY</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: var(--gold-accent);" id="stat-sales-today">$1,240.00</div>
+          <small style="color: var(--neon-green); font-weight: 800;">⚡ Operaciones del día</small>
+        </div>
+
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">📅 VENTAS DE LA SEMANA</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: #38bdf8;" id="stat-sales-week">$4,850.00</div>
+          <small style="color: var(--neon-green); font-weight: 800;" id="stat-pct-week">▲ +18.5% esta semana</small>
+        </div>
+
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">📊 VENTAS MENSUALES</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: #a855f7;" id="stat-sales-month">$18,750.50</div>
+          <small style="color: var(--neon-green); font-weight: 800;" id="stat-pct-month">▲ +24.2% este mes</small>
+        </div>
+
+        <div class="kpi-card">
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">💰 RECAUDACIÓN TOTAL</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: var(--neon-green);" id="stat-sales-total">$18,750.50</div>
+          <small style="color: var(--text-muted);">Acumulado histórico</small>
+        </div>
+      </div>
+
+      <!-- Métricas Operativas & Resumen de Canales de Venta -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        
+        <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.25rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🛵 RESUMEN DE VENTAS POR CANAL Y PORCENTAJES</h3>
+          <div style="margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+              <span>🍽️ Ventas en Mesa (Vía QR)</span>
+              <strong style="color: var(--cyan-accent);" id="pct-canal-mesa">55%</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem;">
+              <div style="background: var(--cyan-accent); width: 55%; height: 100%;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+              <span>🛵 Pedidos por Delivery</span>
+              <strong style="color: var(--neon-red);" id="pct-canal-delivery">30%</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem;">
+              <div style="background: var(--neon-red); width: 30%; height: 100%;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+              <span>🛍️ Para Llevar / Mostrador</span>
+              <strong style="color: var(--gold-accent);" id="pct-canal-llevar">15%</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); height: 10px; border-radius: 5px; overflow: hidden;">
+              <div style="background: var(--gold-accent); width: 15%; height: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.25rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">⚡ OPERACIONES EN TIEMPO REAL</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem;">
+            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
+              <small style="color: var(--text-muted);">Ingredientes en Stock Crítico</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-red);" id="stat-critical">3 insumos</div>
+            </div>
+            <div style="background: rgba(0, 245, 212, 0.08); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--cyan-accent); cursor: pointer;" onclick="openRealtimeOpsModal()">
+              <small style="color: var(--cyan-accent); font-weight: 800;">⚡ Pedidos Activos (Toca para ver)</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent);" id="stat-cocina">12 pedidos</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
+              <small style="color: var(--text-muted);">Mesas Ocupadas</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--neon-green);" id="stat-mesas">5 / 20</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--toon-border);">
+              <small style="color: var(--text-muted);">Apertura de Caja</small>
+              <div style="font-size: 1.4rem; font-weight: 900; color: var(--gold-accent);" id="stat-caja">$950.50</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+  <!-- MODAL DE OPERACIONES EN TIEMPO REAL (PEDIDOS EN ESPERA, SALIDOS, TIEMPO, MESAS, MONTO EN CAJA) -->
+  <div class="product-modal-backdrop" id="realtime-ops-modal">
+    <div class="product-modal-card" style="max-width: 520px; padding: 1.75rem;">
+      <button class="modal-close-btn" onclick="closeModal('realtime-ops-modal')">&times;</button>
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <span style="font-size: 2.5rem;">⚡</span>
+        <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-accent); margin-top: 0.3rem;">OPERACIONES EN TIEMPO REAL</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Monitoreo en vivo de comandas, tiempos de cocina, mesas ocupadas y saldo de caja.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid var(--toon-border);">
+          <small style="color: var(--text-muted);">🍽️ Mesas Ocupadas</small>
+          <div style="font-size: 1.2rem; font-weight: 900; color: var(--neon-green);" id="modal-ops-mesas">5 / 20 Mesas</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid var(--toon-border);">
+          <small style="color: var(--text-muted);">💰 Monto en Caja</small>
+          <div style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent);" id="modal-ops-caja">$950.50</div>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">🔥 DESGLOSE DE COMANDAS EN COCINA:</h4>
+      <div id="modal-ops-orders-list" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.5rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--gold-accent); margin-top: 0;">🏆 Top Productos e Ingredientes Más Vendidos</h3>
+        <div id="top-products-container"></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PRODUCTOS Y EDICION DE INGREDIENTES -->
+    <div id="tab-productos" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>🍔 PRODUCTOS DEL CATÁLOGO & INGREDIENTES EDITABLES</h2>
+        <button class="btn-gold" onclick="openProductModal()">➕ Crear Producto</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Imagen</th>
+              <th style="padding: 0.75rem;">Nombre</th>
+              <th style="padding: 0.75rem;">Precio ($ / Bs)</th>
+              <th style="padding: 0.75rem;">Ingredientes / Opciones</th>
+              <th style="padding: 0.75rem;">Stock</th>
+              <th style="padding: 0.75rem;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: PUBLICACIONES WEB -->
+    <div id="tab-publicaciones" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>📰 PUBLICACIONES Y NOVEDADES WEB PÚBLICA</h2>
+        <button class="btn-gold" onclick="openModal('add-publicacion-modal')">➕ Nueva Publicación</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Imagen</th>
+              <th style="padding: 0.75rem;">Título Anuncio</th>
+              <th style="padding: 0.75rem;">Contenido</th>
+              <th style="padding: 0.75rem;">Autor</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="publicaciones-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: PROMOCIONES ("BOOM! PROMO DEL DIA") -->
+    <div id="tab-promociones" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>🔥 PROMOCIONES EDITABLES (BOOM! PROMO DEL DÍA)</h2>
+        <button class="btn-gold" onclick="openModal('promo-modal')">➕ Nueva Promoción</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Banner</th>
+              <th style="padding: 0.75rem;">Título Promo</th>
+              <th style="padding: 0.75rem;">Descripción</th>
+              <th style="padding: 0.75rem;">Descuento</th>
+              <th style="padding: 0.75rem;">Código Cupon</th>
+              <th style="padding: 0.75rem;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="promos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 6: PORTAL WEB & TASA DE CAMBIO -->
+    <div id="tab-portal" class="tab-content">
+      <h2>🌐 TASA DE CAMBIO BCV/PARALELO Y CONFIGURACIÓN DEL PORTAL</h2>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1rem; max-width: 700px;">
+        
+        <div class="form-group" style="background: rgba(255, 188, 13, 0.1); border: 1px solid var(--gold-accent); padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
+          <label style="font-weight: 900; color: var(--gold-accent); font-size: 1rem;">💵 TASA DE CAMBIO (1 USD = Bs.)</label>
+          <input type="number" step="0.01" id="cfg-tasa-cambio" class="form-control" style="font-size: 1.3rem; font-weight: 900; color: var(--gold-accent);" value="36.50">
+          <small style="color: var(--text-muted); margin-top: 0.3rem; display: block;">Esta tasa se utiliza para convertir automáticamente todos los precios de la app en Bolívares (Bs.)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Nuestra Historia (Sección Web Pública)</label>
+          <textarea id="cfg-historia" class="form-control" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Número WhatsApp Oficial</label>
+          <input type="text" id="cfg-whatsapp" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Enlace Instagram</label>
+          <input type="text" id="cfg-instagram" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Enlace TikTok</label>
+          <input type="text" id="cfg-tiktok" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Costo Estándar Delivery ($ USD)</label>
+          <input type="number" step="0.5" id="cfg-costo-delivery" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Costo Empaque Para Llevar ($ USD)</label>
+          <input type="number" step="0.5" id="cfg-costo-empaque" class="form-control">
+        </div>
+        <button class="btn-gold" style="width: 100%; margin-top: 1rem; font-size: 1.05rem;" onclick="submitSavePortalConfigs()">💾 GUARDAR CONFIGURACIONES Y TASA DE CAMBIO</button>
+      </div>
+    </div>
+
+    </div>
+
+    <!-- TAB 8: MESAS -->
+    <div id="tab-mesas" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>🍽️ DISTRIBUCIÓN DE MESAS & CÓDIGOS QR</h2>
+        <button class="btn-gold" onclick="openModal('add-mesa-modal')">➕ Agregar Nueva Mesa</button>
+      </div>
+      <div class="mesas-grid" id="admin-mesas-grid"></div>
+    </div>
+
+    <!-- TAB 9: INVENTARIO -->
+    <div id="tab-inventario" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>📦 CONTROL DE INSUMOS E INVENTARIO</h2>
+        <button class="btn-gold" onclick="openModal('add-insumo-modal')">➕ Nuevo Insumo</button>
+      </div>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Insumo</th>
+              <th style="padding: 0.75rem;">Stock Actual</th>
+              <th style="padding: 0.75rem;">Stock Mínimo</th>
+              <th style="padding: 0.75rem;">Unidad</th>
+              <th style="padding: 0.75rem;">Estado</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="insumos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 10: CATEGORIAS -->
+    <div id="tab-categorias" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2>📂 CATEGORÍAS CON FOTOS</h2>
+        <button class="btn-gold" onclick="openModal('category-modal')">➕ Nueva Categoría</button>
+      </div>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Imagen</th>
+              <th style="padding: 0.75rem;">Nombre</th>
+              <th style="padding: 0.75rem;">Descripción</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="categories-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 11: USUARIOS Y PERSONAL -->
+    <div id="tab-usuarios" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h2 style="margin: 0;">👥 USUARIOS Y PERSONAL DEL SISTEMA</h2>
+        <button class="btn-gold" onclick="openCreateUserModal()">➕ CREAR NUEVO USUARIO / PERSONAL</button>
+      </div>
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto; margin-top: 1rem;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">ID</th>
+              <th style="padding: 0.75rem;">Nombre Completo</th>
+              <th style="padding: 0.75rem;">Usuario</th>
+              <th style="padding: 0.75rem;">Email</th>
+              <th style="padding: 0.75rem;">Teléfono</th>
+              <th style="padding: 0.75rem;">Rol</th>
+              <th style="padding: 0.75rem;">Estado</th>
+              <th style="padding: 0.75rem;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 12: CALIFICACIONES Y RESEÑAS ENVIADAS POR CLIENTES -->
+    <div id="tab-resenas" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="margin: 0; font-weight: 900; color: var(--gold-accent);">⭐ CALIFICACIONES Y RESEÑAS DE CLIENTES</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">Visualiza y gestiona las puntuaciones enviadas por los comensales al finalizar sus pedidos.</p>
+        </div>
+        <button class="btn-gold" onclick="openModal('resena-modal')">➕ Nueva Reseña Destacada</button>
+      </div>
+
+      <div style="background: var(--toon-card); border: 1px solid var(--toon-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--toon-border); color: var(--text-muted);">
+              <th style="padding: 0.75rem;">Cliente</th>
+              <th style="padding: 0.75rem;">Calificación</th>
+              <th style="padding: 0.75rem;">Comentario / Opinión</th>
+              <th style="padding: 0.75rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="resenas-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+  <!-- MODAL WIZARD: ASISTENTE DE CONFIGURACIÓN INICIAL -->
+  <div class="product-modal-backdrop" id="wizard-modal">
+    <div class="product-modal-card" style="max-width: 580px; padding: 2rem;">
+      <button class="modal-close-btn" onclick="closeModal('wizard-modal')">&times;</button>
+
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <span style="font-size: 2.5rem;">🚀</span>
+        <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--gold-accent); margin: 0.3rem 0 0 0;">CONFIGURACIÓN INICIAL DEL RESTAURANTE</h2>
+        <div style="font-size: 0.85rem; color: var(--text-muted);" id="wizard-step-title">Paso 1 de 4: Identidad y Moneda</div>
+      </div>
+
+      <!-- Paso 1: Identidad -->
+      <div class="wizard-step active" id="wiz-step-1">
+        <div class="form-group"><label>Nombre del Restaurante / Negocio</label><input type="text" id="wiz-nombre" class="form-control" value="Donde David Fresh & Tasty!"></div>
+        <div class="form-group"><label>Eslogan o Historia Corta</label><textarea id="wiz-historia" class="form-control" rows="2">Especialistas en hamburguesas artesanales gourmet y perros estilo Toon.</textarea></div>
+        <div style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;"><label>Tasa Inicial en Bolívares (Bs.)</label><input type="number" step="0.1" id="wiz-tasa" class="form-control" value="36.50"></div>
+          <div class="form-group" style="flex: 1;"><label>WhatsApp Oficial</label><input type="text" id="wiz-whatsapp" class="form-control" value="+502 4112 5554"></div>
+        </div>
+      </div>
+
+      <!-- Paso 2: Menú y Productos -->
+      <div class="wizard-step" id="wiz-step-2">
+        <h4 style="color: var(--gold-accent); margin-top: 0;">🍔 CATÁLOGO DE MENÚ Y EXTRAS</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Puedes precargar los productos iniciales o agregar el primer plato estrella de tu menú:</p>
+
+        <div class="form-group"><label>Nombre del Plato Principal</label><input type="text" id="wiz-prod-name" class="form-control" value="Hamburguesa Clásica Gourmet"></div>
+        <div style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;"><label>Precio ($ USD)</label><input type="number" step="0.5" id="wiz-prod-price" class="form-control" value="42.00"></div>
+          <div class="form-group" style="flex: 1;"><label>Ingredientes</label><input type="text" id="wiz-prod-ings" class="form-control" value="Carne 150g, Queso Cheddar, Tomate, Cebolla"></div>
+        </div>
+      </div>
+
+      <!-- Paso 3: Mesas y QR -->
+      <div class="wizard-step" id="wiz-step-3">
+        <h4 style="color: var(--gold-accent); margin-top: 0;">🍽️ DISTRIBUCIÓN DE MESAS Y CÓDIGOS QR</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">El sistema creará los códigos QR automáticos para tus mesas de salón:</p>
+        <div class="form-group"><label>Número de Mesas a Generar en Salón</label><input type="number" id="wiz-num-mesas" class="form-control" value="20"></div>
+      </div>
+
+      <!-- Paso 4: Usuarios del Sistema -->
+      <div class="wizard-step" id="wiz-step-4">
+        <h4 style="color: var(--gold-accent); margin-top: 0;">👥 USUARIOS Y ROLES DEL SISTEMA</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Se crearán automáticamente las cuentas de prueba para tu personal:</p>
+
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--toon-border); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
+          <div>⚙️ <strong>Admin:</strong> admin / admin123</div>
+          <div>💰 <strong>Caja POS:</strong> caja1 / caja123</div>
+          <div>👨‍🍳 <strong>Cocina KDS:</strong> cocina1 / cocina123</div>
+          <div>🍽️ <strong>Mesero:</strong> delivery1 / delivery123</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+        <button class="btn-gold" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);" id="wiz-btn-prev" onclick="wizardNav(-1)">← Anterior</button>
+        <button class="btn-gold" id="wiz-btn-next" onclick="wizardNav(1)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Crear Publicación Web -->
+  <div class="product-modal-backdrop" id="add-publicacion-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-publicacion-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">📰 NUEVA PUBLICACIÓN PARA LA WEB PÚBLICA</h3>
+      <div class="form-group"><label>Título del Anuncio</label><input type="text" id="pub-titulo" class="form-control" placeholder="Ej. ¡Gran Inauguración de Nueva Sucursal!" required></div>
+      <div class="form-group"><label>Contenido / Detalles</label><textarea id="pub-contenido" class="form-control" rows="4" placeholder="Escribe aquí el contenido para los clientes..." required></textarea></div>
+      <div class="form-group">
+        <label>Subir Foto Ilustrativa</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'pub-img')">
+      </div>
+      <div class="form-group"><label>URL Imagen</label><input type="text" id="pub-img" class="form-control"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreatePublicacion()">PUBLICAR EN LA WEB PÚBLICA</button>
+    </div>
+  </div>
+
+  <!-- Modal Editar Producto e Ingredientes -->
+  <div class="product-modal-backdrop" id="edit-product-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('edit-product-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">✏️ EDITAR PRODUCTO E INGREDIENTES</h3>
+      <input type="hidden" id="edit-prod-id">
+      <div class="form-group"><label>Nombre del Producto</label><input type="text" id="edit-prod-name" class="form-control" required></div>
+      <div class="form-group"><label>Categoría</label><select id="edit-prod-cat-select" class="form-control" required></select></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="edit-prod-desc" class="form-control"></div>
+      <div class="form-group"><label>Precio Regular ($ USD)</label><input type="number" step="0.01" id="edit-prod-price" class="form-control" required></div>
+      <div class="form-group"><label>Precio Promoción ($ USD) (opcional)</label><input type="number" step="0.01" id="edit-prod-price-promo" class="form-control"></div>
+      <div class="form-group"><label>Ingredientes (separados por coma)</label><input type="text" id="edit-prod-ingredientes" class="form-control" placeholder="Ej. Carne 150g, Queso Cheddar, Tomate, Cebolla"></div>
+      <div class="form-group">
+        <label>Cambiar Foto (Upload Local)</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'edit-prod-img')">
+      </div>
+      <div class="form-group"><label>URL Imagen</label><input type="text" id="edit-prod-img" class="form-control"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitUpdateProduct()">GUARDAR CAMBIOS EN EL PRODUCTO</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear/Editar Promoción -->
+  <div class="product-modal-backdrop" id="promo-modal">
+    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('promo-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">🔥 PROMOCIÓN DÍA (BOOM!)</h3>
+      <div class="form-group"><label>Título Promocional</label><input type="text" id="promo-titulo" class="form-control" placeholder="Ej. COMBO EXPLOSIVO TOON" required></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="promo-desc" class="form-control" placeholder="2 Hamburguesas + Papas + 2 Refrescos"></div>
+      <div class="form-group"><label>Porcentaje Descuento (%)</label><input type="number" id="promo-pct" class="form-control" value="20"></div>
+      <div class="form-group"><label>Código Cupon</label><input type="text" id="promo-codigo" class="form-control" value="COMBO20"></div>
+      <div class="form-group">
+        <label>Subir Imagen Banner</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'promo-img')">
+      </div>
+      <div class="form-group"><label>Ruta Imagen</label><input type="text" id="promo-img" class="form-control"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreatePromo()">GUARDAR PROMOCIÓN</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Reseña Admin -->
+  <div class="product-modal-backdrop" id="add-resena-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-resena-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">⭐ NUEVA RESEÑA DE CLIENTE</h3>
+      <div class="form-group"><label>Nombre del Cliente</label><input type="text" id="res-nombre" class="form-control" placeholder="Ej. Carlos Ramos"></div>
+      <div class="form-group"><label>Comentario</label><textarea id="res-comentario" class="form-control" rows="3" placeholder="Excelente comida..."></textarea></div>
+      <div class="form-group"><label>Estrellas (1 a 5)</label><input type="number" id="res-estrellas" class="form-control" value="5" min="1" max="5"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateResena()">PUBLICAR RESEÑA</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Elemento a la Guía / Carrusel -->
+  <div class="product-modal-backdrop" id="add-guia-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-guia-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">🎬 NUEVA DIAPOSITIVA GUÍA</h3>
+      <div class="form-group"><label>Título</label><input type="text" id="guia-titulo" class="form-control" placeholder="Ej. Paso 1: Escanea tu QR" required></div>
+      <div class="form-group"><label>Descripción / Instrucciones</label><textarea id="guia-desc" class="form-control" rows="2" placeholder="Explicación detallada..."></textarea></div>
+      <div class="form-group">
+        <label>Subir Foto o Video Local (.jpg, .png, .mp4)</label>
+        <input type="file" accept="image/*,video/*" class="form-control" onchange="uploadLocalFile(event, 'guia-media-url')">
+      </div>
+      <div class="form-group"><label>Ruta / URL Guardada</label><input type="text" id="guia-media-url" class="form-control" placeholder="/static/uploads/file.jpg" required></div>
+      <div class="form-group">
+        <label>Tipo de Media</label>
+        <select id="guia-tipo-media" class="form-control">
+          <option value="imagen">🖼️ Imagen (Foto)</option>
+          <option value="video">🎥 Video corto (.mp4)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vista de Aplicación</label>
+        <select id="guia-tipo-vista" class="form-control">
+          <option value="ambos">🌐 Ambos (Mesa y Delivery)</option>
+          <option value="mesa">🍽️ Solo en Mesa (QR)</option>
+          <option value="delivery">🛵 Solo en Delivery</option>
+        </select>
+      </div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateGuia()">GUARDAR EN LA GUÍA INTERACTIVA</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear/Editar Usuario del Personal (REQUERIMIENTO #1) -->
+  <div class="product-modal-backdrop" id="user-modal">
+    <div class="product-modal-card" style="max-width: 480px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('user-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;" id="user-modal-title">👤 CREAR NUEVO USUARIO / PERSONAL</h3>
+      <input type="hidden" id="user-edit-id">
+      <div class="form-group"><label>Nombre</label><input type="text" id="user-nombre" class="form-control" placeholder="Ej. Juan" required></div>
+      <div class="form-group"><label>Apellido</label><input type="text" id="user-apellido" class="form-control" placeholder="Ej. Pérez" required></div>
+      <div class="form-group"><label>Nombre de Usuario (Login)</label><input type="text" id="user-username" class="form-control" placeholder="Ej. juan_cocina" required></div>
+      <div class="form-group"><label>Correo Electrónico</label><input type="email" id="user-email" class="form-control" placeholder="juan@dondedavid.com" required></div>
+      <div class="form-group"><label>Teléfono</label><input type="text" id="user-telefono" class="form-control" placeholder="+502 9999 8888"></div>
+      <div class="form-group">
+        <label>Rol en el Sistema</label>
+        <select id="user-rol" class="form-control" required>
+          <option value="admin">👑 Administrador</option>
+          <option value="caja">💵 Caja Registradora (POS)</option>
+          <option value="cocina">🍳 Cocina (Monitor KDS)</option>
+          <option value="mesero">🤵 Mesero / Atención Salón</option>
+          <option value="cliente">📱 Cliente</option>
+        </select>
+      </div>
+      <div class="form-group"><label id="user-pwd-label">Contraseña</label><input type="password" id="user-password" class="form-control" placeholder="••••••••"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitUserForm()">💾 GUARDAR USUARIO</button>
+    </div>
+  </div>
+
+  <!-- Modal Ver QR Mesa -->
+  <div class="product-modal-backdrop" id="qr-modal">
+    <div class="product-modal-card" style="max-width: 380px; text-align: center; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('qr-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;" id="qr-modal-title">CÓDIGO QR MESA #1</h3>
+      <img id="qr-modal-img" src="" style="width: 220px; height: 220px; border-radius: 12px; margin: 1rem 0; border: 2px solid var(--gold-accent);">
+      <div style="font-size: 0.8rem; color: var(--text-muted); word-break: break-all;" id="qr-modal-url"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="window.print()">🖨️ IMPRIMIR CÓDIGO QR MESA</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Mesa -->
+  <div class="product-modal-backdrop" id="add-mesa-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-mesa-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ AGREGAR NUEVA MESA</h3>
+      <div class="form-group"><label>Número de Mesa</label><input type="number" id="new-mesa-num" class="form-control" placeholder="Ej. 21"></div>
+      <div class="form-group"><label>Capacidad (personas)</label><input type="number" id="new-mesa-cap" class="form-control" value="4"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateMesa()">AGREGAR Y GENERAR QR</button>
+    </div>
+  </div>
+
+  <!-- Modal Ingreso Insumo -->
+  <div class="product-modal-backdrop" id="ingreso-insumo-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('ingreso-insumo-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ REGISTRAR INGRESO DE INSUMO</h3>
+      <p id="ingreso-insumo-title" style="color: #fff; font-weight: 700;"></p>
+      <div class="form-group"><label>Cantidad a Ingresar</label><input type="number" step="0.1" id="ingreso-cant-input" class="form-control" placeholder="Ej. 10.0"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitIngresoInsumo()">CONFIRMAR INGRESO AL STOCK</button>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Insumo -->
+  <div class="product-modal-backdrop" id="add-insumo-modal">
+    <div class="product-modal-card" style="max-width: 400px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('add-insumo-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ NUEVO INSUMO</h3>
+      <div class="form-group"><label>Nombre</label><input type="text" id="ins-nombre" class="form-control" placeholder="Ej. Tomates frescos"></div>
+      <div class="form-group"><label>Stock Inicial</label><input type="number" step="0.1" id="ins-stock" class="form-control" value="10.0"></div>
+      <div class="form-group"><label>Stock Mínimo</label><input type="number" step="0.1" id="ins-min" class="form-control" value="5.0"></div>
+      <div class="form-group"><label>Unidad de Medida</label><input type="text" id="ins-unidad" class="form-control" value="kg"></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateInsumo()">GUARDAR INSUMO</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear Producto -->
+  <div class="product-modal-backdrop" id="product-modal">
+    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('product-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ CREAR NUEVO PRODUCTO</h3>
+      <div class="form-group"><label>Nombre del Producto</label><input type="text" id="prod-name" class="form-control" required></div>
+      <div class="form-group"><label>Categoría</label><select id="prod-cat-select" class="form-control" required></select></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="prod-desc" class="form-control"></div>
+      <div class="form-group"><label>Precio ($ USD)</label><input type="number" step="0.01" id="prod-price" class="form-control" required></div>
+      <div class="form-group"><label>Ingredientes (separados por coma)</label><input type="text" id="prod-ingredientes" class="form-control" placeholder="Ej. Carne 150g, Queso Cheddar, Tomate, Cebolla"></div>
+      <div class="form-group">
+        <label>Subir Foto Local al Servidor</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'prod-img')">
+      </div>
+      <div class="form-group"><label>Ruta / URL de la Imagen</label><input type="text" id="prod-img" class="form-control" placeholder="/static/uploads/..." required></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateProduct()">GUARDAR PRODUCTO EN EL CATÁLOGO</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear Categoría -->
+  <div class="product-modal-backdrop" id="category-modal">
+    <div class="product-modal-card" style="max-width: 450px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('category-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">➕ CREAR NUEVA CATEGORÍA</h3>
+      <div class="form-group"><label>Nombre</label><input type="text" id="cat-name" class="form-control" required></div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="cat-desc" class="form-control"></div>
+      <div class="form-group">
+        <label>Subir Foto Local al Servidor</label>
+        <input type="file" accept="image/*" class="form-control" onchange="uploadLocalFile(event, 'cat-img')">
+      </div>
+      <div class="form-group"><label>Ruta / URL Imagen Categoría</label><input type="text" id="cat-img" class="form-control" placeholder="/static/uploads/..." required></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateCategory()">GUARDAR CATEGORÍA EN EL SERVIDOR</button>
+    </div>
+  </div>
+
+  <!-- Modal Crear Reseña -->
+  <div class="product-modal-backdrop" id="resena-modal">
+    <div class="product-modal-card" style="max-width: 440px; padding: 1.5rem;">
+      <button class="modal-close-btn" onclick="closeModal('resena-modal')">&times;</button>
+      <h3 style="color: var(--gold-accent); margin-top: 0;">⭐ AGREGAR RESEÑA DESTACADA</h3>
+      <div class="form-group"><label>Nombre del Cliente</label><input type="text" id="res-nombre" class="form-control" placeholder="Ej. Ana María"></div>
+      <div class="form-group"><label>Estrellas (1 a 5)</label><input type="number" min="1" max="5" id="res-estrellas" class="form-control" value="5"></div>
+      <div class="form-group"><label>Comentario / Opinión</label><textarea id="res-comentario" class="form-control" rows="3" placeholder="Excelente atención..."></textarea></div>
+      <button class="btn-gold" style="width: 100%; margin-top: 1rem;" onclick="submitCreateResena()">GUARDAR RESEÑA EN EL SISTEMA</button>
+    </div>
+  </div>
+
+  <!-- Driver.js Library script -->
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+  <script src="/static/js/theme-toggle.js?v=2.0"></script>
+  <script src="/static/js/auth.js?v=2.0"></script>
+  <script src="/static/js/appShell.js?v=2.0"></script>
+  <script src="/static/js/websocket.js?v=2.0"></script>
+  <script src="/static/js/admin-toon.js?v=2.0"></script>
+
+  <!-- Script para Autodisparo del Tour Interactivo Driver.js -->
+  <script>
+    function startOnboardingTour(force = false) {
+      if (!window.driver || !window.driver.js) return;
+
+      const driverObj = window.driver.js.driver({
+        showProgress: true,
+        animate: true,
+        allowClose: true,
+        doneBtnText: '¡Entendido y Comenzar! 🚀',
+        nextBtnText: 'Siguiente →',
+        prevBtnText: '← Anterior',
+        onDestroyed: () => {
+          // Registrar en el backend tour_completed = true
+          fetch('/api/v1/admin/tour-completed', {
+            method: 'POST',
+            headers: Auth.getHeaders()
+          }).catch(err => console.error(err));
+        },
+        steps: [
+          {
+            element: '#sidebar-branding',
+            popover: {
+              title: '🖼️ Personalización de Marca',
+              description: 'Aquí puedes configurar la identidad comercial de tu restaurante: actualizar el logotipo, cambiar los banners y ajustar la paleta de colores de la web pública.',
+              side: 'bottom',
+              align: 'start'
+            }
+          },
+          {
+            element: '#nav-menu-items',
+            popover: {
+              title: '🍔 Gestión del Menú / Productos',
+              description: 'Desde este panel administras todo tu catálogo gastronómico: agregar categorías, registrar nuevos platos, ajustar precios e ingredientes editables.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#btn-view-site',
+            popover: {
+              title: '🌐 Ver Sitio Web Público',
+              description: 'Acceso directo en una nueva pestaña para previsualizar exactamente cómo ven tus clientes la página web de tu restaurante en vivo.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#btn-orders-panel',
+            popover: {
+              title: '📊 Panel de Pedidos y Métricas',
+              description: 'Monitor central donde visualizas en tiempo real el total de ventas, insumos críticos, pedidos en cocina y mesas ocupadas.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#btn-help-tour',
+            popover: {
+              title: '❓ Botón de Ayuda del Tour',
+              description: 'Puedes hacer clic en este icono en cualquier momento para volver a ejecutar este Tour Interactivo de Bienvenida.',
+              side: 'bottom',
+              align: 'end'
+            }
+          }
+        ]
+      });
+
+      driverObj.drive();
+    }
+
+    // Comprobar si tour_completed === false para disparar el tour automáticamente
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = Auth.getUser();
+      if (user && user.tour_completed === false) {
+        setTimeout(() => startOnboardingTour(false), 800);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -23,7 +23,7 @@ class Settings:
 
     ALLOWED_ORIGINS: str = os.getenv(
         "ALLOWED_ORIGINS", 
-        os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000,https://donde-david.com,https://adondedavid-com.onrender.com")
+        os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000,https://donde-david.com,https://adondedavid-com.onrender.com,https://donde-david-frontend.onrender.com")
     )
 
     @property

@@ -4,9 +4,14 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
+from fastapi.testclient import TestClient
+from backend.app.main import app
 from backend.app.core.database import SessionLocal, engine, Base
 from backend.app.core.security import get_password_hash
 from backend.app.models.usuario import Usuario
+
+from backend.app.models.categoria import Categoria
+from backend.app.models.producto import Producto
 
 @pytest.fixture(autouse=True)
 def setup_test_users():
@@ -29,6 +34,17 @@ def setup_test_users():
                 nombre="Cajero", apellido="Test", email="cajero1@test.com",
                 nombre_usuario="cajero1", contraseña_hash=get_password_hash("caja123"),
                 rol="caja", activo=True
+            ))
+        cat = db.query(Categoria).first()
+        if not cat:
+            cat = Categoria(nombre="Hamburguesas", descripcion="Prueba", activo=True)
+            db.add(cat)
+            db.commit()
+            db.refresh(cat)
+        if not db.query(Producto).filter(Producto.id == 1).first():
+            db.add(Producto(
+                id=1, nombre="Burger Test", descripcion="Prueba", precio=10.00,
+                categoria_id=cat.id, activo=True
             ))
         db.commit()
     except Exception:
