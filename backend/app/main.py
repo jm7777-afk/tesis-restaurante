@@ -97,10 +97,12 @@ async def websocket_endpoint(websocket: WebSocket):
         ws_manager.disconnect(websocket)
 
 # Mount static files
-static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../static"))
+# Cambiamos ../static por ../../interfaz
+static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../interfaz"))
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
-
+else:
+    print(f"⚠️ ADVERTENCIA: No se encontró la carpeta de interfaz en: {static_dir}")
 @app.get("/login")
 def login_redirect():
     return RedirectResponse(url="/static/login.html")
